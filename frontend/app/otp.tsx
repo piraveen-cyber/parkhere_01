@@ -8,18 +8,33 @@ import {
   Alert,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { supabase } from "../config/supabaseClient";
+import { useTheme } from "../context/themeContext";
 
 export default function Otp() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { phone } = useLocalSearchParams();
+
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
+  const bg = isDark ? "#0D1B2A" : "#FAFAFA";
+  const textColor = isDark ? "#FFFFFF" : "#222";
+  const descColor = isDark ? "#9FB5C2" : "#7A7A7A";
+  const inputBg = isDark ? "#1B263B" : "#FFFFFF";
+  const borderColor = isDark ? "#415A77" : "#E0E0E0";
 
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const inputs = useRef<(TextInput | null)[]>([]);
   const [timer, setTimer] = useState(30);
   const [loading, setLoading] = useState(false);
 
+  /* Timer */
   useEffect(() => {
     if (timer === 0) return;
     const interval = setInterval(() => setTimer((t) => t - 1), 1000);
@@ -69,8 +84,6 @@ export default function Otp() {
         type: "sms",
       });
 
-      console.log("Verify OTP:", { data, error });
-
       if (error) {
         Alert.alert("Error", error.message);
         setLoading(false);
@@ -82,7 +95,7 @@ export default function Otp() {
         Alert.alert("Success", "OTP Verified!");
         router.push("/(tabs)/home");
       }
-    } catch (err) {
+    } catch {
       Alert.alert("Error", "Verification failed. Try again.");
     } finally {
       setLoading(false);
@@ -107,7 +120,6 @@ export default function Otp() {
       }
 
       Alert.alert("Success", "OTP resent!");
-
       setOtp(["", "", "", "", "", ""]);
       inputs.current[0]?.focus();
       setTimer(30);
@@ -119,19 +131,21 @@ export default function Otp() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: bg }]}>
       {/* Back Button */}
       <TouchableOpacity
-        style={styles.backBtn}
-        onPress={() => router.replace("/phoneAuth")}
+        style={[styles.backBtn, { top: insets.top + 10 }]}
+        onPress={() => router.back()}
       >
-        <Text style={styles.backArrow}>←</Text>
+        <Text style={[styles.backArrow, { color: textColor }]}>{"<"}</Text>
       </TouchableOpacity>
 
-      <Text style={styles.title}>Verify OTP</Text>
-      <Text style={styles.subtitle}>We sent a 6-digit code to</Text>
+      <Text style={[styles.title, { color: textColor }]}>Verify OTP</Text>
+      <Text style={[styles.subtitle, { color: descColor }]}>
+        We sent a 6-digit code to
+      </Text>
 
-      <Text style={styles.phone}>{phone}</Text>
+      <Text style={[styles.phone, { color: textColor }]}>{phone}</Text>
 
       {/* OTP Inputs */}
       <View style={styles.otpContainer}>
@@ -141,7 +155,15 @@ export default function Otp() {
             ref={(el: TextInput | null) => {
               inputs.current[index] = el;
             }}
-            style={[styles.otpBox, digit !== "" && styles.activeBox]}
+            style={[
+              styles.otpBox,
+              {
+                backgroundColor: inputBg,
+                borderColor: borderColor,
+                color: textColor,
+              },
+              digit !== "" && { borderColor: "#E5C100", borderWidth: 2 },
+            ]}
             keyboardType="number-pad"
             maxLength={1}
             value={digit}
@@ -152,36 +174,50 @@ export default function Otp() {
         ))}
       </View>
 
-      <Text style={styles.timer}>00:{timer < 10 ? `0${timer}` : timer}</Text>
+      <Text style={[styles.timer, { color: descColor }]}>
+        00:{timer < 10 ? `0${timer}` : timer}
+      </Text>
 
       <TouchableOpacity disabled={timer !== 0} onPress={resendOtp}>
-        <Text style={[styles.resend, timer !== 0 && styles.resendDisabled]}>
+        <Text
+          style={[styles.resend, { color: timer === 0 ? textColor : "#999" }]}
+        >
           Resend OTP
         </Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.verifyBtn} onPress={verifyOtp}>
+      {/* Verify Button */}
+      <TouchableOpacity
+        style={[styles.verifyBtn, { bottom: insets.bottom + 20 }]}
+        onPress={verifyOtp}
+      >
         <Text style={styles.verifyText}>
           {loading ? "Verifying..." : "Verify & Continue"}
+        </Text>
+      </TouchableOpacity>
+
+      {/* DEV BUTTON */}
+      <TouchableOpacity
+        onPress={() => router.push("/detail")}
+        style={{ marginTop: 20 }}
+      >
+        <Text style={{ color: "red", fontWeight: "700" }}>
+          DEV: Go to DETAIL →
         </Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
 }
 
-/* ---------- STYLES (with backBtn added) ---------- */
 const styles = StyleSheet.create({
-  container: {
+  safe: {
     flex: 1,
     alignItems: "center",
-    paddingTop: 100,
-    backgroundColor: "#fff",
   },
 
-  /* 🔙 Back Button */
+  /* Back button */
   backBtn: {
     position: "absolute",
-    top: 40,
     left: 20,
     zIndex: 10,
   },
@@ -192,63 +228,56 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: "700",
+    marginTop: 80,
   },
   subtitle: {
     fontSize: 16,
-    color: "#7A7A7A",
     marginTop: 6,
   },
   phone: {
     fontSize: 18,
     fontWeight: "600",
-    marginTop: 8,
+    marginTop: 6,
   },
+
   otpContainer: {
     flexDirection: "row",
     gap: 10,
     marginTop: 50,
+    paddingHorizontal: 20,
   },
   otpBox: {
-    width: 52,
-    height: 58,
+    width: 50,
+    height: 50,
     borderWidth: 1,
-    borderColor: "#E0E0E0",
     borderRadius: 10,
-    textAlign: "center",
     fontSize: 22,
-    fontWeight: "600",
-    color: "#000",
+    fontWeight: "700",
+    textAlign: "center",
   },
-  activeBox: {
-    borderColor: "#E5C100",
-    borderWidth: 2,
-  },
+
   timer: {
     marginTop: 20,
     fontSize: 16,
-    color: "#7A7A7A",
   },
+
   resend: {
-    marginTop: 6,
+    marginTop: 8,
     fontSize: 16,
     textDecorationLine: "underline",
-    color: "#000",
   },
-  resendDisabled: {
-    color: "#CBCBCB",
-  },
+
   verifyBtn: {
     width: "90%",
     backgroundColor: "#FFD400",
     padding: 18,
     borderRadius: 14,
-    position: "absolute",
-    bottom: 50,
+    marginTop: 100, //
   },
   verifyText: {
+    textAlign: "center",
     fontSize: 18,
     fontWeight: "700",
-    textAlign: "center",
-    color: "#fff",
+    color: "#000",
   },
 });

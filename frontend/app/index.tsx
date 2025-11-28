@@ -1,78 +1,55 @@
-import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { useEffect } from "react";
+import { View, Image, StyleSheet, Animated } from "react-native";
 import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { StatusBar } from "expo-status-bar";
+import { supabase } from "../config/supabaseClient";
 
-export default function WelcomeScreen() {
+export default function SplashScreen() {
   const router = useRouter();
+  const fadeAnim = new Animated.Value(0);
+
+  useEffect(() => {
+    // Fade-in animation
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 800,
+      useNativeDriver: true,
+    }).start();
+
+    const redirect = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      setTimeout(() => {
+        if (session) {
+          router.replace("/(tabs)/home");
+        } else {
+          router.replace("/language");
+        }
+      }, 2000); // 2 seconds splash
+    };
+
+    redirect();
+  }, []);
 
   return (
-    <SafeAreaView style={styles.container}>
-       <StatusBar style="dark" />
-    
-      {/* Illustration */}
-      <Image
-        source={require("../assets/images/payment.png")} // change to your image name
-        style={styles.image}
+    <View style={styles.container}>
+      <Animated.Image
+        source={require("../assets/images/splash-icon.png")}
+        style={[styles.logo, { opacity: fadeAnim }]}
         resizeMode="contain"
       />
-
-      {/* Title */}
-      <Text style={styles.title}>Easy Payment</Text>
-
-      {/* Subtitle */}
-      <Text style={styles.subtitle}>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit
-      </Text>
-
-      {/* Button */}
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => router.push("/phoneAuth")}
-      >
-        <Text style={styles.buttonText}>Get Started</Text>
-      </TouchableOpacity>
-    
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
-    alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 30,
+    alignItems: "center",
+    backgroundColor: "#ffffff",
   },
-  image: {
-    width: "80%",
-    height: 250,
-    marginBottom: 40,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#333",
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: "#777",
-    textAlign: "center",
-    marginBottom: 40,
-  },
-  button: {
-    width: "100%",
-    backgroundColor: "#FFD11A",
-    paddingVertical: 15,
-    borderRadius: 12,
-    elevation: 3,
-  },
-  buttonText: {
-    textAlign: "center",
-    fontSize: 16,
-    fontWeight: "700",
-    color: "black",
+  logo: {
+    width: 200,
+    height: 200,
   },
 });

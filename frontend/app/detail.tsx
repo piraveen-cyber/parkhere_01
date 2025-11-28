@@ -1,0 +1,190 @@
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Platform,
+} from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+import { useTheme } from "../context/themeContext";
+
+export default function Detail() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const { theme } = useTheme();
+
+  const isDark = theme === "dark";
+
+  const bg = isDark ? "#0D1B2A" : "#FAFAFA";
+  const textColor = isDark ? "#FFFFFF" : "#111";
+  const descColor = isDark ? "#C7D1D9" : "#555";
+  const inputBg = isDark ? "#1B263B" : "#FFFFFF";
+  const borderColor = isDark ? "#415A77" : "#E2E2E2";
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [gender, setGender] = useState("");
+  const [plate, setPlate] = useState("");
+
+  const goHome = () => {
+    router.replace("/(tabs)/home");
+  };
+
+  return (
+    <SafeAreaView style={[styles.safe, { backgroundColor: bg }]}>
+      <View style={styles.container}>
+
+        {/* Title */}
+        <Text style={[styles.title, { color: textColor }]}>Welcome!</Text>
+        <Text style={[styles.subtitle, { color: descColor }]}>
+          Let's set up your profile.
+        </Text>
+
+        {/* Name */}
+        <Text style={[styles.label, { color: textColor }]}>Name</Text>
+        <TextInput
+          style={[
+            styles.input,
+            { backgroundColor: inputBg, borderColor, color: textColor },
+          ]}
+          placeholder="Enter your full name"
+          placeholderTextColor={descColor}
+          value={name}
+          onChangeText={setName}
+        />
+
+        {/* Email */}
+        <Text style={[styles.label, { color: textColor }]}>
+          Email <Text style={{ color: descColor }}>(optional)</Text>
+        </Text>
+        <TextInput
+          style={[
+            styles.input,
+            { backgroundColor: inputBg, borderColor, color: textColor },
+          ]}
+          placeholder="Enter your email address"
+          placeholderTextColor={descColor}
+          value={email}
+          onChangeText={setEmail}
+        />
+
+        {/* Gender */}
+        <Text style={[styles.label, { color: textColor }]}>Gender</Text>
+        <TextInput
+          style={[
+            styles.input,
+            { backgroundColor: inputBg, borderColor, color: textColor },
+          ]}
+          placeholder="Select Gender"
+          placeholderTextColor={descColor}
+          value={gender}
+          onChangeText={setGender}
+        />
+
+        {/* Vehicle Details */}
+        <Text style={[styles.sectionTitle, { color: textColor }]}>
+          Vehicle Details
+        </Text>
+
+        <Text style={[styles.label, { color: textColor }]}>
+          Vehicle Number Plate
+        </Text>
+        <TextInput
+          style={[
+            styles.input,
+            { backgroundColor: inputBg, borderColor, color: textColor },
+          ]}
+          placeholder="Enter your vehicle number plate"
+          placeholderTextColor={descColor}
+          value={plate}
+          onChangeText={setPlate}
+        />
+
+        {/* Save Button */}
+        <TouchableOpacity
+          style={[styles.button, { marginTop: 30 }]}
+          onPress={goHome}
+        >
+          <Text style={styles.buttonText}>Save & Continue</Text>
+        </TouchableOpacity>
+
+        {/* Skip */}
+        <TouchableOpacity onPress={goHome}>
+          <Text style={[styles.skip, { color: descColor }]}>Skip for now</Text>
+        </TouchableOpacity>
+
+        {/* Bottom safe padding */}
+        <View style={{ height: insets.bottom + 10 }} />
+      </View>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safe: {
+    flex: 1,
+  },
+
+  container: {
+    flex: 1,
+    paddingHorizontal: 25,
+    paddingTop: 10,
+  },
+
+  title: {
+    fontSize: 32,
+    fontWeight: "700",
+    marginTop: 10,
+  },
+
+  subtitle: {
+    fontSize: 17,
+    marginTop: 4,
+    marginBottom: 25,
+  },
+
+  label: {
+    marginTop: 10,
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
+  sectionTitle: {
+    marginTop: 25,
+    fontSize: 20,
+    fontWeight: "700",
+  },
+
+  input: {
+    height: 52,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    marginTop: 6,
+    fontSize: 16,
+  },
+
+  button: {
+    width: "100%",
+    backgroundColor: "#FFD400",
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: "center",
+    marginTop: 20,
+  },
+
+  buttonText: {
+    color: "#000",
+    fontSize: 17,
+    fontWeight: "700",
+  },
+
+  skip: {
+    textAlign: "center",
+    marginTop: 15,
+    fontSize: 16,
+  },
+});

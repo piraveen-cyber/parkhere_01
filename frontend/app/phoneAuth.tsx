@@ -10,18 +10,31 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { supabase } from "../config/supabaseClient";
+import { useTheme } from "../context/themeContext"; // 🔥 GLOBAL THEME
 
 export default function PhoneAuth() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const { theme } = useTheme(); // 👈 global theme
+
+  const isDark = theme === "dark";
+
+  const bg = isDark ? "#0D1B2A" : "#FAFAFA";
+  const textColor = isDark ? "#FFFFFF" : "#222";
+  const descColor = isDark ? "#C7D1D9" : "#6F6F6F";
+  const inputBg = isDark ? "#1B263B" : "#FFFFFF";
+  const borderColor = isDark ? "#415A77" : "#E2E2E2";
+
   const [phoneNumber, setPhoneNumber] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Clean the number
+  // Clean number
   const cleanNumber = phoneNumber.replace(/\s+/g, "");
-
-  // Sri Lanka valid mobile format: 7XXXXXXXX
   const isValid = /^7\d{8}$/.test(cleanNumber);
 
   const handleSendOTP = async () => {
@@ -49,48 +62,58 @@ export default function PhoneAuth() {
         return;
       }
 
-      Alert.alert("Success", "OTP has been sent to your phone number.");
-      router.push({
-        pathname: "/otp",
-        params: { phone: fullPhoneNumber },
-      });
+      Alert.alert("Success", "OTP has been sent.");
+      router.push({ pathname: "/otp", params: { phone: fullPhoneNumber } });
     } catch (error) {
-      Alert.alert("Error", "Failed to send OTP. Please try again.");
+      Alert.alert("Error", "Failed to send OTP. Try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: bg }]}>
       {/* Header */}
-      <View style={styles.headerWrapper}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backArrow}>←</Text>
+      <View style={[styles.headerWrapper, { marginTop: insets.top + 5 }]}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Text style={[styles.backArrow, { color: textColor }]}>{"<"}</Text>
         </TouchableOpacity>
-        <Text style={styles.header}>Login</Text>
+
+        <Text style={[styles.header, { color: textColor }]}>Login</Text>
       </View>
 
-      <Text style={styles.title}>Enter your mobile number</Text>
-      <Text style={styles.subtitle}>
+      <Text style={[styles.title, { color: textColor }]}>
+        Enter your mobile number
+      </Text>
+
+      <Text style={[styles.subtitle, { color: descColor }]}>
         We will send you a 6-digit OTP for verification.
       </Text>
 
-      <Text style={styles.label}>Phone Number</Text>
+      <Text style={[styles.label, { color: textColor }]}>Phone Number</Text>
 
       {/* Phone Input */}
-      <View style={styles.phoneContainer}>
-        <View style={styles.countryBox}>
+      <View
+        style={[
+          styles.phoneContainer,
+          { backgroundColor: inputBg, borderColor: borderColor },
+        ]}
+      >
+        <View style={[styles.countryBox, { borderRightColor: borderColor }]}>
           <Image
             source={require("../assets/images/srilanka_flag.png")}
             style={styles.flag}
           />
-          <Text style={styles.countryCode}>+94 ▼</Text>
+          <Text style={[styles.countryCode, { color: textColor }]}>+94 ▼</Text>
         </View>
 
         <TextInput
-          style={styles.phoneInput}
+          style={[styles.phoneInput, { color: textColor }]}
           placeholder="7XXXXXXXX"
+          placeholderTextColor={isDark ? "#8FA3B0" : "#999"}
           value={phoneNumber}
           keyboardType="numeric"
           onChangeText={setPhoneNumber}
@@ -98,7 +121,7 @@ export default function PhoneAuth() {
         />
       </View>
 
-      {/* Button */}
+      {/* Send OTP Button */}
       <TouchableOpacity
         style={[
           styles.button,
@@ -108,7 +131,7 @@ export default function PhoneAuth() {
         onPress={handleSendOTP}
       >
         {loading ? (
-          <ActivityIndicator size="small" />
+          <ActivityIndicator size="small" color={isDark ? "#000" : "#000"} />
         ) : (
           <Text
             style={[
@@ -121,122 +144,83 @@ export default function PhoneAuth() {
         )}
       </TouchableOpacity>
 
-      <Text style={styles.terms}>
+      {/* Terms */}
+      <Text style={[styles.terms, { color: descColor }]}>
         By continuing, you agree to our <Text style={styles.link}>Terms</Text> &{" "}
         <Text style={styles.link}>Privacy Policy</Text>
       </Text>
+
+      {/* === DEV ONLY BUTTON === */}
+      <TouchableOpacity
+        style={{ marginTop: 20 }}
+        onPress={() =>
+          router.push({ pathname: "/otp", params: { phone: "+94700000000" } })
+        }
+      >
+        <Text style={{ color: "red", fontWeight: "700" }}>
+          DEV: Go to OTP →
+        </Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    paddingHorizontal: 25,
-    paddingTop: 20,
-  },
+  container: { flex: 1, paddingHorizontal: 25 },
 
-  /* Header Fix */
   headerWrapper: {
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
-    paddingVertical: 10,
-  },
-  backButton: {
-    position: "absolute",
-    left: 0,
-    padding: 10,
-  },
-  backArrow: {
-    fontSize: 32,
-  },
-  header: {
-    fontSize: 22,
-    fontWeight: "600",
   },
 
-  title: {
-    marginTop: 20,
-    fontSize: 26,
-    fontWeight: "700",
-  },
-  subtitle: {
-    color: "#6F6F6F",
-    fontSize: 15,
-    marginTop: 6,
-  },
+  backButton: { position: "absolute", left: 0, padding: 10 },
 
-  label: {
-    marginTop: 40,
-    fontSize: 16,
-    fontWeight: "500",
-  },
+  backArrow: { fontSize: 32 },
 
-  /* Phone Input */
+  header: { fontSize: 22, fontWeight: "600" },
+
+  title: { marginTop: 20, fontSize: 26, fontWeight: "700" },
+
+  subtitle: { fontSize: 15, marginTop: 6 },
+
+  label: { marginTop: 40, fontSize: 16, fontWeight: "500" },
+
   phoneContainer: {
     flexDirection: "row",
     marginTop: 12,
     borderWidth: 1,
-    borderColor: "#E2E2E2",
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 14,
     alignItems: "center",
   },
+
   countryBox: {
     flexDirection: "row",
     alignItems: "center",
     paddingRight: 15,
     borderRightWidth: 1,
-    borderRightColor: "#E2E2E2",
-  },
-  flag: {
-    width: 24,
-    height: 18,
-    marginRight: 6,
-  },
-  countryCode: {
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  phoneInput: {
-    flex: 1,
-    marginLeft: 15,
-    fontSize: 18,
-    letterSpacing: 1.2,
   },
 
-  /* Button */
-  button: {
-    marginTop: 50,
-    paddingVertical: 18,
-    borderRadius: 14,
-  },
-  buttonDisabled: {
-    backgroundColor: "#EFEFEF",
-  },
-  buttonActive: {
-    backgroundColor: "#FFD400",
-  },
-  buttonText: {
-    textAlign: "center",
-    fontSize: 17,
-    fontWeight: "600",
-  },
-  buttonTextDisabled: {
-    color: "#B5B5B5",
-  },
+  flag: { width: 24, height: 18, marginRight: 6 },
 
-  terms: {
-    marginTop: 25,
-    textAlign: "center",
-    color: "#6F6F6F",
-  },
-  link: {
-    color: "#D4A000",
-    fontWeight: "600",
-  },
+  countryCode: { fontSize: 16, fontWeight: "600" },
+
+  phoneInput: { flex: 1, marginLeft: 15, fontSize: 18, letterSpacing: 1.2 },
+
+  button: { marginTop: 50, paddingVertical: 18, borderRadius: 14 },
+
+  buttonDisabled: { backgroundColor: "#EFEFEF" },
+
+  buttonActive: { backgroundColor: "#FFD400" },
+
+  buttonText: { textAlign: "center", fontSize: 17, fontWeight: "600" },
+
+  buttonTextDisabled: { color: "#B5B5B5" },
+
+  terms: { marginTop: 25, textAlign: "center" },
+
+  link: { color: "#D4A000", fontWeight: "600" },
 });

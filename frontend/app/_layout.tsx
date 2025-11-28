@@ -5,9 +5,13 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase } from "../config/supabaseClient";
 import { View, Text } from "react-native";
 
+// 🌙 GLOBAL THEME PROVIDER
+import { ThemeProvider } from "../context/themeContext";
+
 export default function RootLayout() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
+  // Debug Supabase session in AsyncStorage
   const debugAsyncStorage = async () => {
     try {
       const keys = await AsyncStorage.getAllKeys();
@@ -53,6 +57,7 @@ export default function RootLayout() {
     return () => authListener.subscription.unsubscribe();
   }, []);
 
+  // ⏳ Show loading while checking auth
   if (isAuthenticated === null) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -63,26 +68,33 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      {/* 👇 Redirect happens BEFORE rendering Stack screens */}
-      {isAuthenticated ? (
-        <Redirect href="/(tabs)/home" />
-      ) : (
-        <Redirect href="/" />
-      )}
+      {/* 🌙 GLOBAL THEME FOR ENTIRE APP */}
+      <ThemeProvider>
+        {/* ⛔ Redirect must be OUTSIDE stack but INSIDE providers */}
+        {isAuthenticated ? (
+          <Redirect href="/(tabs)/home" />
+        ) : (
+          <Redirect href="/" />
+        )}
 
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          animation: "slide_from_right",
-          contentStyle: { backgroundColor: "white" },
-        }}
-      >
-        {/* All screens defined ONE time */}
-        <Stack.Screen name="index" />
-        <Stack.Screen name="phoneAuth" />
-        <Stack.Screen name="otp" />
-        <Stack.Screen name="(tabs)" />
-      </Stack>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            animation: "slide_from_right",
+          }}
+        >
+          {/* Only declare screens once */}
+          <Stack.Screen name="index" />
+          <Stack.Screen name="language" />
+          <Stack.Screen name="onboarding1" />
+          <Stack.Screen name="onboarding2" />
+          <Stack.Screen name="onboarding3" />
+          <Stack.Screen name="phoneAuth" />
+          <Stack.Screen name="otp" />
+          <Stack.Screen name="detail" />
+          <Stack.Screen name="(tabs)" />
+        </Stack>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

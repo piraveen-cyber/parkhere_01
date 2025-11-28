@@ -9,54 +9,83 @@ import {
   Image,
   Alert,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { supabase } from "../../config/supabaseClient"; // <-- Add this import
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { supabase } from "../../config/supabaseClient";
+import { useTheme } from "../../context/themeContext";
 
 export default function HomeScreen() {
+  const insets = useSafeAreaInsets();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
+  /* THEME COLORS */
+  const bg = isDark ? "#0D1B2A" : "#FAFAFA";
+  const cardBg = isDark ? "#1B263B" : "#FFFFFF";
+  const textColor = isDark ? "#FFFFFF" : "#111";
+  const descColor = isDark ? "#9FB5C2" : "#6F6F6F";
+  const borderColor = isDark ? "#415A77" : "#EDEDED";
+
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
-    if (error) {
-      Alert.alert("Error", error.message);
-    }
+    if (error) Alert.alert("Error", error.message);
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: bg }]}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom + 140 },
+        ]}
       >
-        {/* Header */}
-        <Text style={styles.welcome}>Welcome back, Suko 👋</Text>
-        <Text style={styles.subtitle}>
+        {/* HEADER */}
+        <Text style={[styles.welcome, { color: textColor }]}>
+          Welcome back, Suko 👋
+        </Text>
+
+        <Text style={[styles.subtitle, { color: descColor }]}>
           Find everything your vehicle needs — fast and easy.
         </Text>
 
-        {/* Search Bar */}
-        <View style={styles.searchBox}>
-          <Text style={styles.searchIcon}>🔍</Text>
+        {/* SEARCH BAR */}
+        <View
+          style={[
+            styles.searchBox,
+            { backgroundColor: cardBg, borderColor: borderColor },
+          ]}
+        >
+          <Text style={[styles.searchIcon, { color: descColor }]}>🔍</Text>
           <TextInput
             placeholder="Search services or parking..."
-            style={styles.searchInput}
+            placeholderTextColor={descColor}
+            style={[styles.searchInput, { color: textColor }]}
           />
         </View>
 
-        {/* Services Grid */}
+        {/* GRID */}
         <View style={styles.grid}>
           {services.map((item) => (
-            <TouchableOpacity key={item.title} style={styles.card}>
+            <TouchableOpacity
+              key={item.title}
+              style={[styles.card, { backgroundColor: cardBg }]}
+            >
               <View style={styles.iconWrapper}>
                 <Image source={item.icon} style={styles.iconImg} />
               </View>
-              <Text style={styles.cardTitle}>{item.title}</Text>
+              <Text style={[styles.cardTitle, { color: textColor }]}>
+                {item.title}
+              </Text>
             </TouchableOpacity>
           ))}
         </View>
 
-        {/* Book Now Card */}
-        <View style={styles.bigCard}>
-          <Text style={styles.bigCardTitle}>Book Your Spot in Seconds</Text>
-          <Text style={styles.bigCardSubtitle}>
+        {/* BIG CARD */}
+        <View style={[styles.bigCard, { backgroundColor: cardBg }]}>
+          <Text style={[styles.bigCardTitle, { color: textColor }]}>
+            Book Your Spot in Seconds
+          </Text>
+          <Text style={[styles.bigCardSubtitle, { color: descColor }]}>
             Secure, easy, and instant confirmation
           </Text>
 
@@ -65,22 +94,35 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Promo Cards */}
+        {/* PROMOS */}
         <View style={styles.promoYellow}>
           <Text style={styles.promoTitle}>20% Off Washing</Text>
           <Text style={styles.promoSubtitle}>Valid until end of month</Text>
         </View>
 
-        <View style={styles.promoWhite}>
-          <Text style={styles.promoTitle}>Free EV Charging</Text>
-          <Text style={styles.promoSubtitle}>First 30 minutes free</Text>
+        <View
+          style={[
+            styles.promoWhite,
+            { backgroundColor: cardBg, borderColor: "#FFD400" },
+          ]}
+        >
+          <Text
+            style={[
+              styles.promoTitle,
+              { color: isDark ? "#FFFFFF" : "#000" },
+            ]}
+          >
+            Free EV Charging
+          </Text>
+          <Text style={[styles.promoSubtitle, { color: descColor }]}>
+            First 30 minutes free
+          </Text>
         </View>
 
-        {/* 🔥 LOGOUT BUTTON AT THE BOTTOM */}
+        {/* LOGOUT BUTTON */}
         <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
-
       </ScrollView>
     </SafeAreaView>
   );
@@ -96,24 +138,21 @@ const services = [
 ];
 
 const styles = StyleSheet.create({
-  container: {
+  safe: {
     flex: 1,
-    backgroundColor: "#fff",
   },
 
   scrollContent: {
     paddingHorizontal: 25,
-    paddingTop: 10,
-    paddingBottom: 140, // extra padding for logout button
+    paddingTop: 15,
   },
 
   welcome: {
     fontSize: 28,
     fontWeight: "700",
-    marginTop: 10,
   },
+
   subtitle: {
-    color: "#6F6F6F",
     marginTop: 5,
     fontSize: 15,
   },
@@ -122,16 +161,12 @@ const styles = StyleSheet.create({
     marginTop: 20,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
     paddingHorizontal: 15,
-    paddingVertical: 12,
+    paddingVertical: 14,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: "#EDEDED",
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
   },
+
   searchIcon: { fontSize: 20, marginRight: 10 },
   searchInput: { flex: 1, fontSize: 16 },
 
@@ -141,56 +176,49 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginTop: 20,
   },
+
   card: {
     width: "47%",
     padding: 20,
-    backgroundColor: "#fff",
     borderRadius: 16,
     marginBottom: 20,
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
   },
+
   iconWrapper: {
     backgroundColor: "#FFD400",
     padding: 18,
     borderRadius: 14,
     marginBottom: 12,
   },
-  iconImg: {
-    width: 35,
-    height: 35,
-    tintColor: "#000",
-  },
+
+  iconImg: { width: 35, height: 35, tintColor: "#000" },
+
   cardTitle: {
     fontSize: 17,
     fontWeight: "600",
   },
 
   bigCard: {
-    backgroundColor: "#fff",
     padding: 25,
     borderRadius: 18,
     marginTop: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.07,
-    shadowRadius: 8,
   },
+
   bigCardTitle: {
     fontSize: 22,
     fontWeight: "700",
   },
+
   bigCardSubtitle: {
-    color: "#777",
     marginTop: 4,
     marginBottom: 15,
   },
+
   bookNowBtn: {
     backgroundColor: "#FFD400",
     paddingVertical: 16,
     borderRadius: 12,
-    marginTop: 10,
   },
   bookNowText: {
     textAlign: "center",
@@ -204,14 +232,14 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     marginTop: 20,
   },
+
   promoWhite: {
-    backgroundColor: "#fff",
     padding: 20,
     borderWidth: 1,
-    borderColor: "#FFD400",
     borderRadius: 15,
     marginTop: 20,
   },
+
   promoTitle: {
     fontSize: 20,
     fontWeight: "700",
@@ -221,7 +249,6 @@ const styles = StyleSheet.create({
     color: "#666",
   },
 
-  /* 🔥 Logout Button */
   logoutBtn: {
     marginTop: 40,
     backgroundColor: "#FF3B30",
