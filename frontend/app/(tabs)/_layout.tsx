@@ -1,13 +1,13 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { Platform } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "../../context/themeContext";
 
 export default function TabLayout() {
+  const insets = useSafeAreaInsets();
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
-  // THEME COLORS
   const bg = isDark ? "#0D1B2A" : "#FFFFFF";
   const activeColor = "#FFD400";
   const inactiveColor = isDark ? "#9FB5C2" : "#999";
@@ -22,11 +22,13 @@ export default function TabLayout() {
 
         tabBarStyle: {
           backgroundColor: bg,
-          height: Platform.OS === "android" ? 62 : 90,
-          paddingBottom: Platform.OS === "android" ? 8 : 25,
-          paddingTop: 10,
           borderTopWidth: 1,
           borderTopColor: borderColor,
+
+          // ⭐ FIX for EVERY phone
+          height: 60 + insets.bottom,
+          paddingBottom: insets.bottom > 0 ? insets.bottom - 5 : 10,
+          paddingTop: 10,
         },
       }}
     >
