@@ -14,11 +14,13 @@ import {
 } from "react-native-safe-area-context";
 import { supabase } from "../config/supabaseClient";
 import { useTheme } from "../context/themeContext";
+import { useTranslation } from "react-i18next";
 
 export default function Otp() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { phone } = useLocalSearchParams();
+  const { t } = useTranslation();
 
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -71,7 +73,7 @@ export default function Otp() {
     const otpCode = otp.join("");
 
     if (otpCode.length !== 6) {
-      Alert.alert("Invalid OTP", "Please enter a valid 6-digit OTP.");
+      Alert.alert(t("invalidOtpTitle"), t("invalidOtpMsg"));
       return;
     }
 
@@ -85,18 +87,18 @@ export default function Otp() {
       });
 
       if (error) {
-        Alert.alert("Error", error.message);
+        Alert.alert(t("error"), error.message);
         setLoading(false);
         return;
       }
 
       if (data.user) {
         await supabase.auth.refreshSession();
-        Alert.alert("Success", "OTP Verified!");
+        Alert.alert(t("success"), t("otpVerified"));
         router.push("/(tabs)/home");
       }
     } catch {
-      Alert.alert("Error", "Verification failed. Try again.");
+      Alert.alert(t("error"), t("verificationFailed"));
     } finally {
       setLoading(false);
     }
@@ -114,17 +116,17 @@ export default function Otp() {
       });
 
       if (error) {
-        Alert.alert("Error", error.message);
+        Alert.alert(t("error"), error.message);
         setLoading(false);
         return;
       }
 
-      Alert.alert("Success", "OTP resent!");
+      Alert.alert(t("success"), t("otpResent"));
       setOtp(["", "", "", "", "", ""]);
       inputs.current[0]?.focus();
       setTimer(30);
     } catch {
-      Alert.alert("Error", "Failed to resend OTP.");
+      Alert.alert(t("error"), t("failedResend"));
     } finally {
       setLoading(false);
     }
@@ -140,9 +142,9 @@ export default function Otp() {
         <Text style={[styles.backArrow, { color: textColor }]}>{"<"}</Text>
       </TouchableOpacity>
 
-      <Text style={[styles.title, { color: textColor }]}>Verify OTP</Text>
+      <Text style={[styles.title, { color: textColor }]}>{t("verifyOtp")}</Text>
       <Text style={[styles.subtitle, { color: descColor }]}>
-        We sent a 6-digit code to
+        {t("otpSentTo")}
       </Text>
 
       <Text style={[styles.phone, { color: textColor }]}>{phone}</Text>
@@ -182,7 +184,7 @@ export default function Otp() {
         <Text
           style={[styles.resend, { color: timer === 0 ? textColor : "#999" }]}
         >
-          Resend OTP
+          {t("resendOtp")}
         </Text>
       </TouchableOpacity>
 
@@ -192,7 +194,7 @@ export default function Otp() {
         onPress={verifyOtp}
       >
         <Text style={styles.verifyText}>
-          {loading ? "Verifying..." : "Verify & Continue"}
+          {loading ? "Verifying..." : t("verifyContinue")}
         </Text>
       </TouchableOpacity>
 

@@ -8,11 +8,19 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
+import "../i18n/i18n"; // Ensure init
 
 export default function LanguageScreen() {
   const router = useRouter();
+  const { t, i18n } = useTranslation();
 
-  const goNext = () => {
+  const goNext = async (lang: string) => {
+    try {
+      await i18n.changeLanguage(lang);
+    } catch (e) {
+      console.log("Error changing language", e);
+    }
     router.push("/onboarding1");
   };
 
@@ -28,17 +36,17 @@ export default function LanguageScreen() {
 
       {/* Bottom White Section */}
       <View style={styles.bottomSection}>
-        <Text style={styles.title}>Welcome Back 🚗✨</Text>
+        <Text style={styles.title}>{t("chooseLanguage")}</Text>
 
-        <TouchableOpacity style={styles.langButton} onPress={goNext}>
+        <TouchableOpacity style={styles.langButton} onPress={() => goNext('en')}>
           <Text style={styles.langText}>English</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.langButton} onPress={goNext}>
+        <TouchableOpacity style={styles.langButton} onPress={() => goNext('ta')}>
           <Text style={styles.langText}>தமிழ்</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.langButton} onPress={goNext}>
+        <TouchableOpacity style={styles.langButton} onPress={() => goNext('si')}>
           <Text style={styles.langText}>සිංහල</Text>
         </TouchableOpacity>
       </View>
