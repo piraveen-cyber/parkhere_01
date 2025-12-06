@@ -16,11 +16,13 @@ import {
 } from "react-native-safe-area-context";
 import { supabase } from "../config/supabaseClient";
 import { useTheme } from "../context/themeContext"; // 🔥 GLOBAL THEME
+import { useTranslation } from "react-i18next";
 
 export default function PhoneAuth() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { theme } = useTheme(); // 👈 global theme
+  const { t } = useTranslation();
 
   const isDark = theme === "dark";
 
@@ -40,8 +42,8 @@ export default function PhoneAuth() {
   const handleSendOTP = async () => {
     if (!isValid) {
       Alert.alert(
-        "Invalid Phone Number",
-        "Please enter a valid Sri Lankan number (07XXXXXXXX)."
+        t("invalidPhoneTitle"),
+        t("invalidPhoneMsg")
       );
       return;
     }
@@ -57,15 +59,15 @@ export default function PhoneAuth() {
       });
 
       if (error) {
-        Alert.alert("Error", error.message);
+        Alert.alert(t("error"), error.message);
         setLoading(false);
         return;
       }
 
-      Alert.alert("Success", "OTP has been sent.");
+      Alert.alert(t("success"), t("otpSent"));
       router.push({ pathname: "/otp", params: { phone: fullPhoneNumber } });
     } catch (error) {
-      Alert.alert("Error", "Failed to send OTP. Try again.");
+      Alert.alert(t("error"), t("otpError"));
     } finally {
       setLoading(false);
     }
@@ -82,18 +84,18 @@ export default function PhoneAuth() {
           <Text style={[styles.backArrow, { color: textColor }]}>{"<"}</Text>
         </TouchableOpacity>
 
-        <Text style={[styles.header, { color: textColor }]}>Login</Text>
+        <Text style={[styles.header, { color: textColor }]}>{t("login")}</Text>
       </View>
 
       <Text style={[styles.title, { color: textColor }]}>
-        Enter your mobile number
+        {t("enterMobile")}
       </Text>
 
       <Text style={[styles.subtitle, { color: descColor }]}>
-        We will send you a 6-digit OTP for verification.
+        {t("otpMessage")}
       </Text>
 
-      <Text style={[styles.label, { color: textColor }]}>Phone Number</Text>
+      <Text style={[styles.label, { color: textColor }]}>{t("phoneNumber")}</Text>
 
       {/* Phone Input */}
       <View
@@ -139,15 +141,15 @@ export default function PhoneAuth() {
               (!isValid || loading) && styles.buttonTextDisabled,
             ]}
           >
-            Send OTP
+            {t("sendOtp")}
           </Text>
         )}
       </TouchableOpacity>
 
       {/* Terms */}
       <Text style={[styles.terms, { color: descColor }]}>
-        By continuing, you agree to our <Text style={styles.link}>Terms</Text> &{" "}
-        <Text style={styles.link}>Privacy Policy</Text>
+        {t("termsAgree")} <Text style={styles.link}>{t("terms")}</Text> &{" "}
+        <Text style={styles.link}>{t("privacyPolicy")}</Text>
       </Text>
 
       {/* === DEV ONLY BUTTON === */}

@@ -10,6 +10,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useTheme } from "../context/themeContext";
+import { useTranslation } from "react-i18next";
 
 const { width, height } = Dimensions.get("window");
 
@@ -17,6 +18,7 @@ export default function Onboarding2() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { theme, toggleTheme } = useTheme();
+  const { t } = useTranslation();
 
   const isDark = theme === "dark";
 
@@ -61,11 +63,11 @@ export default function Onboarding2() {
 
         {/* TEXTS */}
         <Text style={[styles.title, { color: textColor }]}>
-          Quick Navigation
+          {t("quickNavigation")}
         </Text>
 
         <Text style={[styles.desc, { color: descColor }]}>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit
+          {t("loremIpsum")}
         </Text>
 
         {/* DOTS */}
@@ -83,11 +85,11 @@ export default function Onboarding2() {
           ]}
         >
           <TouchableOpacity onPress={() => router.replace("/(tabs)/home")}>
-            <Text style={[styles.skip, { color: descColor }]}>Skip</Text>
+            <Text style={[styles.skip, { color: descColor }]}>{t("skip")}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => router.push("/onboarding3")}>
-            <Text style={[styles.next, { color: textColor }]}>Next</Text>
+            <Text style={[styles.next, { color: textColor }]}>{t("next")}</Text>
           </TouchableOpacity>
         </View>
 

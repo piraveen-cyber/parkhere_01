@@ -11,6 +11,7 @@ import { useRouter } from "expo-router";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useTheme } from "../context/themeContext";
+import { useTranslation } from "react-i18next";
 
 const { width, height } = Dimensions.get("window");
 
@@ -18,6 +19,7 @@ export default function Onboarding3() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { theme, toggleTheme } = useTheme();
+  const { t } = useTranslation();
 
   const isDark = theme === "dark";
 
@@ -62,10 +64,10 @@ export default function Onboarding3() {
           resizeMode="contain"
         />
 
-        <Text style={[styles.title, { color: textColor }]}>Easy Payment</Text>
+        <Text style={[styles.title, { color: textColor }]}>{t("easyPayment")}</Text>
 
         <Text style={[styles.subtitle, { color: descColor }]}>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit
+          {t("loremIpsum")}
         </Text>
 
         {/* Get Started Button */}
@@ -73,7 +75,7 @@ export default function Onboarding3() {
           style={styles.button}
           onPress={() => router.push("/phoneAuth")}
         >
-          <Text style={styles.buttonText}>Get Started</Text>
+          <Text style={styles.buttonText}>{t("getStarted")}</Text>
         </TouchableOpacity>
       </View>
 

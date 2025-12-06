@@ -10,11 +10,13 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useTheme } from "../context/themeContext";
+import { useTranslation } from "react-i18next";
 
 export default function Detail() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { theme } = useTheme();
+  const { t } = useTranslation();
 
   const isDark = theme === "dark";
 
@@ -38,19 +40,19 @@ export default function Detail() {
       <View style={styles.container}>
 
         {/* Title */}
-        <Text style={[styles.title, { color: textColor }]}>Welcome!</Text>
+        <Text style={[styles.title, { color: textColor }]}>{t("welcomeTitle")}</Text>
         <Text style={[styles.subtitle, { color: descColor }]}>
-          Let's set up your profile.
+          {t("setupProfile")}
         </Text>
 
         {/* Name */}
-        <Text style={[styles.label, { color: textColor }]}>Name</Text>
+        <Text style={[styles.label, { color: textColor }]}>{t("name")}</Text>
         <TextInput
           style={[
             styles.input,
             { backgroundColor: inputBg, borderColor, color: textColor },
           ]}
-          placeholder="Enter your full name"
+          placeholder={t("enterName")}
           placeholderTextColor={descColor}
           value={name}
           onChangeText={setName}
@@ -58,27 +60,27 @@ export default function Detail() {
 
         {/* Email */}
         <Text style={[styles.label, { color: textColor }]}>
-          Email <Text style={{ color: descColor }}>(optional)</Text>
+          {t("emailLabel")} <Text style={{ color: descColor }}>{t("optional")}</Text>
         </Text>
         <TextInput
           style={[
             styles.input,
             { backgroundColor: inputBg, borderColor, color: textColor },
           ]}
-          placeholder="Enter your email address"
+          placeholder={t("enterEmail")}
           placeholderTextColor={descColor}
           value={email}
           onChangeText={setEmail}
         />
 
         {/* Gender */}
-        <Text style={[styles.label, { color: textColor }]}>Gender</Text>
+        <Text style={[styles.label, { color: textColor }]}>{t("gender")}</Text>
         <TextInput
           style={[
             styles.input,
             { backgroundColor: inputBg, borderColor, color: textColor },
           ]}
-          placeholder="Select Gender"
+          placeholder={t("selectGender")}
           placeholderTextColor={descColor}
           value={gender}
           onChangeText={setGender}
@@ -86,18 +88,18 @@ export default function Detail() {
 
         {/* Vehicle Details */}
         <Text style={[styles.sectionTitle, { color: textColor }]}>
-          Vehicle Details
+          {t("vehicleDetails")}
         </Text>
 
         <Text style={[styles.label, { color: textColor }]}>
-          Vehicle Number Plate
+          {t("vehiclePlate")}
         </Text>
         <TextInput
           style={[
             styles.input,
             { backgroundColor: inputBg, borderColor, color: textColor },
           ]}
-          placeholder="Enter your vehicle number plate"
+          placeholder={t("enterPlate")}
           placeholderTextColor={descColor}
           value={plate}
           onChangeText={setPlate}
@@ -108,12 +110,12 @@ export default function Detail() {
           style={[styles.button, { marginTop: 30 }]}
           onPress={goHome}
         >
-          <Text style={styles.buttonText}>Save & Continue</Text>
+          <Text style={styles.buttonText}>{t("saveContinue")}</Text>
         </TouchableOpacity>
 
         {/* Skip */}
         <TouchableOpacity onPress={goHome}>
-          <Text style={[styles.skip, { color: descColor }]}>Skip for now</Text>
+          <Text style={[styles.skip, { color: descColor }]}>{t("skipNow")}</Text>
         </TouchableOpacity>
 
         {/* Bottom safe padding */}
