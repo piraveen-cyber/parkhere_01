@@ -12,10 +12,12 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { supabase } from "../../config/supabaseClient";
 import { useTheme } from "../../context/themeContext";
+import { useTranslation } from "react-i18next";
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const isDark = theme === "dark";
 
   /* THEME COLORS */
@@ -27,8 +29,17 @@ export default function HomeScreen() {
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
-    if (error) Alert.alert("Error", error.message);
+    if (error) Alert.alert(t("error"), error.message);
   };
+
+  const services = [
+    { title: t("parking"), icon: require("../../assets/images/car.png") },
+    { title: t("mechanics"), icon: require("../../assets/images/wrench.png") },
+    { title: t("washing"), icon: require("../../assets/images/wash.png") },
+    { title: t("evCharging"), icon: require("../../assets/images/ev.png") },
+    { title: t("towing"), icon: require("../../assets/images/tow.png") },
+    { title: t("hiring"), icon: require("../../assets/images/check.png") },
+  ];
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: bg }]}>
@@ -41,11 +52,11 @@ export default function HomeScreen() {
       >
         {/* HEADER */}
         <Text style={[styles.welcome, { color: textColor }]}>
-          Welcome back, Suko 👋
+          {t("welcomeUser")}
         </Text>
 
         <Text style={[styles.subtitle, { color: descColor }]}>
-          Find everything your vehicle needs — fast and easy.
+          {t("findEverything")}
         </Text>
 
         {/* SEARCH BAR */}
@@ -57,7 +68,7 @@ export default function HomeScreen() {
         >
           <Text style={[styles.searchIcon, { color: descColor }]}>🔍</Text>
           <TextInput
-            placeholder="Search services or parking..."
+            placeholder={t("searchPlaceholder")}
             placeholderTextColor={descColor}
             style={[styles.searchInput, { color: textColor }]}
           />
@@ -83,21 +94,21 @@ export default function HomeScreen() {
         {/* BIG CARD */}
         <View style={[styles.bigCard, { backgroundColor: cardBg }]}>
           <Text style={[styles.bigCardTitle, { color: textColor }]}>
-            Book Your Spot in Seconds
+            {t("bookSpot")}
           </Text>
           <Text style={[styles.bigCardSubtitle, { color: descColor }]}>
-            Secure, easy, and instant confirmation
+            {t("secureEasy")}
           </Text>
 
           <TouchableOpacity style={styles.bookNowBtn}>
-            <Text style={styles.bookNowText}>Book Now</Text>
+            <Text style={styles.bookNowText}>{t("bookNow")}</Text>
           </TouchableOpacity>
         </View>
 
         {/* PROMOS */}
         <View style={styles.promoYellow}>
-          <Text style={styles.promoTitle}>20% Off Washing</Text>
-          <Text style={styles.promoSubtitle}>Valid until end of month</Text>
+          <Text style={styles.promoTitle}>{t("promoWashing")}</Text>
+          <Text style={styles.promoSubtitle}>{t("validUntil")}</Text>
         </View>
 
         <View
@@ -112,30 +123,21 @@ export default function HomeScreen() {
               { color: isDark ? "#FFFFFF" : "#000" },
             ]}
           >
-            Free EV Charging
+            {t("freeCharging")}
           </Text>
           <Text style={[styles.promoSubtitle, { color: descColor }]}>
-            First 30 minutes free
+            {t("first30Min")}
           </Text>
         </View>
 
         {/* LOGOUT BUTTON */}
         <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-          <Text style={styles.logoutText}>Logout</Text>
+          <Text style={styles.logoutText}>{t("logout")}</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const services = [
-  { title: "Parking", icon: require("../../assets/images/car.png") },
-  { title: "Mechanics", icon: require("../../assets/images/wrench.png") },
-  { title: "Washing", icon: require("../../assets/images/wash.png") },
-  { title: "EV Charging", icon: require("../../assets/images/ev.png") },
-  { title: "Towing", icon: require("../../assets/images/tow.png") },
-  { title: "Hiring", icon: require("../../assets/images/check.png") },
-];
 
 const styles = StyleSheet.create({
   safe: {
