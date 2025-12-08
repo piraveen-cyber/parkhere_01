@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "605071456178",
+    "project_id": "parkhere-01",
+    "storage_bucket": "parkhere-01.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:605071456178:android:9414b2e393a6b8734ed6ab",
+        "android_client_info": {
+          "package_name": "com.piraveenan.frontend"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "605071456178-pqqj1cplo3f1jbq9cbudtnk1dh8n4iq6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.piraveenan.frontend",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "605071456178-jit5mp5cv6pj8h51n4i0h8n5dnrg2cjk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCVB02qFuXQuem293Ye_zsHGnPKHVh7WEs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "605071456178-jit5mp5cv6pj8h51n4i0h8n5dnrg2cjk.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "605071456178-refv4cb757hc0tse0hf593oolbjim703.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.piraveenan.frontend"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
