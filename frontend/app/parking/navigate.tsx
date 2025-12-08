@@ -1,14 +1,14 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 
-const selectVehicle = () => {
+const navigate = () => {
   return (
     <View>
-      <Text>selectVehicle</Text>
+      <Text>navigate</Text>
     </View>
   )
 }
 
-export default selectVehicle
+export default navigate
 
 const styles = StyleSheet.create({})

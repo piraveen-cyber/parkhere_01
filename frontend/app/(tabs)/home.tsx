@@ -13,6 +13,7 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import { supabase } from "../../config/supabaseClient";
 import { useTheme } from "../../context/themeContext";
 import { useTranslation } from "react-i18next";
+import { router } from "expo-router";   // 👈 ADDED
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
@@ -33,13 +34,19 @@ export default function HomeScreen() {
   };
 
   const services = [
-    { title: t("parking"), icon: require("../../assets/images/car.png") },
-    { title: t("mechanics"), icon: require("../../assets/images/wrench.png") },
-    { title: t("washing"), icon: require("../../assets/images/wash.png") },
-    { title: t("evCharging"), icon: require("../../assets/images/ev.png") },
-    { title: t("towing"), icon: require("../../assets/images/tow.png") },
-    { title: t("hiring"), icon: require("../../assets/images/check.png") },
+    { key: "parking", title: t("parking"), icon: require("../../assets/images/car.png") },
+    { key: "mechanics", title: t("mechanics"), icon: require("../../assets/images/wrench.png") },
+    { key: "washing", title: t("washing"), icon: require("../../assets/images/wash.png") },
+    { key: "evCharging", title: t("evCharging"), icon: require("../../assets/images/ev.png") },
+    { key: "towing", title: t("towing"), icon: require("../../assets/images/tow.png") },
+    { key: "hiring", title: t("hiring"), icon: require("../../assets/images/check.png") },
   ];
+
+  const handleServiceNavigation = (key) => {
+    if (key === "parking") {
+      router.push("/parking/selectVehicle");  // 👈 UPDATED
+    }
+  };
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: bg }]}>
@@ -78,8 +85,9 @@ export default function HomeScreen() {
         <View style={styles.grid}>
           {services.map((item) => (
             <TouchableOpacity
-              key={item.title}
+              key={item.key}
               style={[styles.card, { backgroundColor: cardBg }]}
+              onPress={() => handleServiceNavigation(item.key)}
             >
               <View style={styles.iconWrapper}>
                 <Image source={item.icon} style={styles.iconImg} />
