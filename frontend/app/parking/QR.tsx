@@ -1,14 +1,179 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import React from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Image,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 
-const QR = () => {
+export default function QRScreen() {
+  const booking = {
+    parkingName: "Lekki Gardens Car Park A",
+    slot: "B20",
+    checkIn: "11:00 am",
+    checkOut: "05:00 pm",
+    spec: "None",
+    uniqueId: "CPA-0129",
+  };
+
   return (
-    <View>
-      <Text>QR</Text>
-    </View>
-  )
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Ionicons name="chevron-back" size={28} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Booking QR</Text>
+      </View>
+
+      {/* PARKING NAME */}
+      <View style={styles.parkingNameCard}>
+        <Text style={styles.parkingName}>
+          {booking.parkingName} <Text style={styles.spaceText}>Space 4c</Text>
+        </Text>
+      </View>
+
+      {/* QR Code */}
+      <View style={styles.qrWrapper}>
+        <Image
+          source={require("../../assets/images/QR.png")} // 🔥 Put your QR image here
+          style={styles.qrImage}
+        />
+        <Text style={styles.uniqueId}>Unique ID: {booking.uniqueId}</Text>
+      </View>
+
+      {/* Booking Details */}
+      <View style={styles.detailsCard}>
+        <Text style={styles.sectionTitle}>Booking Details</Text>
+
+        <View style={styles.row}>
+          <Text style={styles.label}>slot :</Text>
+          <Text style={styles.value}>{booking.slot}</Text>
+        </View>
+
+        <View style={styles.row}>
+          <Text style={styles.label}>Check-in Time:</Text>
+          <Text style={styles.value}>{booking.checkIn}</Text>
+        </View>
+
+        <View style={styles.row}>
+          <Text style={styles.label}>Check-out Time (Est):</Text>
+          <Text style={styles.value}>{booking.checkOut}</Text>
+        </View>
+
+        <View style={styles.row}>
+          <Text style={styles.label}>Specifications:</Text>
+          <Text style={styles.value}>{booking.spec}</Text>
+        </View>
+      </View>
+
+      {/* Buttons */}
+      <TouchableOpacity
+        style={styles.btnYellow}
+        onPress={() => router.push("../(tabs)/home")} // ✔ Go Home
+      >
+        <Text style={styles.btnText}>Go Back to Home Screen</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.btnYellow}
+        onPress={() => router.push("../parking/navigate")} // ✔ Navigate page
+      >
+        <Text style={styles.btnText}>Navigate to Location</Text>
+      </TouchableOpacity>
+    </ScrollView>
+  );
 }
 
-export default QR
+/* ===================== STYLES ===================== */
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    paddingHorizontal: 20,
+    paddingTop: 10,
+  },
+
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  headerTitle: {
+    marginLeft: 10,
+    fontSize: 20,
+    fontWeight: "700",
+  },
+
+  parkingNameCard: {
+    backgroundColor: "#fff",
+    padding: 18,
+    borderRadius: 12,
+    elevation: 5,
+  },
+  parkingName: {
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  spaceText: {
+    color: "#FFD400",
+    fontWeight: "800",
+  },
+
+  qrWrapper: {
+    marginTop: 25,
+    alignItems: "center",
+  },
+  qrImage: {
+    width: 170,
+    height: 170,
+  },
+  uniqueId: {
+    marginTop: 12,
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#444",
+  },
+
+  detailsCard: {
+    backgroundColor: "#fff",
+    padding: 18,
+    borderRadius: 12,
+    elevation: 4,
+    marginTop: 30,
+  },
+
+  sectionTitle: {
+    textAlign: "center",
+    fontSize: 17,
+    fontWeight: "700",
+    marginBottom: 10,
+  },
+
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 8,
+  },
+
+  label: { color: "#777", fontSize: 15 },
+  value: { fontSize: 15, fontWeight: "600", color: "#000" },
+
+  btnYellow: {
+    backgroundColor: "#FFD400",
+    paddingVertical: 15,
+    borderRadius: 12,
+    marginTop: 20,
+  },
+  btnText: {
+    textAlign: "center",
+    fontWeight: "700",
+    fontSize: 16,
+  },
+});

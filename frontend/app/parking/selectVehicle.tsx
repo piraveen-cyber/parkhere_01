@@ -28,10 +28,7 @@ export default function SelectVehicle() {
         }}
       />
 
-      {/* Search Bar */}
-      <View style={styles.searchBox}>
-        <Text style={styles.searchText}>Where are you going to?</Text>
-      </View>
+
 
       {/* Vehicle Selector */}
       <ScrollView
@@ -72,7 +69,7 @@ export default function SelectVehicle() {
         style={styles.floatButton}
         onPress={() =>
           router.push(
-            "../parkmap" 
+            "../parking/parkMap"
           )
         }
       >
@@ -83,25 +80,28 @@ export default function SelectVehicle() {
 }
 
 const styles = StyleSheet.create({
-  searchBox: {
-    position: "absolute",
-    top: 60,
-    alignSelf: "center",
-    width: "85%",
-    padding: 14,
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    elevation: 5,
-  },
-  searchText: {
-    color: "#777",
-    fontSize: 16,
-  },
+
   vehicleContainer: {
     position: "absolute",
-    top: 130,
+    top: 80,
     paddingHorizontal: 10,
   },
+  bottomContainer: {
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
+    backgroundColor: "#fff",
+    paddingVertical: 30,
+    paddingHorizontal: 10,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    elevation: 20, // Android shadow
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: -5 }, // iOS shadow
+  },
+
   vehicleCard: {
     backgroundColor: "#fff",
     width: 80,
