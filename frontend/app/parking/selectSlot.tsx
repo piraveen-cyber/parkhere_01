@@ -9,8 +9,10 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 export default function SelectSlot() {
+  const { t } = useTranslation();
   const [disabledParking, setDisabledParking] = useState(false);
   const [reserveLater, setReserveLater] = useState(false);
 
@@ -36,22 +38,22 @@ export default function SelectSlot() {
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={28} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>PICK PARKING SLOT</Text>
+        <Text style={styles.headerTitle}>{t('pickParkingSlot')}</Text>
       </View>
 
       {/* Parking name + price card */}
       <View style={styles.parkingCard}>
         <Text style={styles.parkingCardText}>
-          Lekki Gardens Car Park A <Text style={styles.price}>RS.200</Text>Hr
+          Lekki Gardens Car Park A <Text style={styles.price}>RS.200</Text>{t('perHour')}
         </Text>
       </View>
 
       {/* Specifications */}
-      <Text style={styles.sectionTitle}>Specifications</Text>
+      <Text style={styles.sectionTitle}>{t('specifications')}</Text>
 
       <View style={styles.row}>
         <Ionicons name="accessibility" size={22} />
-        <Text style={styles.label}>Disabled Parking</Text>
+        <Text style={styles.label}>{t('disabledParking')}</Text>
         <Switch
           value={disabledParking}
           onValueChange={setDisabledParking}
@@ -59,9 +61,9 @@ export default function SelectSlot() {
         />
       </View>
 
-      <Text style={styles.subTitle}>Select preferred space</Text>
+      <Text style={styles.subTitle}>{t('selectPreferredSpace')}</Text>
 
-      <Text style={styles.parkingSlotTitle}>Parking slot</Text>
+      <Text style={styles.parkingSlotTitle}>{t('parkingSlot')}</Text>
 
       {/* Slots Grid */}
       <View style={styles.slotsGrid}>
@@ -96,7 +98,7 @@ export default function SelectSlot() {
 
       {/* Reserve time switch */}
       <View style={[styles.row, { marginTop: 20 }]}>
-        <Text style={styles.label}>Reserve spot for another time</Text>
+        <Text style={styles.label}>{t('reserveSpotLater')}</Text>
         <Switch
           value={reserveLater}
           onValueChange={setReserveLater}
@@ -109,7 +111,7 @@ export default function SelectSlot() {
         style={styles.continueBtn}
         onPress={() => router.push("../parking/setTime")} // ✔ NAVIGATE TO SET TIME PAGE
       >
-        <Text style={styles.continueText}>Continue</Text>
+        <Text style={styles.continueText}>{t('continue')}</Text>
       </TouchableOpacity>
 
     </ScrollView>

@@ -9,32 +9,33 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 export default function QRScreen() {
+  const { t } = useTranslation();
   const booking = {
     parkingName: "Lekki Gardens Car Park A",
     slot: "B20",
     checkIn: "11:00 am",
     checkOut: "05:00 pm",
-    spec: "None",
+    spec: t('none'),
     uniqueId: "CPA-0129",
   };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
 
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={28} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Booking QR</Text>
+        <Text style={styles.headerTitle}>{t('bookingQr')}</Text>
       </View>
 
       {/* PARKING NAME */}
       <View style={styles.parkingNameCard}>
         <Text style={styles.parkingName}>
-          {booking.parkingName} <Text style={styles.spaceText}>Space 4c</Text>
+          {booking.parkingName} <Text style={styles.spaceText}>{t('space')} 4c</Text>
         </Text>
       </View>
 
@@ -44,30 +45,30 @@ export default function QRScreen() {
           source={require("../../assets/images/QR.png")} // 🔥 Put your QR image here
           style={styles.qrImage}
         />
-        <Text style={styles.uniqueId}>Unique ID: {booking.uniqueId}</Text>
+        <Text style={styles.uniqueId}>{t('uniqueId')}: {booking.uniqueId}</Text>
       </View>
 
       {/* Booking Details */}
       <View style={styles.detailsCard}>
-        <Text style={styles.sectionTitle}>Booking Details</Text>
+        <Text style={styles.sectionTitle}>{t('bookingDetails')}</Text>
 
         <View style={styles.row}>
-          <Text style={styles.label}>slot :</Text>
+          <Text style={styles.label}>{t('slot')} :</Text>
           <Text style={styles.value}>{booking.slot}</Text>
         </View>
 
         <View style={styles.row}>
-          <Text style={styles.label}>Check-in Time:</Text>
+          <Text style={styles.label}>{t('checkInTime')}:</Text>
           <Text style={styles.value}>{booking.checkIn}</Text>
         </View>
 
         <View style={styles.row}>
-          <Text style={styles.label}>Check-out Time (Est):</Text>
+          <Text style={styles.label}>{t('checkOutTime')}:</Text>
           <Text style={styles.value}>{booking.checkOut}</Text>
         </View>
 
         <View style={styles.row}>
-          <Text style={styles.label}>Specifications:</Text>
+          <Text style={styles.label}>{t('specifications')}:</Text>
           <Text style={styles.value}>{booking.spec}</Text>
         </View>
       </View>
@@ -77,14 +78,14 @@ export default function QRScreen() {
         style={styles.btnYellow}
         onPress={() => router.push("../(tabs)/home")} // ✔ Go Home
       >
-        <Text style={styles.btnText}>Go Back to Home Screen</Text>
+        <Text style={styles.btnText}>{t('goHome')}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.btnYellow}
         onPress={() => router.push("../parking/navigate")} // ✔ Navigate page
       >
-        <Text style={styles.btnText}>Navigate to Location</Text>
+        <Text style={styles.btnText}>{t('navigateToLocation')}</Text>
       </TouchableOpacity>
     </ScrollView>
   );

@@ -3,10 +3,12 @@ import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from "react-nati
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 const { width } = Dimensions.get("window");
 
 export default function Navigate() {
+  const { t } = useTranslation();
   const mapRef = useRef(null);
 
   const userLocation = { latitude: 6.9271, longitude: 79.8612 };
@@ -59,11 +61,11 @@ export default function Navigate() {
 
       {/* BOTTOM NAV CARD */}
       <View style={styles.bottomCard}>
-        <Text style={styles.timeText}>15 min</Text>
+        <Text style={styles.timeText}>15 {t('min')}</Text>
         <Text style={styles.distanceText}>6.7 km – 1:42 PM</Text>
 
         <View style={styles.rowBetween}>
-          <Text style={styles.smallText}>600 meters</Text>
+          <Text style={styles.smallText}>600 {t('meters')}</Text>
 
           {/* Graph icon */}
           <View style={styles.graphBtn}>
@@ -75,7 +77,7 @@ export default function Navigate() {
             style={styles.exitBtn}
             onPress={() => router.push("../(tabs)/home")} // ✔ Go Home
           >
-            <Text style={styles.exitText}>Exit</Text>
+            <Text style={styles.exitText}>{t('exit')}</Text>
           </TouchableOpacity>
         </View>
 

@@ -2,18 +2,19 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 export default function PaymentSuccess() {
+  const { t } = useTranslation();
   return (
     <View style={styles.container}>
 
       {/* Title */}
-      <Text style={styles.title}>Payment Succesful!</Text>
+      <Text style={styles.title}>{t('paymentSuccessful')}</Text>
 
       {/* Sub description */}
       <Text style={styles.subText}>
-        Your payment transaction has been successful. You’ll an email confirmation
-        containing your invoice.
+        {t('paymentSuccessMsg')}
       </Text>
 
       {/* Green Check Circle */}
@@ -28,7 +29,7 @@ export default function PaymentSuccess() {
         style={styles.nextBtn}
         onPress={() => router.push("../parking/QR")}   // ✅ Navigate to QR Page
       >
-        <Text style={styles.nextText}>Next</Text>
+        <Text style={styles.nextText}>{t('next')}</Text>
       </TouchableOpacity>
 
     </View>

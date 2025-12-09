@@ -9,13 +9,15 @@ import MapView, { Marker } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 export default function SelectParking() {
+  const { t } = useTranslation();
   const parkingSpot = {
     name: "Lekki Gardens Car Park A",
     price: "N200",
     spaces: 9,
-    distance: "3 mins walk",
+    distance: `3 ${t('minsWalk')}`,
     lat: 6.9278,
     lng: 79.8619,
   };
@@ -65,11 +67,11 @@ export default function SelectParking() {
         <View style={styles.line} />
 
         <Text style={styles.detailText}>
-          Spaces Available: <Text style={styles.value}>{parkingSpot.spaces} slots</Text>
+          {t('spacesAvailable')}: <Text style={styles.value}>{parkingSpot.spaces} {t('slots')}</Text>
         </Text>
 
         <Text style={styles.detailText}>
-          Distance to Venue: <Text style={styles.value}>{parkingSpot.distance}</Text>
+          {t('distanceToVenue')}: <Text style={styles.value}>{parkingSpot.distance}</Text>
         </Text>
 
         {/* BUTTON */}
@@ -77,7 +79,7 @@ export default function SelectParking() {
           style={styles.button}
           onPress={() => router.push("../parking/selectSlot")} // 🚀 route to selectSlot
         >
-          <Text style={styles.buttonText}>PICK PARKING SLOT</Text>
+          <Text style={styles.buttonText}>{t('pickParkingSlot')}</Text>
         </TouchableOpacity>
       </View>
 

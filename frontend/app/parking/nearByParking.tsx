@@ -7,17 +7,19 @@ import {
     StyleSheet,
     FlatList,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import MapView, { Marker, Circle } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 
 export default function NearBySearch() {
-    const [selectedVehicle, setSelectedVehicle] = useState("CAR");
+    const { t } = useTranslation();
+    const [selectedVehicle, setSelectedVehicle] = useState("car");
 
     const mapRef = useRef(null);
 
-    const vehicleTypes = ["CAR", "BIKE", "BUS", "VAN"];
+    const vehicleTypes = ["car", "bike", "bus", "van"];
 
     const parkingLocations = [
         { id: 1, name: "Car Park A", lat: 6.9278, lng: 79.8619 },
@@ -85,7 +87,7 @@ export default function NearBySearch() {
             >
                 <Ionicons name="search" size={20} color="#888" />
                 <TextInput
-                    placeholder="Search location…"
+                    placeholder={t('searchLocation')}
                     placeholderTextColor="#999"
                     style={styles.searchInput}
                     editable={false}
@@ -114,7 +116,7 @@ export default function NearBySearch() {
                                     selectedVehicle === item && { color: "#000" },
                                 ]}
                             >
-                                {item}
+                                {t(item)}
                             </Text>
                         </TouchableOpacity>
                     )}

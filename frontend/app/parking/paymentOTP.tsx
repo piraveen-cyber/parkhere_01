@@ -6,17 +6,19 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { router } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 export default function OtpPage() {
+  const { t } = useTranslation();
   const [otp, setOtp] = useState(["1", "9", "8", "3"]);
 
   return (
     <View style={styles.container}>
 
-      <Text style={styles.title}>Waiting for the OTP</Text>
+      <Text style={styles.title}>{t('waitingOtp')}</Text>
 
       <Text style={styles.subtitle}>
-        Interactively expedite revolutionary ROI after bricks-and-clicks alignments.
+        {t('otpSubtitle')}
       </Text>
 
       <View style={styles.otpRow}>
@@ -27,17 +29,17 @@ export default function OtpPage() {
         ))}
       </View>
 
-      <Text style={styles.smallInfo}>Automatically displayed OTP</Text>
+      <Text style={styles.smallInfo}>{t('autoOtp')}</Text>
 
       {/* Circular loader area */}
       <View style={styles.centerCircle}>
-        <Text style={styles.centerCircleText}>Waiting for the OTP</Text>
+        <Text style={styles.centerCircleText}>{t('waitingOtp')}</Text>
       </View>
 
       <View style={styles.row}>
-        <Text style={styles.muted}>Didn’t receive OTP?</Text>
+        <Text style={styles.muted}>{t('didntReceiveOtp')}</Text>
         <TouchableOpacity>
-          <Text style={styles.resend}>Resend</Text>
+          <Text style={styles.resend}>{t('resend')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -46,7 +48,7 @@ export default function OtpPage() {
         style={styles.button}
         onPress={() => router.push("../parking/paymentSuccess")} // ✔ navigate to successBook page
       >
-        <Text style={styles.buttonText}>Complete Payment</Text>
+        <Text style={styles.buttonText}>{t('completePayment')}</Text>
       </TouchableOpacity>
     </View>
   );

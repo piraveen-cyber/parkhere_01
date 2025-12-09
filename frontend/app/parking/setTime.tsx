@@ -5,13 +5,14 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  SafeAreaView,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 import { router } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 export default function SetTime() {
+  const { t } = useTranslation();
   const [checkIn, setCheckIn] = useState("11:00 am");
   const [duration, setDuration] = useState(6);
 
@@ -21,14 +22,14 @@ export default function SetTime() {
   const calculatedPrice = duration * pricePerHour;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <ScrollView style={styles.container}>
 
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={26} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Parking Details</Text>
+        <Text style={styles.headerTitle}>{t('parkingDetails')}</Text>
       </View>
 
       {/* Parking Card */}
@@ -37,7 +38,7 @@ export default function SetTime() {
           <Text style={styles.parkingTitle}>Parking A</Text>
           <View style={styles.priceTag}>
             <Text style={styles.priceText}>RS. {pricePerHour}</Text>
-            <Text style={styles.perHour}>/h</Text>
+            <Text style={styles.perHour}>{t('perHour')}</Text>
           </View>
         </View>
 
@@ -52,27 +53,27 @@ export default function SetTime() {
         <View style={styles.detailsRow}>
           <View style={styles.iconPair}>
             <Ionicons name="camera" size={18} color="#555" />
-            <Text style={styles.iconText}>CCTV</Text>
+            <Text style={styles.iconText}>{t('cctv')}</Text>
           </View>
           <View style={styles.iconPair}>
             <Ionicons name="shield-checkmark" size={18} color="#555" />
-            <Text style={styles.iconText}>Security</Text>
+            <Text style={styles.iconText}>{t('security')}</Text>
           </View>
           <View style={styles.iconPair}>
             <MaterialIcons name="warning" size={18} color="#555" />
-            <Text style={styles.iconText}>Covered</Text>
+            <Text style={styles.iconText}>{t('covered')}</Text>
           </View>
         </View>
       </View>
 
       {/* Slot */}
-      <Text style={styles.slotText}>Slot: {selectedSlot}</Text>
+      <Text style={styles.slotText}>{t('slot')}: {selectedSlot}</Text>
 
       {/* Time section */}
-      <Text style={styles.sectionTitle}>Select time</Text>
+      <Text style={styles.sectionTitle}>{t('selectTime')}</Text>
 
       <View style={styles.rowBetween}>
-        <Text style={styles.label}>Check-in Time:</Text>
+        <Text style={styles.label}>{t('checkInTime')}:</Text>
 
         {/* Time editing */}
         <TouchableOpacity style={styles.timeBox}>
@@ -82,11 +83,11 @@ export default function SetTime() {
       </View>
 
       <View style={{ marginTop: 20 }}>
-        <Text style={styles.label}>Estimate Duration</Text>
+        <Text style={styles.label}>{t('estimateDuration')}</Text>
 
         <View style={styles.durationBox}>
           <Text style={styles.durationText}>
-            {duration} hours - RS.{calculatedPrice}
+            {duration} {t('hours')} - RS.{calculatedPrice}
           </Text>
         </View>
       </View>
@@ -103,13 +104,13 @@ export default function SetTime() {
       />
 
       {/* Add services */}
-      <Text style={styles.sectionTitle}>Add services (optional)</Text>
+      <Text style={styles.sectionTitle}>{t('addServices')}</Text>
 
       <View style={styles.servicesRow}>
         {[
-          { name: "EV Charging", price: 50 },
-          { name: "Car Wash", price: 100 },
-          { name: "Mechanic Check", price: 150 },
+          { name: t('evCharging'), price: 50 },
+          { name: t('carWash'), price: 100 },
+          { name: t('mechanicCheck'), price: 150 },
         ].map((service, i) => (
           <TouchableOpacity key={i} style={styles.serviceBox}>
             <Text style={styles.serviceMain}>{service.name}</Text>
@@ -123,10 +124,10 @@ export default function SetTime() {
         style={styles.button}
         onPress={() => router.push("../parking/paymentCard")} // ✔ ROUTER TO PAYMENT
       >
-        <Text style={styles.buttonText}>Continue to Payment</Text>
+        <Text style={styles.buttonText}>{t('continueToPayment')}</Text>
       </TouchableOpacity>
 
-    </SafeAreaView>
+    </ScrollView>
   );
 }
 

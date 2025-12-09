@@ -2,8 +2,10 @@ import React, { useEffect } from "react";
 import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 export default function LoadingPopup() {
+  const { t } = useTranslation();
 
   useEffect(() => {
     // After 2 seconds → move to Payment OTP page
@@ -18,9 +20,9 @@ export default function LoadingPopup() {
     <View style={styles.container}>
       <View style={styles.popup}>
         <Ionicons name="checkmark-circle" size={70} color="#2ecc71" />
-        <Text style={styles.title}>Space Successfully Booked</Text>
+        <Text style={styles.title}>{t('spaceBooked')}</Text>
 
-        <Text style={styles.subtitle}>Notifying Security Guards</Text>
+        <Text style={styles.subtitle}>{t('notifyingGuards')}</Text>
 
         <ActivityIndicator size="large" color="#555" style={{ marginTop: 15 }} />
       </View>

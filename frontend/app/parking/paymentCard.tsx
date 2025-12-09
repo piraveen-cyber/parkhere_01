@@ -9,8 +9,10 @@ import {
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 export default function PaymentCard() {
+  const { t } = useTranslation();
   const [method, setMethod] = useState("card"); // card | cash | upi
   const [cardNumber, setCardNumber] = useState("");
   const [expiry, setExpiry] = useState("");
@@ -41,15 +43,15 @@ export default function PaymentCard() {
 
       {/* SUMMARY CARD */}
       <View style={styles.summaryCard}>
-        <Text style={styles.title}>City Center Parking</Text>
-        <Text style={styles.subText}>Today, 11:00 am</Text>
-        <Text style={styles.subText}>Total Duration: 6 hr</Text>
+        <Text style={styles.title}>{t('cityCenterParking')}</Text>
+        <Text style={styles.subText}>{t('today')}, 11:00 am</Text>
+        <Text style={styles.subText}>{t('totalDuration')}: 6 hr</Text>
 
         <Text style={styles.price}>RS. 200</Text>
       </View>
 
       {/* METHOD TITLE */}
-      <Text style={styles.sectionTitle}>Select Payment Method</Text>
+      <Text style={styles.sectionTitle}>{t('selectPaymentMethod')}</Text>
 
       {/* PAYMENT OPTIONS */}
 
@@ -63,7 +65,7 @@ export default function PaymentCard() {
       >
         <MaterialIcons name="credit-card" size={32} color="#555" />
         <View style={{ marginLeft: 10 }}>
-          <Text style={styles.methodTitle}>Credit / Debit Card</Text>
+          <Text style={styles.methodTitle}>{t('creditDebitCard')}</Text>
           <View style={{ flexDirection: "row", marginTop: 4 }}>
             <View style={styles.visaTag}>
               <Text style={{ color: "#fff", fontWeight: "700" }}>VISA</Text>
@@ -89,8 +91,8 @@ export default function PaymentCard() {
       >
         <MaterialIcons name="payments" size={32} color="#555" />
         <View style={{ marginLeft: 10 }}>
-          <Text style={styles.methodTitle}>Cash at Location</Text>
-          <Text style={styles.methodSub}>Pay when you arrive</Text>
+          <Text style={styles.methodTitle}>{t('cashAtLocation')}</Text>
+          <Text style={styles.methodSub}>{t('payOnArrival')}</Text>
         </View>
 
         {method === "cash" && (
@@ -108,8 +110,8 @@ export default function PaymentCard() {
       >
         <Ionicons name="wallet" size={32} color="#555" />
         <View style={{ marginLeft: 10 }}>
-          <Text style={styles.methodTitle}>UPI / Wallet / Online Payment</Text>
-          <Text style={styles.methodSub}>PhonePe, GPay, Paytm & more</Text>
+          <Text style={styles.methodTitle}>{t('upiWallet')}</Text>
+          <Text style={styles.methodSub}>{t('upiDesc')}</Text>
         </View>
 
         {method === "upi" && (
@@ -120,9 +122,9 @@ export default function PaymentCard() {
       {/* CARD DETAILS — only when Credit/Debit Card selected */}
       {method === "card" && (
         <>
-          <Text style={styles.sectionTitle}>Add Card Details</Text>
+          <Text style={styles.sectionTitle}>{t('addCardDetails')}</Text>
 
-          <Text style={styles.label}>Card Number</Text>
+          <Text style={styles.label}>{t('cardNumber')}</Text>
           <TextInput
             style={styles.input}
             placeholder="1234 5678 9012 3456"
@@ -134,7 +136,7 @@ export default function PaymentCard() {
 
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.label}>Expiry</Text>
+              <Text style={styles.label}>{t('expiry')}</Text>
               <TextInput
                 style={styles.input}
                 placeholder="MM/YY"
@@ -145,7 +147,7 @@ export default function PaymentCard() {
             </View>
 
             <View style={{ width: 120, marginLeft: 10 }}>
-              <Text style={styles.label}>CVV</Text>
+              <Text style={styles.label}>{t('cvv')}</Text>
               <TextInput
                 style={styles.input}
                 placeholder="123"
@@ -162,12 +164,12 @@ export default function PaymentCard() {
 
       {/* PAY BUTTON */}
       <TouchableOpacity style={styles.payBtn} onPress={handlePayment}>
-        <Text style={styles.payText}>Pay & Reserve</Text>
+        <Text style={styles.payText}>{t('payReserve')}</Text>
       </TouchableOpacity>
 
       {/* CANCEL */}
       <TouchableOpacity onPress={() => router.back()}>
-        <Text style={styles.cancelText}>Cancel booking</Text>
+        <Text style={styles.cancelText}>{t('cancelBooking')}</Text>
       </TouchableOpacity>
     </ScrollView>
   );

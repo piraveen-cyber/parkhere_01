@@ -1,5 +1,6 @@
 import { router } from "expo-router";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   View,
   Text,
@@ -13,16 +14,17 @@ import MapView from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ParkingScreen() {
+  const { t } = useTranslation();
   const [selectedType, setSelectedType] = useState("car");
 
   const vehicleTypes = [
-    { id: "car", label: "CAR", icon: require("../../assets/images/carpark.png") },
-    { id: "bike", label: "BIKE", icon: require("../../assets/images/bikepark.png") },
-    { id: "bus", label: "BUS", icon: require("../../assets/images/buspark.png") },
-    { id: "van", label: "VAN", icon: require("../../assets/images/vanpark.png") },
+    { id: "car", label: t('car'), icon: require("../../assets/images/carpark.png") },
+    { id: "bike", label: t('bike'), icon: require("../../assets/images/bikepark.png") },
+    { id: "bus", label: t('bus'), icon: require("../../assets/images/buspark.png") },
+    { id: "van", label: t('van'), icon: require("../../assets/images/vanpark.png") },
     {
       id: "threewheel",
-      label: "Three Wheeler",
+      label: t('threeWheel'),
       icon: require("../../assets/images/tukpark.png"),
     },
   ];
@@ -48,7 +50,7 @@ export default function ParkingScreen() {
         onPress={() => router.push("../parking/nearBySearch")}
       >
         <TextInput
-          placeholder="Where are you going to?"
+          placeholder={t('whereTo')}
           placeholderTextColor="#999"
           style={styles.searchInput}
           editable={false}

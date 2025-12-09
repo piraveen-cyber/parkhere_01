@@ -2,18 +2,22 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from "react-native";
 import MapView from "react-native-maps";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 
-const vehicles = [
-  { id: "car", label: "CAR", icon: require("../../assets/images/carpark.png") },
-  { id: "bike", label: "BIKE", icon: require("../../assets/images/bikepark.png") },
-  { id: "bus", label: "BUS", icon: require("../../assets/images/buspark.png") },
-  { id: "van", label: "VAN", icon: require("../../assets/images/vanpark.png") },
-  { id: "three", label: "Three Wheeler", icon: require("../../assets/images/tukpark.png") },
-];
+
 
 export default function SelectVehicle() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [selected, setSelected] = useState("car");
+
+  const vehicles = [
+    { id: "car", label: t('car'), icon: require("../../assets/images/carpark.png") },
+    { id: "bike", label: t('bike'), icon: require("../../assets/images/bikepark.png") },
+    { id: "bus", label: t('bus'), icon: require("../../assets/images/buspark.png") },
+    { id: "van", label: t('van'), icon: require("../../assets/images/vanpark.png") },
+    { id: "three", label: t('threeWheel'), icon: require("../../assets/images/tukpark.png") },
+  ];
 
   return (
     <View style={{ flex: 1 }}>
