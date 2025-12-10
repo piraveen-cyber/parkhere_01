@@ -1,16 +1,43 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 
+import { processPayment } from "../../services/paymentService";
+import { supabase } from "../../config/supabaseClient";
+import CustomButton from "../../components/CustomButton";
+
 export default function OtpPage() {
   const { t } = useTranslation();
-  const [otp, setOtp] = useState(["1", "9", "8", "3"]);
+  const [otp] = useState(["1", "9", "8", "3"]);
+  const [loading, setLoading] = useState(false);
+
+  const handlePayment = async () => {
+    console.log("Button Pressed!");
+    // Alert.alert("Debug", "Button Pressed!"); // Debugging
+    setLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      await processPayment({
+        userId: session?.user?.id || "guest",
+        amount: 500, // Dummy amount
+        method: "card",
+      });
+
+      router.push("../parking/paymentSuccess");
+    } catch (error: any) {
+      Alert.alert("Error", "Payment failed: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -43,13 +70,15 @@ export default function OtpPage() {
         </TouchableOpacity>
       </View>
 
+
+
       {/* Complete Payment Button */}
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => router.push("../parking/paymentSuccess")} // ✔ navigate to successBook page
-      >
-        <Text style={styles.buttonText}>{t('completePayment')}</Text>
-      </TouchableOpacity>
+      <CustomButton
+        title={t('completePayment')}
+        onPress={handlePayment}
+        loading={loading}
+        style={{ marginTop: 40 }}
+      />
     </View>
   );
 }

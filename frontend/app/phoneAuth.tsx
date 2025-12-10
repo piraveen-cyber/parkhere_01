@@ -17,20 +17,13 @@ import {
 import { supabase } from "../config/supabaseClient";
 import { useTheme } from "../context/themeContext"; // 🔥 GLOBAL THEME
 import { useTranslation } from "react-i18next";
+import CustomButton from "../components/CustomButton";
 
 export default function PhoneAuth() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { theme } = useTheme(); // 👈 global theme
+  const { theme, colors } = useTheme(); // 👈 use new colors
   const { t } = useTranslation();
-
-  const isDark = theme === "dark";
-
-  const bg = isDark ? "#0D1B2A" : "#FAFAFA";
-  const textColor = isDark ? "#FFFFFF" : "#222";
-  const descColor = isDark ? "#C7D1D9" : "#6F6F6F";
-  const inputBg = isDark ? "#1B263B" : "#FFFFFF";
-  const borderColor = isDark ? "#415A77" : "#E2E2E2";
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [loading, setLoading] = useState(false);
@@ -74,48 +67,48 @@ export default function PhoneAuth() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: bg }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
       <View style={[styles.headerWrapper, { marginTop: insets.top + 5 }]}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
         >
-          <Text style={[styles.backArrow, { color: textColor }]}>{"<"}</Text>
+          <Text style={[styles.backArrow, { color: colors.text }]}>{"<"}</Text>
         </TouchableOpacity>
 
-        <Text style={[styles.header, { color: textColor }]}>{t("login")}</Text>
+        <Text style={[styles.header, { color: colors.text }]}>{t("login")}</Text>
       </View>
 
-      <Text style={[styles.title, { color: textColor }]}>
+      <Text style={[styles.title, { color: colors.primary }]}>
         {t("enterMobile")}
       </Text>
 
-      <Text style={[styles.subtitle, { color: descColor }]}>
+      <Text style={[styles.subtitle, { color: colors.subText }]}>
         {t("otpMessage")}
       </Text>
 
-      <Text style={[styles.label, { color: textColor }]}>{t("phoneNumber")}</Text>
+      <Text style={[styles.label, { color: colors.text }]}>{t("phoneNumber")}</Text>
 
       {/* Phone Input */}
       <View
         style={[
           styles.phoneContainer,
-          { backgroundColor: inputBg, borderColor: borderColor },
+          { backgroundColor: colors.inputBg, borderColor: colors.border },
         ]}
       >
-        <View style={[styles.countryBox, { borderRightColor: borderColor }]}>
+        <View style={[styles.countryBox, { borderRightColor: colors.border }]}>
           <Image
             source={require("../assets/images/srilanka_flag.png")}
             style={styles.flag}
           />
-          <Text style={[styles.countryCode, { color: textColor }]}>+94 ▼</Text>
+          <Text style={[styles.countryCode, { color: colors.text }]}>+94 ▼</Text>
         </View>
 
         <TextInput
-          style={[styles.phoneInput, { color: textColor }]}
+          style={[styles.phoneInput, { color: colors.text }]}
           placeholder="7XXXXXXXX"
-          placeholderTextColor={isDark ? "#8FA3B0" : "#999"}
+          placeholderTextColor={colors.subText}
           value={phoneNumber}
           keyboardType="numeric"
           onChangeText={setPhoneNumber}
@@ -123,33 +116,21 @@ export default function PhoneAuth() {
         />
       </View>
 
+
+
       {/* Send OTP Button */}
-      <TouchableOpacity
-        style={[
-          styles.button,
-          isValid && !loading ? styles.buttonActive : styles.buttonDisabled,
-        ]}
-        disabled={!isValid || loading}
+      <CustomButton
+        title={t("sendOtp")}
         onPress={handleSendOTP}
-      >
-        {loading ? (
-          <ActivityIndicator size="small" color={isDark ? "#000" : "#000"} />
-        ) : (
-          <Text
-            style={[
-              styles.buttonText,
-              (!isValid || loading) && styles.buttonTextDisabled,
-            ]}
-          >
-            {t("sendOtp")}
-          </Text>
-        )}
-      </TouchableOpacity>
+        loading={loading}
+        disabled={!isValid || loading}
+        style={{ marginTop: 50 }}
+      />
 
       {/* Terms */}
-      <Text style={[styles.terms, { color: descColor }]}>
-        {t("termsAgree")} <Text style={styles.link}>{t("terms")}</Text> &{" "}
-        <Text style={styles.link}>{t("privacyPolicy")}</Text>
+      <Text style={[styles.terms, { color: colors.subText }]}>
+        {t("termsAgree")} <Text style={[styles.link, { color: colors.primary }]}>{t("terms")}</Text> &{" "}
+        <Text style={[styles.link, { color: colors.primary }]}>{t("privacyPolicy")}</Text>
       </Text>
 
       {/* === DEV ONLY BUTTON === */}
@@ -159,7 +140,7 @@ export default function PhoneAuth() {
           router.push({ pathname: "/otp", params: { phone: "+94700000000" } })
         }
       >
-        <Text style={{ color: "red", fontWeight: "700" }}>
+        <Text style={{ color: colors.error, fontWeight: "700" }}>
           DEV: Go to OTP →
         </Text>
       </TouchableOpacity>
@@ -214,15 +195,9 @@ const styles = StyleSheet.create({
 
   button: { marginTop: 50, paddingVertical: 18, borderRadius: 14 },
 
-  buttonDisabled: { backgroundColor: "#EFEFEF" },
-
-  buttonActive: { backgroundColor: "#FFD400" },
-
   buttonText: { textAlign: "center", fontSize: 17, fontWeight: "600" },
-
-  buttonTextDisabled: { color: "#B5B5B5" },
 
   terms: { marginTop: 25, textAlign: "center" },
 
-  link: { color: "#D4A000", fontWeight: "600" },
+  link: { fontWeight: "600" },
 });

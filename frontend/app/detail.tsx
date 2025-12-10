@@ -12,6 +12,10 @@ import { useRouter } from "expo-router";
 import { useTheme } from "../context/themeContext";
 import { useTranslation } from "react-i18next";
 
+import { supabase } from "../config/supabaseClient";
+import { updateUserProfile } from "../services/userService";
+import CustomButton from "../components/CustomButton";
+
 export default function Detail() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -30,9 +34,36 @@ export default function Detail() {
   const [email, setEmail] = useState("");
   const [gender, setGender] = useState("");
   const [plate, setPlate] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const goHome = () => {
-    router.replace("/(tabs)/home");
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session?.user?.id) {
+        alert(t("loginRequired") || "Login required");
+        return;
+      }
+
+      const userProfile = {
+        supabaseId: session.user.id,
+        name,
+        email,
+        gender,
+        vehiclePlate: plate,
+        phone: session.user.phone, // Include phone from auth
+      };
+
+      await updateUserProfile(userProfile);
+
+      router.replace("/(tabs)/home");
+    } catch (error: any) {
+      console.error("Save error:", error);
+      alert("Failed to save profile: " + error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -105,16 +136,17 @@ export default function Detail() {
           onChangeText={setPlate}
         />
 
+
         {/* Save Button */}
-        <TouchableOpacity
-          style={[styles.button, { marginTop: 30 }]}
-          onPress={goHome}
-        >
-          <Text style={styles.buttonText}>{t("saveContinue")}</Text>
-        </TouchableOpacity>
+        <CustomButton
+          title={t("saveContinue")}
+          onPress={handleSave}
+          loading={loading}
+          style={{ marginTop: 30 }}
+        />
 
         {/* Skip */}
-        <TouchableOpacity onPress={goHome}>
+        <TouchableOpacity onPress={() => router.replace("/(tabs)/home")}>
           <Text style={[styles.skip, { color: descColor }]}>{t("skipNow")}</Text>
         </TouchableOpacity>
 

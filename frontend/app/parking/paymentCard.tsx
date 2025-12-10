@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
+  Pressable,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -35,9 +36,9 @@ export default function PaymentCard() {
 
       {/* HEADER */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <Pressable onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={26} />
-        </TouchableOpacity>
+        </Pressable>
         <Text style={styles.headerTitle}>Payment</Text>
       </View>
 
@@ -56,22 +57,23 @@ export default function PaymentCard() {
       {/* PAYMENT OPTIONS */}
 
       {/* CREDIT CARD */}
-      <TouchableOpacity
-        style={[
+      <Pressable
+        style={({ pressed }) => [
           styles.methodBox,
           method === "card" && styles.methodSelected,
+          pressed && styles.methodPressed,
         ]}
         onPress={() => setMethod("card")}
       >
         <MaterialIcons name="credit-card" size={32} color="#555" />
-        <View style={{ marginLeft: 10 }}>
+        <View style={{ marginLeft: 15 }}>
           <Text style={styles.methodTitle}>{t('creditDebitCard')}</Text>
-          <View style={{ flexDirection: "row", marginTop: 4 }}>
+          <View style={{ flexDirection: "row", marginTop: 6 }}>
             <View style={styles.visaTag}>
-              <Text style={{ color: "#fff", fontWeight: "700" }}>VISA</Text>
+              <Text style={{ color: "#fff", fontWeight: "700", fontSize: 10 }}>VISA</Text>
             </View>
             <View style={styles.masterTag}>
-              <Text style={{ color: "#fff", fontWeight: "700" }}>MC</Text>
+              <Text style={{ color: "#fff", fontWeight: "700", fontSize: 10 }}>MC</Text>
             </View>
           </View>
         </View>
@@ -79,18 +81,19 @@ export default function PaymentCard() {
         {method === "card" && (
           <Ionicons name="checkmark-circle" size={28} color="#FFD400" style={{ marginLeft: "auto" }} />
         )}
-      </TouchableOpacity>
+      </Pressable>
 
       {/* CASH OPTION */}
-      <TouchableOpacity
-        style={[
+      <Pressable
+        style={({ pressed }) => [
           styles.methodBox,
           method === "cash" && styles.methodSelected,
+          pressed && styles.methodPressed,
         ]}
         onPress={() => setMethod("cash")}
       >
         <MaterialIcons name="payments" size={32} color="#555" />
-        <View style={{ marginLeft: 10 }}>
+        <View style={{ marginLeft: 15 }}>
           <Text style={styles.methodTitle}>{t('cashAtLocation')}</Text>
           <Text style={styles.methodSub}>{t('payOnArrival')}</Text>
         </View>
@@ -98,18 +101,19 @@ export default function PaymentCard() {
         {method === "cash" && (
           <Ionicons name="checkmark-circle" size={28} color="#FFD400" style={{ marginLeft: "auto" }} />
         )}
-      </TouchableOpacity>
+      </Pressable>
 
       {/* UPI OPTION */}
-      <TouchableOpacity
-        style={[
+      <Pressable
+        style={({ pressed }) => [
           styles.methodBox,
           method === "upi" && styles.methodSelected,
+          pressed && styles.methodPressed,
         ]}
         onPress={() => setMethod("upi")}
       >
-        <Ionicons name="wallet" size={32} color="#555" />
-        <View style={{ marginLeft: 10 }}>
+        <Ionicons name="wallet" size={25} color="#555" />
+        <View style={{ marginLeft: 15 }}>
           <Text style={styles.methodTitle}>{t('upiWallet')}</Text>
           <Text style={styles.methodSub}>{t('upiDesc')}</Text>
         </View>
@@ -117,7 +121,7 @@ export default function PaymentCard() {
         {method === "upi" && (
           <Ionicons name="checkmark-circle" size={28} color="#FFD400" style={{ marginLeft: "auto" }} />
         )}
-      </TouchableOpacity>
+      </Pressable>
 
       {/* CARD DETAILS — only when Credit/Debit Card selected */}
       {method === "card" && (
@@ -163,9 +167,22 @@ export default function PaymentCard() {
       )}
 
       {/* PAY BUTTON */}
-      <TouchableOpacity style={styles.payBtn} onPress={handlePayment}>
+      <Pressable
+        style={({ pressed }) => [
+          styles.payBtn,
+          pressed && {
+            backgroundColor: "#FFE04D",
+            shadowColor: "#FFD400",
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: 1,
+            shadowRadius: 25,
+            elevation: 15,
+          },
+        ]}
+        onPress={handlePayment}
+      >
         <Text style={styles.payText}>{t('payReserve')}</Text>
-      </TouchableOpacity>
+      </Pressable>
 
       {/* CANCEL */}
       <TouchableOpacity onPress={() => router.back()}>
@@ -180,86 +197,121 @@ export default function PaymentCard() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff", padding: 20 },
 
-  header: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
-  headerTitle: { fontSize: 20, fontWeight: "700", marginLeft: 10 },
+  header: { flexDirection: "row", alignItems: "center", marginBottom: 20, marginTop: 10 },
+  headerTitle: { fontSize: 24, fontWeight: "800", marginLeft: 15, color: "#333", letterSpacing: 0.5 },
 
   summaryCard: {
     backgroundColor: "#fff",
-    padding: 18,
-    borderRadius: 16,
-    elevation: 5,
+    padding: 20,
+    borderRadius: 20,
+    elevation: 8,
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 20,
+    marginBottom: 25,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.05)",
   },
 
-  title: { fontSize: 18, fontWeight: "700" },
-  subText: { color: "#777", marginTop: 3 },
-  price: { fontSize: 22, fontWeight: "900", color: "#FFD400" },
+  title: { fontSize: 18, fontWeight: "800", color: "#333" },
+  subText: { color: "#666", marginTop: 4, fontWeight: "500" },
+  price: { fontSize: 24, fontWeight: "900", color: "#FFD400" },
 
-  sectionTitle: { fontSize: 16, fontWeight: "700", marginTop: 10, marginBottom: 10 },
+  sectionTitle: { fontSize: 18, fontWeight: "800", marginTop: 15, marginBottom: 15, color: "#333" },
 
   methodBox: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 16,
-    borderRadius: 16,
+    padding: 18,
+    borderRadius: 18,
     backgroundColor: "#fff",
-    marginBottom: 12,
-    elevation: 3,
+    marginBottom: 15,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    borderWidth: 1,
+    borderColor: "#f0f0f0",
   },
 
   methodSelected: {
     borderWidth: 2,
     borderColor: "#FFD400",
+    backgroundColor: "#FFFDF0",
   },
 
-  methodTitle: { fontSize: 16, fontWeight: "600" },
-  methodSub: { color: "#777", marginTop: 4 },
+  methodPressed: {
+    borderColor: "#FFD400",
+    borderWidth: 2,
+    shadowColor: "#FFD400",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 15,
+    elevation: 8,
+  },
+
+  methodTitle: { fontSize: 17, fontWeight: "700", color: "#333" },
+  methodSub: { color: "#888", marginTop: 4, fontSize: 13 },
 
   visaTag: {
     backgroundColor: "#1A237E",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-    marginRight: 5,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    marginRight: 6,
   },
   masterTag: {
     backgroundColor: "#d50000",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
   },
 
-  label: { fontSize: 14, marginTop: 6, marginBottom: 4 },
+  label: { fontSize: 15, marginTop: 8, marginBottom: 6, color: "#555", fontWeight: "600" },
 
   input: {
-    backgroundColor: "#f5f5f5",
-    padding: 14,
-    borderRadius: 10,
+    backgroundColor: "#f9f9f9",
+    padding: 16,
+    borderRadius: 14,
     fontSize: 16,
-    marginBottom: 10,
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: "#eee",
+    color: "#333",
   },
 
   row: { flexDirection: "row", justifyContent: "space-between" },
 
   payBtn: {
     backgroundColor: "#FFD400",
-    paddingVertical: 16,
-    borderRadius: 12,
-    marginTop: 20,
-    marginBottom: 10,
+    paddingVertical: 18,
+    borderRadius: 30, // Gold Pill
+    marginTop: 30,
+    marginBottom: 20,
+    shadowColor: "#FFD400",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 8,
   },
   payText: {
     textAlign: "center",
     fontSize: 18,
-    fontWeight: "700",
+    fontWeight: "800",
+    color: "#000",
+    letterSpacing: 1,
+    textTransform: "uppercase",
   },
 
   cancelText: {
     textAlign: "center",
-    color: "#777",
-    fontSize: 15,
+    color: "#999",
+    fontSize: 16,
     marginBottom: 40,
+    fontWeight: "600",
   },
 });

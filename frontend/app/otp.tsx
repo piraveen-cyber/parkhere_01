@@ -15,6 +15,7 @@ import {
 import { supabase } from "../config/supabaseClient";
 import { useTheme } from "../context/themeContext";
 import { useTranslation } from "react-i18next";
+import CustomButton from "../components/CustomButton";
 
 export default function Otp() {
   const router = useRouter();
@@ -188,15 +189,15 @@ export default function Otp() {
         </Text>
       </TouchableOpacity>
 
+
+
       {/* Verify Button */}
-      <TouchableOpacity
-        style={[styles.verifyBtn, { bottom: insets.bottom + 20 }]}
+      <CustomButton
+        title={t("verifyContinue")}
         onPress={verifyOtp}
-      >
-        <Text style={styles.verifyText}>
-          {loading ? "Verifying..." : t("verifyContinue")}
-        </Text>
-      </TouchableOpacity>
+        loading={loading}
+        style={{ marginTop: 100, marginBottom: insets.bottom + 20 }}
+      />
 
       {/* DEV BUTTON */}
       <TouchableOpacity

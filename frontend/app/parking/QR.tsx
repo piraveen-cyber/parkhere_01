@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
+  Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -26,9 +27,9 @@ export default function QRScreen() {
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
 
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <Pressable onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={28} />
-        </TouchableOpacity>
+        </Pressable>
         <Text style={styles.headerTitle}>{t('bookingQr')}</Text>
       </View>
 
@@ -41,11 +42,13 @@ export default function QRScreen() {
 
       {/* QR Code */}
       <View style={styles.qrWrapper}>
-        <Image
-          source={require("../../assets/images/QR.png")} // 🔥 Put your QR image here
-          style={styles.qrImage}
-        />
-        <Text style={styles.uniqueId}>{t('uniqueId')}: {booking.uniqueId}</Text>
+        <View style={styles.qrBorder}>
+          <Image
+            source={require("../../assets/images/QR.png")} // 🔥 Put your QR image here
+            style={styles.qrImage}
+          />
+        </View>
+        <Text style={styles.uniqueId}>{t('uniqueId')}: <Text style={{ color: "#FFD400" }}>{booking.uniqueId}</Text></Text>
       </View>
 
       {/* Booking Details */}
@@ -74,19 +77,39 @@ export default function QRScreen() {
       </View>
 
       {/* Buttons */}
-      <TouchableOpacity
-        style={styles.btnYellow}
-        onPress={() => router.push("../(tabs)/home")} // ✔ Go Home
+      <Pressable
+        style={({ pressed }) => [
+          styles.btnYellow,
+          pressed && {
+            backgroundColor: "#FFE04D",
+            shadowColor: "#FFD400",
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: 1,
+            shadowRadius: 25,
+            elevation: 15,
+          },
+        ]}
+        onPress={() => router.push("../(tabs)/home")}
       >
         <Text style={styles.btnText}>{t('goHome')}</Text>
-      </TouchableOpacity>
+      </Pressable>
 
-      <TouchableOpacity
-        style={styles.btnYellow}
-        onPress={() => router.push("../parking/navigate")} // ✔ Navigate page
+      <Pressable
+        style={({ pressed }) => [
+          styles.btnYellow,
+          pressed && {
+            backgroundColor: "#FFE04D",
+            shadowColor: "#FFD400",
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: 1,
+            shadowRadius: 25,
+            elevation: 15,
+          },
+        ]}
+        onPress={() => router.push("../parking/navigate")}
       >
         <Text style={styles.btnText}>{t('navigateToLocation')}</Text>
-      </TouchableOpacity>
+      </Pressable>
     </ScrollView>
   );
 }
@@ -101,80 +124,109 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
 
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 15,
-  },
-  headerTitle: {
-    marginLeft: 10,
-    fontSize: 20,
-    fontWeight: "700",
-  },
+  header: { flexDirection: "row", alignItems: "center", marginBottom: 20, marginTop: 10 },
+  headerTitle: { fontSize: 24, fontWeight: "800", marginLeft: 15, color: "#333", letterSpacing: 0.5 },
 
   parkingNameCard: {
     backgroundColor: "#fff",
-    padding: 18,
-    borderRadius: 12,
-    elevation: 5,
+    padding: 20,
+    borderRadius: 20,
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.05)",
   },
   parkingName: {
     fontSize: 18,
-    fontWeight: "700",
+    fontWeight: "800",
+    color: "#333",
   },
   spaceText: {
     color: "#FFD400",
-    fontWeight: "800",
+    fontWeight: "900",
+    fontSize: 20,
   },
 
   qrWrapper: {
-    marginTop: 25,
+    marginTop: 30,
     alignItems: "center",
   },
+  qrBorder: {
+    padding: 15,
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    elevation: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+  },
   qrImage: {
-    width: 170,
-    height: 170,
+    width: 180,
+    height: 180,
   },
   uniqueId: {
-    marginTop: 12,
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#444",
+    marginTop: 15,
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#333",
+    letterSpacing: 1,
   },
 
   detailsCard: {
     backgroundColor: "#fff",
-    padding: 18,
-    borderRadius: 12,
-    elevation: 4,
+    padding: 20,
+    borderRadius: 20,
+    elevation: 8,
     marginTop: 30,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.05)",
   },
 
   sectionTitle: {
     textAlign: "center",
-    fontSize: 17,
-    fontWeight: "700",
-    marginBottom: 10,
+    fontSize: 18,
+    fontWeight: "800",
+    marginBottom: 15,
+    color: "#333",
   },
 
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 8,
+    marginTop: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+    paddingBottom: 8,
   },
 
-  label: { color: "#777", fontSize: 15 },
-  value: { fontSize: 15, fontWeight: "600", color: "#000" },
+  label: { color: "#777", fontSize: 15, fontWeight: "500" },
+  value: { fontSize: 16, fontWeight: "700", color: "#000" },
 
   btnYellow: {
     backgroundColor: "#FFD400",
-    paddingVertical: 15,
-    borderRadius: 12,
+    paddingVertical: 18,
+    borderRadius: 30, // Gold Pill
     marginTop: 20,
+    shadowColor: "#FFD400",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 8,
   },
   btnText: {
     textAlign: "center",
-    fontWeight: "700",
-    fontSize: 16,
+    fontWeight: "800",
+    fontSize: 18,
+    color: "#000",
+    letterSpacing: 1,
+    textTransform: "uppercase",
   },
 });

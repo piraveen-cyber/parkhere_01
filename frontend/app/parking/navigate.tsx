@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from "react-native";
+import { View, Text, StyleSheet, Dimensions, Pressable } from "react-native";
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -73,12 +73,22 @@ export default function Navigate() {
           </View>
 
           {/* EXIT BUTTON */}
-          <TouchableOpacity
-            style={styles.exitBtn}
-            onPress={() => router.push("../(tabs)/home")} // ✔ Go Home
+          <Pressable
+            style={({ pressed }) => [
+              styles.exitBtn,
+              pressed && {
+                backgroundColor: "#FF5E55",
+                shadowColor: "#FF3B30",
+                shadowOffset: { width: 0, height: 0 },
+                shadowOpacity: 1,
+                shadowRadius: 20,
+                elevation: 10,
+              },
+            ]}
+            onPress={() => router.push("../(tabs)/home")}
           >
             <Text style={styles.exitText}>{t('exit')}</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         {/* Bottom drag indicator */}
@@ -96,108 +106,163 @@ const styles = StyleSheet.create({
   },
 
   glowCircle: {
-    width: 70,
-    height: 70,
-    backgroundColor: "rgba(255, 212, 0, 0.3)",
-    borderRadius: 35,
+    width: 80,
+    height: 80,
+    backgroundColor: "rgba(255, 212, 0, 0.2)",
+    borderRadius: 40,
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 212, 0, 0.1)",
   },
 
   navArrow: {
     width: 0,
     height: 0,
-    borderLeftWidth: 12,
-    borderRightWidth: 12,
-    borderBottomWidth: 22,
+    borderLeftWidth: 14,
+    borderRightWidth: 14,
+    borderBottomWidth: 26,
     borderLeftColor: "transparent",
     borderRightColor: "transparent",
-    borderBottomColor: "#fff",
+    borderBottomColor: "#FFD400", // Gold Arrow
+    shadowColor: "#FFD400",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 10,
   },
 
   bottomCard: {
     position: "absolute",
     bottom: 0,
     width: width,
-    backgroundColor: "#1c1c1c",
-    padding: 20,
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
+    backgroundColor: "rgba(20, 20, 20, 0.95)", // Glassy Dark
+    padding: 25,
+    borderTopLeftRadius: 35,
+    borderTopRightRadius: 35,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -5 },
+    shadowOpacity: 0.3,
+    shadowRadius: 15,
+    elevation: 20,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255,255,255,0.1)",
   },
 
   timeText: {
     color: "#FFD400",
-    fontSize: 22,
-    fontWeight: "700",
+    fontSize: 26,
+    fontWeight: "800",
+    letterSpacing: 0.5,
   },
 
   distanceText: {
-    color: "#69a0ff",
-    marginTop: 4,
+    color: "#aaa",
+    marginTop: 6,
+    fontSize: 16,
+    fontWeight: "500",
   },
 
   rowBetween: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 15,
+    marginTop: 20,
   },
 
   smallText: {
-    color: "#ddd",
+    color: "#fff",
     flex: 1,
-    fontSize: 15,
+    fontSize: 16,
+    fontWeight: "600",
   },
 
   graphBtn: {
     backgroundColor: "#333",
-    padding: 10,
-    borderRadius: 12,
-    marginRight: 12,
+    padding: 12,
+    borderRadius: 14,
+    marginRight: 15,
+    borderWidth: 1,
+    borderColor: "#444",
   },
 
   exitBtn: {
-    backgroundColor: "#ff4d4d",
-    paddingVertical: 10,
-    paddingHorizontal: 22,
-    borderRadius: 12,
+    backgroundColor: "#FF3B30",
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 20,
+    shadowColor: "#FF3B30",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
 
   exitText: {
     color: "#fff",
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "800",
+    textTransform: "uppercase",
+    letterSpacing: 1,
   },
 
   handle: {
-    width: 90,
+    width: 60,
     height: 5,
-    backgroundColor: "#444",
-    borderRadius: 5,
+    backgroundColor: "#555",
+    borderRadius: 10,
     alignSelf: "center",
-    marginTop: 18,
+    marginTop: 15,
+    marginBottom: 5,
   },
 });
 
 /* ======================= DARK MAP STYLE ======================= */
 const darkMapStyle = [
-  { elementType: "geometry", stylers: [{ color: "#212121" }] },
-  { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
-  { elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
-  { elementType: "labels.text.stroke", stylers: [{ color: "#212121" }] },
+  { elementType: "geometry", stylers: [{ color: "#121212" }] }, // Deepest Black/Grey
+  { elementType: "labels.text.fill", stylers: [{ color: "#888888" }] },
+  { elementType: "labels.text.stroke", stylers: [{ color: "#1a1a1a" }] },
   {
-    featureType: "road",
-    stylers: [{ color: "#2c2c2c" }],
-  },
-  {
-    featureType: "water",
-    stylers: [{ color: "#000000" }],
-  },
-  {
-    featureType: "landscape",
-    stylers: [{ color: "#181818" }],
+    featureType: "administrative.locality",
+    elementType: "labels.text.fill",
+    stylers: [{ color: "#d59563" }], // Goldish Town Names
   },
   {
     featureType: "poi",
-    stylers: [{ color: "#282828" }],
+    elementType: "labels.text.fill",
+    stylers: [{ color: "#6f7276" }],
+  },
+  {
+    featureType: "poi.park",
+    elementType: "geometry",
+    stylers: [{ color: "#181818" }],
+  },
+  {
+    featureType: "road",
+    elementType: "geometry",
+    stylers: [{ color: "#2c2c2c" }], // Dark Roads
+  },
+  {
+    featureType: "road",
+    elementType: "geometry.stroke",
+    stylers: [{ color: "#1c1c1c" }],
+  },
+  {
+    featureType: "road.highway",
+    elementType: "geometry",
+    stylers: [{ color: "#3c3c3c" }], // Slightly lighter highways
+  },
+  {
+    featureType: "road.highway",
+    elementType: "geometry.stroke",
+    stylers: [{ color: "#252525" }],
+  },
+  {
+    featureType: "water",
+    elementType: "geometry",
+    stylers: [{ color: "#000000" }], // Pure Black Water
+  },
+  {
+    featureType: "water",
+    elementType: "labels.text.fill",
+    stylers: [{ color: "#3d3d3d" }],
   },
 ];

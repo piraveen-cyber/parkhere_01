@@ -121,36 +121,46 @@ export default function SelectSlot() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#534f4f1e",
     paddingHorizontal: 20,
   },
 
   header: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 10,
-    marginBottom: 10,
+    marginTop: 15,
+    marginBottom: 20,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    marginLeft: 10,
+    fontSize: 22,
+    fontWeight: "800",
+    marginLeft: 15,
+    letterSpacing: 0.5,
+    color: "#333",
   },
 
   parkingCard: {
     backgroundColor: "#fff",
-    elevation: 5,
-    padding: 15,
-    borderRadius: 12,
-    marginVertical: 10,
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    padding: 20,
+    borderRadius: 20,
+    marginVertical: 15,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.05)",
   },
   parkingCardText: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: "600",
+    color: "#444",
   },
   price: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "900",
+    color: "#FFD400",
   },
 
   sectionTitle: {
@@ -187,43 +197,61 @@ const styles = StyleSheet.create({
   slotsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginTop: 10,
-    gap: 10,
-  },
-
-  slotBox: {
-    width: 55,
-    height: 55,
-    backgroundColor: "#eee",
-    borderRadius: 10,
-    alignItems: "center",
+    marginTop: 20,
+    gap: 12,
     justifyContent: "center",
   },
 
+  slotBox: {
+    width: 50,
+    height: 50,
+    backgroundColor: "#F0F0F0",
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "transparent",
+  },
+
   unavailableSlot: {
-    backgroundColor: "#999",
+    backgroundColor: "#E0E0E0",
+    opacity: 0.5,
   },
 
   selectedSlot: {
     backgroundColor: "#FFD400",
+    borderColor: "#FFD400",
+    shadowColor: "#FFD400",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 10,
+    elevation: 8,
   },
 
   slotText: {
     fontWeight: "700",
-    color: "#000",
+    color: "#333",
+    fontSize: 13,
   },
 
   continueBtn: {
     backgroundColor: "#FFD400",
-    paddingVertical: 16,
-    marginTop: 30,
-    borderRadius: 12,
-    marginBottom: 20,
-    elevation: 3,
+    paddingVertical: 18,
+    marginTop: 40,
+    borderRadius: 30, // Gold Pill
+    marginBottom: 30,
+    shadowColor: "#FFD400",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 8,
   },
   continueText: {
-    fontSize: 17,
-    fontWeight: "700",
+    fontSize: 18,
+    fontWeight: "800",
     textAlign: "center",
+    color: "#000",
+    letterSpacing: 1,
+    textTransform: "uppercase",
   },
 });

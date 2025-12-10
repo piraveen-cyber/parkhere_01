@@ -10,12 +10,30 @@ import {
   FlatList,
   Image,
 } from "react-native";
-import MapView from "react-native-maps";
+import MapView, { Marker } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { getParkingSpots, ParkingSpot } from "../../services/parkingService";
+import { useEffect } from "react";
+
+import { useTheme } from "../../context/themeContext";
 
 export default function ParkingScreen() {
   const { t } = useTranslation();
+  const { colors } = useTheme(); // 👈 use theme
   const [selectedType, setSelectedType] = useState("car");
+  const [parkingSpots, setParkingSpots] = useState<ParkingSpot[]>([]);
+
+  useEffect(() => {
+    const fetchSpots = async () => {
+      try {
+        const spots = await getParkingSpots();
+        setParkingSpots(spots);
+      } catch (error) {
+        console.error("Failed to fetch parking spots:", error);
+      }
+    };
+    fetchSpots();
+  }, []);
 
   const vehicleTypes = [
     { id: "car", label: t('car'), icon: require("../../assets/images/carpark.png") },
@@ -42,17 +60,29 @@ export default function ParkingScreen() {
           longitudeDelta: 0.01,
         }}
         showsUserLocation
-      />
+      >
+        {parkingSpots.map((spot) => (
+          <Marker
+            key={spot._id}
+            coordinate={{
+              latitude: spot.latitude,
+              longitude: spot.longitude,
+            }}
+            title={spot.name}
+            description={spot.description}
+          />
+        ))}
+      </MapView>
 
       {/* FLOATING SEARCH BOX */}
       <TouchableOpacity
-        style={styles.searchBox}
+        style={[styles.searchBox, { backgroundColor: colors.card }]}
         onPress={() => router.push("../parking/nearBySearch")}
       >
         <TextInput
           placeholder={t('whereTo')}
-          placeholderTextColor="#999"
-          style={styles.searchInput}
+          placeholderTextColor={colors.subText}
+          style={[styles.searchInput, { color: colors.text }]}
           editable={false}
         />
       </TouchableOpacity>
@@ -68,7 +98,8 @@ export default function ParkingScreen() {
             <TouchableOpacity
               style={[
                 styles.categoryCard,
-                selectedType === item.id && styles.categoryActive,
+                { backgroundColor: colors.card },
+                selectedType === item.id && { backgroundColor: colors.primary + '40', borderColor: colors.primary, borderWidth: 1 },
               ]}
               onPress={() => setSelectedType(item.id)}
             >
@@ -76,7 +107,8 @@ export default function ParkingScreen() {
               <Text
                 style={[
                   styles.categoryText,
-                  selectedType === item.id && { color: "#FFD400" },
+                  { color: colors.text },
+                  selectedType === item.id && { color: colors.primary },
                 ]}
               >
                 {item.label}
@@ -88,7 +120,7 @@ export default function ParkingScreen() {
 
       {/* FLOATING CURRENT LOCATION BUTTON */}
       <TouchableOpacity
-        style={styles.floatButton}
+        style={[styles.floatButton, { backgroundColor: colors.primary }]}
         onPress={() => router.push("../parking/nearByParking")}
       >
         <Text style={styles.centerIcon}>📍</Text>
@@ -107,10 +139,13 @@ const styles = StyleSheet.create({
     top: 60,
     left: 20,
     right: 20,
-    backgroundColor: "#fff",
     borderRadius: 12,
     padding: 12,
     elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
   },
   searchInput: { fontSize: 16 },
 
@@ -121,7 +156,6 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
   },
   categoryCard: {
-    backgroundColor: "#fff",
     marginRight: 10,
     paddingVertical: 8,
     paddingHorizontal: 14,
@@ -129,9 +163,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     elevation: 4,
-  },
-  categoryActive: {
-    backgroundColor: "#FFF4B0",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    borderWidth: 1,
+    borderColor: 'transparent'
   },
   categoryIcon: {
     width: 35,
@@ -142,7 +179,6 @@ const styles = StyleSheet.create({
   categoryText: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#000",
   },
 
   /** GPS CENTER BUTTON */
@@ -150,13 +186,16 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 110,
     alignSelf: "center",
-    backgroundColor: "#FFD400",
     width: 60,
     height: 60,
     borderRadius: 30,
     alignItems: "center",
     justifyContent: "center",
     elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
   },
   centerIcon: {
     fontSize: 28,

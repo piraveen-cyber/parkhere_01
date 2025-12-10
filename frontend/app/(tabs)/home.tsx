@@ -5,9 +5,9 @@ import {
   StyleSheet,
   ScrollView,
   TextInput,
-  TouchableOpacity,
   Image,
   Alert,
+  Pressable,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { supabase } from "../../config/supabaseClient";
@@ -17,7 +17,7 @@ import { router } from "expo-router";   // 👈 ADDED
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
-  const { theme } = useTheme();
+  const { theme, colors } = useTheme();
   const { t } = useTranslation();
   const isDark = theme === "dark";
 
@@ -70,10 +70,10 @@ export default function HomeScreen() {
         <View
           style={[
             styles.searchBox,
-            { backgroundColor: cardBg, borderColor: borderColor },
+            { backgroundColor: cardBg, borderColor: colors.primary, borderWidth: 1.5 },
           ]}
         >
-          <Text style={[styles.searchIcon, { color: descColor }]}>🔍</Text>
+          <Text style={[styles.searchIcon, { color: colors.primary }]}>🔍</Text>
           <TextInput
             placeholder={t("searchPlaceholder")}
             placeholderTextColor={descColor}
@@ -84,9 +84,21 @@ export default function HomeScreen() {
         {/* GRID */}
         <View style={styles.grid}>
           {services.map((item) => (
-            <TouchableOpacity
+            <Pressable
               key={item.key}
-              style={[styles.card, { backgroundColor: cardBg }]}
+              style={({ pressed }) => [
+                styles.card,
+                { backgroundColor: cardBg },
+                pressed && {
+                  borderColor: "#FFD400",
+                  borderWidth: 2,
+                  shadowColor: "#FFD400",
+                  shadowOffset: { width: 0, height: 0 },
+                  shadowOpacity: 0.8,
+                  shadowRadius: 20,
+                  elevation: 10,
+                },
+              ]}
               onPress={() => handleServiceNavigation(item.key)}
             >
               <View style={styles.iconWrapper}>
@@ -95,7 +107,7 @@ export default function HomeScreen() {
               <Text style={[styles.cardTitle, { color: textColor }]}>
                 {item.title}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           ))}
         </View>
 
@@ -108,9 +120,21 @@ export default function HomeScreen() {
             {t("secureEasy")}
           </Text>
 
-          <TouchableOpacity style={styles.bookNowBtn}>
+          <Pressable
+            style={({ pressed }) => [
+              styles.bookNowBtn,
+              pressed && {
+                backgroundColor: "#FFE04D", // Lighter gold
+                shadowColor: "#FFD400",
+                shadowOffset: { width: 0, height: 0 },
+                shadowOpacity: 1,
+                shadowRadius: 25,
+                elevation: 15,
+              },
+            ]}
+          >
             <Text style={styles.bookNowText}>{t("bookNow")}</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         {/* PROMOS */}
@@ -139,9 +163,22 @@ export default function HomeScreen() {
         </View>
 
         {/* LOGOUT BUTTON */}
-        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+        <Pressable
+          onPress={handleLogout}
+          style={({ pressed }) => [
+            styles.logoutBtn,
+            pressed && {
+              backgroundColor: "#FF5E55", // Lighter red
+              shadowColor: "#FF3B30",
+              shadowOffset: { width: 0, height: 0 },
+              shadowOpacity: 1,
+              shadowRadius: 25,
+              elevation: 15,
+            },
+          ]}
+        >
           <Text style={styles.logoutText}>{t("logout")}</Text>
-        </TouchableOpacity>
+        </Pressable>
       </ScrollView>
     </SafeAreaView>
   );
@@ -190,9 +227,16 @@ const styles = StyleSheet.create({
   card: {
     width: "47%",
     padding: 20,
-    borderRadius: 16,
+    borderRadius: 20,
     marginBottom: 20,
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.05)",
   },
 
   iconWrapper: {
@@ -200,6 +244,11 @@ const styles = StyleSheet.create({
     padding: 18,
     borderRadius: 14,
     marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
   },
 
   iconImg: { width: 35, height: 35, tintColor: "#000" },
@@ -211,13 +260,21 @@ const styles = StyleSheet.create({
 
   bigCard: {
     padding: 25,
-    borderRadius: 18,
+    borderRadius: 20,
     marginTop: 10,
+    borderWidth: 2,
+    borderColor: "#FFD400",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 6,
   },
 
   bigCardTitle: {
-    fontSize: 22,
-    fontWeight: "700",
+    fontSize: 24,
+    fontWeight: "800",
+    letterSpacing: 0.5,
   },
 
   bigCardSubtitle: {
@@ -239,15 +296,25 @@ const styles = StyleSheet.create({
   promoYellow: {
     backgroundColor: "#FFD400",
     padding: 20,
-    borderRadius: 15,
+    borderRadius: 20,
     marginTop: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
   },
 
   promoWhite: {
     padding: 20,
     borderWidth: 1,
-    borderRadius: 15,
+    borderRadius: 20,
     marginTop: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    elevation: 2,
   },
 
   promoTitle: {
@@ -262,13 +329,20 @@ const styles = StyleSheet.create({
   logoutBtn: {
     marginTop: 40,
     backgroundColor: "#FF3B30",
-    paddingVertical: 16,
-    borderRadius: 12,
+    paddingVertical: 18,
+    borderRadius: 30, // Pill shape
+    shadowColor: "#FF3B30",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
   logoutText: {
     textAlign: "center",
     color: "#fff",
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: "700",
+    letterSpacing: 1,
+    textTransform: "uppercase",
   },
 });
