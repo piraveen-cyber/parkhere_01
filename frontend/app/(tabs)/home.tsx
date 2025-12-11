@@ -42,11 +42,15 @@ export default function HomeScreen() {
     { key: "hiring", title: t("hiring"), icon: require("../../assets/images/check.png") },
   ];
 
-  const handleServiceNavigation = (key) => {
+  const handleServiceNavigation = (key: string) => {
     if (key === "parking") {
-      router.push("/parking/selectVehicle");  // 👈 UPDATED
+      router.push("/parking/selectVehicle");
+    } else if (key === "mechanics") {
+      router.push("/Mechanic/vehicleType");
     }
   };
+
+
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: bg }]}>

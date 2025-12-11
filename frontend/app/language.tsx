@@ -55,7 +55,7 @@ export default function LanguageScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FDBD00" },
+  container: { flex: 1, backgroundColor: "#fdcf00f5" },
 
   topSection: {
     flex: 1.5,
@@ -68,8 +68,8 @@ const styles = StyleSheet.create({
     height: 220,
     resizeMode: "cover",
     borderRadius: 110, // Perfect circle
-    borderWidth: 5,
-    borderColor: "#ffffffff",
+    // borderWidth: 5,
+    // borderColor: "#050700ff",
     shadowColor: "#000",
     shadowOffset: { width: 10, height: 10 },
     shadowOpacity: 0.3,
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
   bottomSection: {
     backgroundColor: "#ffffffff",
     borderTopLeftRadius: 50,
-    borderColor: "#ffd000ff",
+    borderColor: "#f2eedaff",
     borderWidth: 5,
     borderTopRightRadius: 50,
     borderBottomLeftRadius: 50,
@@ -110,18 +110,18 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
     borderRadius: 30,
     marginBottom: 20,
-    borderWidth: 2,
-    borderColor: "#FFD400", // Gold Theme
+    borderWidth: 1,
+    borderColor: "#000000ff", // Gold Theme
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
-    shadowRadius: 5,
+    shadowRadius: 15,
     elevation: 6,
   },
 
   langText: {
-    fontSize: 18,
+    fontSize: 12,
     fontWeight: "700",
     color: "#000",
     letterSpacing: 1.5,
