@@ -7,6 +7,8 @@ export interface IUser extends Document {
     phone?: string;
     gender?: string;
     vehiclePlate?: string;
+    disabilityStatus?: 'none' | 'pending' | 'verified' | 'rejected';
+    disabilityDocumentUrl?: string; // URL to the uploaded document
     createdAt: Date;
     updatedAt: Date;
 }
@@ -18,6 +20,12 @@ const UserSchema: Schema = new Schema({
     phone: { type: String },
     gender: { type: String },
     vehiclePlate: { type: String },
+    disabilityStatus: {
+        type: String,
+        enum: ['none', 'pending', 'verified', 'rejected'],
+        default: 'none'
+    },
+    disabilityDocumentUrl: { type: String }
 }, { timestamps: true });
 
 export default mongoose.model<IUser>('User', UserSchema);

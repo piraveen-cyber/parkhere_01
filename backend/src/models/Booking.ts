@@ -7,6 +7,10 @@ export interface IBooking extends Document {
     endTime: Date;
     totalPrice: number;
     status: 'pending' | 'active' | 'completed' | 'cancelled';
+    actualCheckInTime?: Date;
+    actualCheckOutTime?: Date;
+    extraFee?: number;
+    paymentStatus: 'paid' | 'pending' | 'unpaid' | 'refunded';
 }
 
 const BookingSchema: Schema = new Schema({
@@ -19,6 +23,14 @@ const BookingSchema: Schema = new Schema({
         type: String,
         enum: ['pending', 'active', 'completed', 'cancelled'],
         default: 'pending'
+    },
+    actualCheckInTime: { type: Date },
+    actualCheckOutTime: { type: Date },
+    extraFee: { type: Number, default: 0 },
+    paymentStatus: {
+        type: String,
+        enum: ['paid', 'pending', 'unpaid', 'refunded'],
+        default: 'paid' // Assuming initial booking is paid
     }
 }, {
     timestamps: true

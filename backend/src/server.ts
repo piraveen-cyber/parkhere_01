@@ -1,13 +1,15 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import parkingRoutes from './routes/parkingRoutes';
 import bookingRoutes from './routes/bookingRoutes';
 import userRoutes from './routes/userRoutes';
 import paymentRoutes from './routes/paymentRoutes';
-
-dotenv.config();
+import adminRoutes from './routes/adminRoutes';
+import serviceRoutes from './routes/serviceRoutes';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -26,6 +28,8 @@ app.use('/api/parking', parkingRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/services', serviceRoutes);
 
 // Basic Route
 app.get('/', (req, res) => {

@@ -9,6 +9,8 @@ export interface IParkingSpot extends Document {
     isAvailable: boolean;
     address?: string;
     description?: string;
+    floor?: number;
+    block?: string;
 }
 
 const ParkingSpotSchema: Schema = new Schema({
@@ -23,7 +25,9 @@ const ParkingSpotSchema: Schema = new Schema({
     pricePerHour: { type: Number, required: true },
     isAvailable: { type: Boolean, default: true },
     address: { type: String },
-    description: { type: String }
+    description: { type: String },
+    floor: { type: Number, default: 1 },
+    block: { type: String, default: 'A' }
 }, {
     timestamps: true
 });

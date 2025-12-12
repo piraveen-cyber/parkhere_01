@@ -38,9 +38,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const bookingController = __importStar(require("../controllers/bookingController"));
+const validateResource_1 = __importDefault(require("../middleware/validateResource"));
+const booking_schema_1 = require("../schema/booking.schema");
 const router = express_1.default.Router();
 // POST /api/bookings - Create a booking
-router.post('/', bookingController.createBooking);
+router.post('/', (0, validateResource_1.default)(booking_schema_1.createBookingSchema), bookingController.createBooking);
 // GET /api/bookings/:userId - Get bookings for a user
 router.get('/:userId', bookingController.getUserBookings);
+// POST /api/bookings/scan - QR Scan for Check-In/Out
+router.post('/scan', bookingController.scanBooking);
 exports.default = router;

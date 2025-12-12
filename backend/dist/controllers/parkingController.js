@@ -42,25 +42,65 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createParkingSpot = exports.getParkingSpots = void 0;
+exports.getRecommendations = exports.getParkingSpotById = exports.createParkingSpot = exports.getParkingSpots = void 0;
 const parkingService = __importStar(require("../services/parkingService"));
 const getParkingSpots = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const spots = yield parkingService.getAllSpots();
-        res.json(spots);
+        const { search, type, startTime, endTime } = req.query;
+        let start;
+        let end;
+        if (startTime && endTime) {
+            start = new Date(startTime);
+            end = new Date(endTime);
+        }
+        if (search || type || (start && end)) {
+            const spots = yield parkingService.searchParkingSpots(search, type, start, end);
+            res.json(spots);
+        }
+        else {
+            const spots = yield parkingService.getAllParkingSpots();
+            res.json(spots);
+        }
     }
     catch (error) {
-        res.status(500).json({ message: 'Error fetching parking spots', error });
+        res.status(500).json({ message: error.message });
     }
 });
 exports.getParkingSpots = getParkingSpots;
 const createParkingSpot = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const savedSpot = yield parkingService.createSpot(req.body);
-        res.status(201).json(savedSpot);
+        const spot = yield parkingService.createParkingSpot(req.body);
+        res.status(201).json(spot);
     }
     catch (error) {
-        res.status(500).json({ message: 'Error creating parking spot', error });
+        res.status(500).json({ message: error.message });
     }
 });
 exports.createParkingSpot = createParkingSpot;
+const getParkingSpotById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const spot = yield parkingService.getParkingSpotById(req.params.id);
+        if (!spot)
+            return res.status(404).json({ message: 'Spot not found' });
+        res.json(spot);
+    }
+    catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+exports.getParkingSpotById = getParkingSpotById;
+const getRecommendations = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { lat, long, type } = req.query;
+        if (!lat || !long) {
+            return res.status(400).json({ message: 'Latitude and Longitude are required' });
+        }
+        const preference = type || 'best';
+        const spots = yield parkingService.recommendSpots(parseFloat(lat), parseFloat(long), preference);
+        res.json(spots);
+    }
+    catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+exports.getRecommendations = getRecommendations;
