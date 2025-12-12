@@ -1,203 +1,387 @@
-import { router } from "expo-router";
-import React, { useState } from "react";
-import { useTranslation } from "react-i18next";
+// ParkMapScanUpgraded.tsx
+import React, { useEffect, useRef } from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
-  TextInput,
   StyleSheet,
-  FlatList,
-  Image,
+  StatusBar,
+  Animated,
+  Easing,
+  Dimensions,
+  Platform,
 } from "react-native";
-import MapView, { Marker } from "react-native-maps";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { getParkingSpots, ParkingSpot } from "../../services/parkingService";
-import { useEffect } from "react";
-
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import { router } from "expo-router";
 import { useTheme } from "../../context/themeContext";
 
-export default function ParkingScreen() {
-  const { t } = useTranslation();
-  const { colors } = useTheme(); // 👈 use theme
-  const [selectedType, setSelectedType] = useState("car");
-  const [parkingSpots, setParkingSpots] = useState<ParkingSpot[]>([]);
+const { width } = Dimensions.get("window");
+
+// dark cinematic map style (shortened, you can replace with your preferred)
+const darkMapStyle = [
+  { elementType: "geometry", stylers: [{ color: "#0b1220" }] },
+  { elementType: "labels.text.fill", stylers: [{ color: "#9fb5c2" }] },
+  { featureType: "road", elementType: "geometry", stylers: [{ color: "#1e293b" }] },
+  { featureType: "water", elementType: "geometry", stylers: [{ color: "#000000" }] },
+];
+
+export default function ParkMapScanUpgraded() {
+  const { colors, theme } = useTheme();
+  const isDark = theme === 'dark';
+
+  const pulse1 = useRef(new Animated.Value(0)).current;
+  const pulse2 = useRef(new Animated.Value(0)).current;
+  const pulse3 = useRef(new Animated.Value(0)).current;
+  const sweep = useRef(new Animated.Value(0)).current;
+  const fadeText = useRef(new Animated.Value(0)).current;
+  const particles = useRef(
+    Array.from({ length: 8 }).map(() => ({
+      anim: new Animated.Value(0),
+      x: Math.random() * (width * 0.6) - width * 0.3,
+      yOffset: Math.random() * 30 + 10,
+      delay: Math.random() * 2000,
+    }))
+  ).current;
+  const progress = useRef(new Animated.Value(0)).current;
+
+  const accent = colors.primary;
+  const overlayBg = isDark ? "rgba(6,10,18,0.66)" : "rgba(255,255,255,0.66)";
 
   useEffect(() => {
-    const fetchSpots = async () => {
-      try {
-        const spots = await getParkingSpots();
-        setParkingSpots(spots);
-      } catch (error) {
-        console.error("Failed to fetch parking spots:", error);
-      }
-    };
-    fetchSpots();
+    // Pulsing rings (multi-layer, staggered)
+    Animated.loop(
+      Animated.sequence([
+        Animated.parallel([
+          Animated.timing(pulse1, {
+            toValue: 1,
+            duration: 1600,
+            easing: Easing.out(Easing.quad),
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulse2, {
+            toValue: 1,
+            duration: 2000,
+            easing: Easing.out(Easing.quad),
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulse3, {
+            toValue: 1,
+            duration: 2400,
+            easing: Easing.out(Easing.quad),
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.parallel([
+          Animated.timing(pulse1, { toValue: 0, duration: 0, useNativeDriver: true }),
+          Animated.timing(pulse2, { toValue: 0, duration: 0, useNativeDriver: true }),
+          Animated.timing(pulse3, { toValue: 0, duration: 0, useNativeDriver: true }),
+        ]),
+      ])
+    ).start();
+
+    // Rotating sweep line
+    Animated.loop(
+      Animated.timing(sweep, {
+        toValue: 1,
+        duration: 1800,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      })
+    ).start();
+
+    // Text fade in
+    Animated.timing(fadeText, {
+      toValue: 1,
+      duration: 700,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+
+    // Particles animation
+    particles.forEach(({ anim, delay }) => {
+      Animated.loop(
+        Animated.sequence([
+          Animated.delay(delay),
+          Animated.timing(anim, {
+            toValue: 1,
+            duration: 1600 + Math.random() * 1200,
+            easing: Easing.inOut(Easing.quad),
+            useNativeDriver: true,
+          }),
+          Animated.timing(anim, {
+            toValue: 0,
+            duration: 800,
+            easing: Easing.inOut(Easing.quad),
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    });
+
+    // progress bar (scaleX)
+    Animated.timing(progress, {
+      toValue: 1,
+      duration: 3000,
+      easing: Easing.inOut(Easing.quad),
+      useNativeDriver: true,
+    }).start();
+
+    // Auto navigate after 3s
+    const t = setTimeout(() => {
+      // replace to next page
+      router.replace("../parking/selectParking");
+    }, 3000);
+
+    return () => clearTimeout(t);
   }, []);
 
-  const vehicleTypes = [
-    { id: "car", label: t('car'), icon: require("../../assets/images/carpark.png") },
-    { id: "bike", label: t('bike'), icon: require("../../assets/images/bikepark.png") },
-    { id: "bus", label: t('bus'), icon: require("../../assets/images/buspark.png") },
-    { id: "van", label: t('van'), icon: require("../../assets/images/vanpark.png") },
-    {
-      id: "threewheel",
-      label: t('threeWheel'),
-      icon: require("../../assets/images/tukpark.png"),
-    },
-  ];
+  // Derived transforms & opacities
+  const ringStyle = (anim: Animated.Value, startScale: number) => ({
+    transform: [
+      {
+        scale: anim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [startScale, startScale * 4.2],
+        }),
+      },
+    ],
+    opacity: anim.interpolate({
+      inputRange: [0, 0.6, 1],
+      outputRange: [0.85, 0.25, 0],
+    }),
+  });
+
+  const sweepRotate = sweep.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "360deg"],
+  });
+
+  const progressScale = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.0001, 1], // avoid 0
+  });
+
+  // center coords (user)
+  const center = { latitude: 6.9271, longitude: 79.8612 };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
-      {/* MAP BACKGROUND */}
       <MapView
+        provider={PROVIDER_GOOGLE}
         style={StyleSheet.absoluteFill}
+        customMapStyle={isDark ? darkMapStyle : []}
         initialRegion={{
-          latitude: 6.9271,
-          longitude: 79.8612,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
+          latitude: center.latitude,
+          longitude: center.longitude,
+          latitudeDelta: 0.02,
+          longitudeDelta: 0.02,
         }}
-        showsUserLocation
+        scrollEnabled={false}
+        zoomEnabled={false}
+        pitchEnabled={false}
       >
-        {parkingSpots.map((spot) => (
-          <Marker
-            key={spot._id}
-            coordinate={{
-              latitude: spot.latitude,
-              longitude: spot.longitude,
-            }}
-            title={spot.name}
-            description={spot.description}
-          />
-        ))}
+        <Marker coordinate={center}>
+          <View style={[styles.userDot, { backgroundColor: accent }]} />
+        </Marker>
       </MapView>
 
-      {/* FLOATING SEARCH BOX */}
-      <TouchableOpacity
-        style={[styles.searchBox, { backgroundColor: colors.card }]}
-        onPress={() => router.push("../parking/nearBySearch")}
-      >
-        <TextInput
-          placeholder={t('whereTo')}
-          placeholderTextColor={colors.subText}
-          style={[styles.searchInput, { color: colors.text }]}
-          editable={false}
-        />
-      </TouchableOpacity>
+      {/* cinematic overlay */}
+      <View style={[styles.overlay, { backgroundColor: overlayBg }]}>
+        {/* floating particles */}
+        {particles.map((p, i) => (
+          <Animated.View
+            key={`part-${i}`}
+            style={[
+              styles.particle,
+              {
+                left: width / 2 + p.x - 8,
+                transform: [
+                  {
+                    translateY: p.anim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, -p.yOffset],
+                    }),
+                  },
+                  {
+                    scale: p.anim.interpolate({
+                      inputRange: [0, 0.5, 1],
+                      outputRange: [0.6, 1.05, 0.6],
+                    }),
+                  },
+                ],
+                opacity: p.anim.interpolate({ inputRange: [0, 0.4, 1], outputRange: [0, 0.9, 0] }),
+                backgroundColor: "rgba(255, 212, 0, 0.08)",
+              },
+            ]}
+          />
+        ))}
 
-      {/* VEHICLE TYPE SELECTOR */}
-      <View style={styles.categoryWrapper}>
-        <FlatList
-          data={vehicleTypes}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <TouchableOpacity
+        {/* radar/center */}
+        <View style={styles.centerWrap}>
+          {/* multi-layer pulse rings */}
+          <Animated.View style={[styles.pulseRingBase, ringStyle(pulse3, 0.8), { borderColor: accent }]} />
+          <Animated.View style={[styles.pulseRingBase, ringStyle(pulse2, 0.9), { borderColor: accent }]} />
+          <Animated.View style={[styles.pulseRingBase, ringStyle(pulse1, 1.0), { borderColor: accent }]} />
+
+          {/* rotating sweep (semi-transparent wedge) */}
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              styles.sweep,
+              {
+                transform: [{ rotate: sweepRotate }],
+              },
+            ]}
+          >
+            <View style={[styles.sweepInner, { backgroundColor: "rgba(255,212,0,0.08)" }]} />
+          </Animated.View>
+
+          {/* center dot with glow */}
+          <View style={[styles.centerDot, { backgroundColor: accent }]} />
+        </View>
+
+        {/* text */}
+        <Animated.View style={[styles.textBox, { opacity: fadeText }]}>
+          <Text style={[styles.title, { color: accent }]}>Scanning Nearby Parking...</Text>
+          <Text style={styles.subtitle}>Finding safest & closest locations for you</Text>
+        </Animated.View>
+
+        {/* progress / loader - using scaleX (native driver friendly) */}
+        <View style={styles.progressWrap}>
+          <View style={styles.progressTrack}>
+            <Animated.View
               style={[
-                styles.categoryCard,
-                { backgroundColor: colors.card },
-                selectedType === item.id && { backgroundColor: colors.primary + '40', borderColor: colors.primary, borderWidth: 1 },
+                styles.progressBar,
+                {
+                  transform: [{ scaleX: progressScale }],
+                  backgroundColor: accent,
+                },
               ]}
-              onPress={() => setSelectedType(item.id)}
-            >
-              <Image source={item.icon} style={styles.categoryIcon} />
-              <Text
-                style={[
-                  styles.categoryText,
-                  { color: colors.text },
-                  selectedType === item.id && { color: colors.primary },
-                ]}
-              >
-                {item.label}
-              </Text>
-            </TouchableOpacity>
-          )}
-        />
+            />
+          </View>
+        </View>
       </View>
-
-      {/* FLOATING CURRENT LOCATION BUTTON */}
-      <TouchableOpacity
-        style={[styles.floatButton, { backgroundColor: colors.primary }]}
-        onPress={() => router.push("../parking/nearByParking")}
-      >
-        <Text style={styles.centerIcon}>📍</Text>
-      </TouchableOpacity>
-
-    </SafeAreaView>
+    </View>
   );
 }
 
+/* Styles */
 const styles = StyleSheet.create({
   container: { flex: 1 },
 
-  /** SEARCH BOX */
-  searchBox: {
-    position: "absolute",
-    top: 60,
-    left: 20,
-    right: 20,
-    borderRadius: 12,
-    padding: 12,
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
+  userDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    borderWidth: 2,
+    borderColor: "#fff",
+    shadowColor: "#FFD400",
+    shadowOpacity: 0.9,
+    shadowRadius: 12,
+    elevation: 8,
   },
-  searchInput: { fontSize: 16 },
 
-  /** CATEGORY LIST */
-  categoryWrapper: {
-    position: "absolute",
-    top: 140,
-    paddingLeft: 10,
-  },
-  categoryCard: {
-    marginRight: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 12,
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
     alignItems: "center",
     justifyContent: "center",
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 2,
-    borderWidth: 1,
-    borderColor: 'transparent'
   },
-  categoryIcon: {
-    width: 35,
-    height: 35,
-    marginBottom: 4,
-    resizeMode: "contain",
+
+  centerWrap: {
+    width: 240,
+    height: 240,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 18,
   },
-  categoryText: {
-    fontSize: 12,
+
+  pulseRingBase: {
+    position: "absolute",
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    borderWidth: 2,
+    borderColor: "#FFD400",
+  },
+
+  sweep: {
+    position: "absolute",
+    width: 220,
+    height: 220,
+    alignItems: "center",
+    justifyContent: "flex-start",
+  },
+  sweepInner: {
+    position: "absolute",
+    top: 0,
+    width: 220,
+    height: 60,
+    borderTopLeftRadius: 110,
+    borderTopRightRadius: 110,
+    opacity: 0.8,
+    transform: [{ translateY: -10 }],
+  },
+
+  centerDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    borderWidth: 2,
+    borderColor: "#fff",
+    elevation: 10,
+    shadowColor: "#FFD400",
+    shadowOpacity: 0.9,
+    shadowRadius: 10,
+  },
+
+  textBox: {
+    alignItems: "center",
+    marginTop: 12,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "800",
+    letterSpacing: 0.3,
+    marginBottom: 6,
+  },
+  subtitle: {
+    // color will be overridden or we can use dynamic text color here if we move style to inline or useTheme hook fully. 
+    // Since this is inside a component, we can assume text color handling inline or keep neutral.
+    // However, the original code had hardcoded color. Let's make it more flexible or keep as is if it looks good on both.
+    // Ideally we should use colors.subText but styles are static. 
+    // We will leave it for now and override in the component where possible or use a 'smart' gray.
+    color: "#8D99AE",
+    fontSize: 14,
     fontWeight: "600",
   },
 
-  /** GPS CENTER BUTTON */
-  floatButton: {
+  progressWrap: {
     position: "absolute",
-    bottom: 110,
-    alignSelf: "center",
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    bottom: 90,
+    width: width * 0.72,
     alignItems: "center",
-    justifyContent: "center",
-    elevation: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
   },
-  centerIcon: {
-    fontSize: 28,
+  progressTrack: {
+    width: "100%",
+    height: 6,
+    borderRadius: 6,
+    backgroundColor: "rgba(255,255,255,0.06)",
+    overflow: "hidden",
+  },
+  progressBar: {
+    height: "100%",
+    transformOrigin: "left",
+    // scaleX will be used
+  },
+
+  // floating particles
+  particle: {
+    position: "absolute",
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "rgba(255,212,0,0.08)",
+    elevation: 2,
   },
 });

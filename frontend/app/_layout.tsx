@@ -99,12 +99,6 @@ export default function RootLayout() {
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="parking" />
             <Stack.Screen name="Mechanic" />
-
-
-
-
-
-
           </Stack>
         </ThemeProvider>
       </SafeAreaProvider>

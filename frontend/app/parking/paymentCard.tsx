@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -7,311 +7,375 @@ import {
   TextInput,
   ScrollView,
   Pressable,
+  Animated,
+  Easing,
+  StatusBar,
+  Dimensions,
+  Alert
 } from "react-native";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { Ionicons, MaterialIcons, FontAwesome5, Fontisto } from "@expo/vector-icons";
+import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+const { width } = Dimensions.get("window");
+
+import { useTheme } from "../../context/themeContext";
+import * as bookingService from "../../services/bookingService";
+import { supabase } from "../../config/supabaseClient";
 
 export default function PaymentCard() {
+  const { colors, theme } = useTheme();
   const { t } = useTranslation();
+  const params = useLocalSearchParams();
+  const totalPrice = params.totalPrice ? params.totalPrice.toString() : "0.00";
+  const duration = params.duration ? params.duration.toString() : "0";
+  const checkInTime = params.checkInTime ? params.checkInTime.toString() : "--:--";
+  const slot = params.slot ? params.slot.toString() : "N/A";
+  const parkingName = params.parkingName ? params.parkingName.toString() : "Unknown Parking";
+
   const [method, setMethod] = useState("card"); // card | cash | upi
   const [cardNumber, setCardNumber] = useState("");
   const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
 
+  // Animation Values
+  // ... (Keep existing animations)
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
+
+  // Theme Colors
+  const bgDark = colors.background;
+  const cardBg = colors.card;
+  const accent = colors.primary;
+  const textWhite = colors.text;
+  const textGray = colors.subText;
+  const inputBg = theme === 'dark' ? "#1A1A1A" : "#E5E5EA";
+
+  // ... (Keep useEffect)
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 800,
+        easing: Easing.out(Easing.back(1.5)),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
+  // Validation Utils
+  const validateCardNumber = (num: string) => /^\d{16,19}$/.test(num.replace(/\s/g, ''));
+  const validateExpiry = (date: string) => /^(0[1-9]|1[0-2])\/?([0-9]{2})$/.test(date);
+  const validateCVV = (code: string) => /^\d{3,4}$/.test(code);
+
   const handlePayment = () => {
+    const bookingParams = {
+      totalPrice,
+      duration,
+      checkInTime,
+      slot,
+      parkingName
+    };
+
     if (method === "card") {
+      // 1. Basic Empty Check
       if (!cardNumber || !expiry || !cvv) {
-        alert("Please enter all card details!");
+        Alert.alert(t('error', 'Error'), t('fillAllFields', 'Please fill in all card details.'));
         return;
       }
-      router.push("../parking/successBook"); // ✔ Credit card → success page
+
+      // 2. Format Validation
+      if (!validateCardNumber(cardNumber)) {
+        Alert.alert(t('invalidCard', 'Invalid Card'), t('checkCardNumber', 'Please start with a valid card number.'));
+        return;
+      }
+      if (!validateExpiry(expiry)) {
+        Alert.alert(t('invalidDate', 'Invalid Date'), t('checkExpiry', 'Expiry must be in MM/YY format.'));
+        return;
+      }
+      if (!validateCVV(cvv)) {
+        Alert.alert(t('invalidCVV', 'Invalid CVV'), t('checkCVV', 'CVV must be 3 or 4 digits.'));
+        return;
+      }
+
+      // CORRECT FLOW: Card -> OTP Verification
+      router.push({
+        pathname: "../parking/paymentOTP",
+        params: bookingParams
+      });
     } else {
-      router.push("../parking/QR"); // ✔ Cash or UPI → QR page
+      // CORRECT FLOW: Cash/Other -> Create Booking -> Booking Success Popup
+      const createAndNav = async () => {
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user?.id) {
+            const startTime = new Date();
+            const endTime = new Date(startTime.getTime() + (parseFloat(duration) * 60 * 60 * 1000));
+
+            await bookingService.createBooking({
+              userId: session.user.id,
+              parkingSpotId: slot,
+              startTime: startTime,
+              endTime: endTime,
+              totalPrice: parseFloat(totalPrice),
+              status: 'pending'
+            } as any);
+          }
+        } catch (e) {
+          console.log("Booking creation failed (might be guest)", e);
+        }
+
+        router.push({
+          pathname: "../parking/successBook",
+          params: bookingParams
+        });
+      };
+      createAndNav();
     }
   };
 
+  const PaymentMethod = ({ id, iconLib: IconLib, icon, title, sub }: any) => {
+    const isSelected = method === id;
+    const scaleVal = useRef(new Animated.Value(1)).current;
+
+    const onPressIn = () => {
+      Animated.spring(scaleVal, { toValue: 0.98, useNativeDriver: true }).start();
+    };
+    const onPressOut = () => {
+      Animated.spring(scaleVal, { toValue: 1, useNativeDriver: true }).start();
+    };
+
+    return (
+      <Pressable onPress={() => setMethod(id)} onPressIn={onPressIn} onPressOut={onPressOut}>
+        <Animated.View style={[
+          styles.methodBox,
+          {
+            backgroundColor: cardBg,
+            borderColor: isSelected ? accent : "#333",
+            transform: [{ scale: scaleVal }],
+            shadowColor: isSelected ? accent : "#000",
+            elevation: isSelected ? 10 : 2
+          }
+        ]}>
+          <View style={[styles.iconBox, { backgroundColor: isSelected ? accent : "#222" }]}>
+            <IconLib name={icon} size={24} color={isSelected ? "#000" : "#AAA"} />
+          </View>
+          <View style={{ marginLeft: 15, flex: 1 }}>
+            <Text style={[styles.methodTitle, { color: isSelected ? accent : textWhite }]}>{title}</Text>
+            {sub && <Text style={[styles.methodSub, { color: textGray }]}>{sub}</Text>}
+
+            {/* ID Specific Content */}
+            {id === 'card' && (
+              <View style={{ flexDirection: "row", marginTop: 6, gap: 6 }}>
+                <Fontisto name="visa" size={14} color={textGray} />
+                <Fontisto name="mastercard" size={14} color={textGray} />
+              </View>
+            )}
+          </View>
+          {isSelected && <Ionicons name="checkmark-circle" size={24} color={accent} />}
+        </Animated.View>
+      </Pressable>
+    )
+  };
+
   return (
-    <ScrollView style={styles.container}>
+    <View style={[styles.container, { backgroundColor: bgDark }]}>
+      <StatusBar barStyle={theme === 'dark' ? "light-content" : "dark-content"} />
+      <SafeAreaView style={{ flex: 1 }}>
 
-      {/* HEADER */}
-      <View style={styles.header}>
-        <Pressable onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={26} />
-        </Pressable>
-        <Text style={styles.headerTitle}>Payment</Text>
-      </View>
+        {/* HEADER */}
+        <Animated.View style={[styles.header, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+            <Ionicons name="chevron-back" size={24} color={accent} />
+          </TouchableOpacity>
+          <Text style={[styles.headerTitle, { color: textWhite }]}>Payment</Text>
+        </Animated.View>
 
-      {/* SUMMARY CARD */}
-      <View style={styles.summaryCard}>
-        <Text style={styles.title}>{t('cityCenterParking')}</Text>
-        <Text style={styles.subText}>{t('today')}, 11:00 am</Text>
-        <Text style={styles.subText}>{t('totalDuration')}: 6 hr</Text>
+        <ScrollView contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
+          <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
 
-        <Text style={styles.price}>RS. 200</Text>
-      </View>
-
-      {/* METHOD TITLE */}
-      <Text style={styles.sectionTitle}>{t('selectPaymentMethod')}</Text>
-
-      {/* PAYMENT OPTIONS */}
-
-      {/* CREDIT CARD */}
-      <Pressable
-        style={({ pressed }) => [
-          styles.methodBox,
-          method === "card" && styles.methodSelected,
-          pressed && styles.methodPressed,
-        ]}
-        onPress={() => setMethod("card")}
-      >
-        <MaterialIcons name="credit-card" size={32} color="#555" />
-        <View style={{ marginLeft: 15 }}>
-          <Text style={styles.methodTitle}>{t('creditDebitCard')}</Text>
-          <View style={{ flexDirection: "row", marginTop: 6 }}>
-            <View style={styles.visaTag}>
-              <Text style={{ color: "#fff", fontWeight: "700", fontSize: 10 }}>VISA</Text>
+            {/* SUMMARY CARD */}
+            <View style={[styles.summaryCard, { backgroundColor: "rgba(255, 212, 0, 0.05)", borderColor: accent }]}>
+              <View>
+                <Text style={[styles.summaryTitle, { color: textWhite }]}>{parkingName}</Text>
+                <Text style={[styles.summarySub, { color: textGray }]}>{t('today')}, {checkInTime} • {duration} hr</Text>
+              </View>
+              <View style={styles.priceTag}>
+                <Text style={[styles.priceText, { color: accent }]}>LKR {totalPrice}</Text>
+              </View>
             </View>
-            <View style={styles.masterTag}>
-              <Text style={{ color: "#fff", fontWeight: "700", fontSize: 10 }}>MC</Text>
-            </View>
-          </View>
+
+            <Text style={[styles.sectionTitle, { color: textWhite }]}>{t('selectPaymentMethod')}</Text>
+
+            {/* PAYMENT METHODS */}
+            <PaymentMethod
+              id="card" iconLib={MaterialIcons} icon="credit-card"
+              title={t('creditDebitCard')}
+            />
+            <PaymentMethod
+              id="cash" iconLib={MaterialIcons} icon="payments"
+              title={t('cashAtLocation')} sub={t('payOnArrival')}
+            />
+            <PaymentMethod
+              id="upi" iconLib={Ionicons} icon="wallet"
+              title={t('upiWallet')} sub={t('upiDesc')}
+            />
+
+            {/* CREDIT CARD INPUTS */}
+            {method === "card" && (
+              <View style={styles.cardForm}>
+                <Text style={[styles.inputLabel, { color: textGray }]}>{t('cardNumber')}</Text>
+                <View style={[styles.inputContainer, { backgroundColor: inputBg, borderColor: "#333" }]}>
+                  <Ionicons name="card-outline" size={20} color={accent} style={{ marginRight: 10 }} />
+                  <TextInput
+                    style={[styles.input, { color: textWhite }]}
+                    placeholder="1234 5678 9012 3456"
+                    placeholderTextColor="#555"
+                    keyboardType="numeric"
+                    value={cardNumber}
+                    onChangeText={setCardNumber}
+                    maxLength={19}
+                  />
+                </View>
+
+                <View style={styles.row}>
+                  <View style={{ flex: 1, marginRight: 10 }}>
+                    <Text style={[styles.inputLabel, { color: textGray }]}>{t('expiry')}</Text>
+                    <View style={[styles.inputContainer, { backgroundColor: inputBg, borderColor: "#333" }]}>
+                      <TextInput
+                        style={[styles.input, { color: textWhite }]}
+                        placeholder="MM/YY"
+                        placeholderTextColor="#555"
+                        value={expiry}
+                        onChangeText={setExpiry}
+                        maxLength={5}
+                      />
+                    </View>
+                  </View>
+                  <View style={{ flex: 1, marginLeft: 10 }}>
+                    <Text style={[styles.inputLabel, { color: textGray }]}>{t('cvv')}</Text>
+                    <View style={[styles.inputContainer, { backgroundColor: inputBg, borderColor: "#333" }]}>
+                      <TextInput
+                        style={[styles.input, { color: textWhite }]}
+                        placeholder="123"
+                        placeholderTextColor="#555"
+                        keyboardType="numeric"
+                        value={cvv}
+                        onChangeText={setCvv}
+                        maxLength={3}
+                        secureTextEntry
+                      />
+                      <MaterialIcons name="lock-outline" size={18} color="#555" style={{ marginLeft: "auto" }} />
+                    </View>
+                  </View>
+                </View>
+
+                <View style={styles.secureBadge}>
+                  <MaterialIcons name="verified-user" size={14} color={accent} />
+                  <Text style={{ color: textGray, fontSize: 12 }}>Payments are secure and encrypted</Text>
+                </View>
+              </View>
+            )}
+
+          </Animated.View>
+        </ScrollView>
+
+        {/* FOOTER ACTIONS */}
+        <View style={[styles.footer, { backgroundColor: bgDark }]}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            style={[styles.payBtn, { backgroundColor: accent }]}
+            onPress={handlePayment}
+          >
+            <Text style={styles.payText}>{t('payReserve')}</Text>
+            <View style={styles.shine} />
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => router.back()} style={styles.cancelBtn}>
+            <Text style={styles.cancelText}>{t('cancelBooking')}</Text>
+          </TouchableOpacity>
         </View>
 
-        {method === "card" && (
-          <Ionicons name="checkmark-circle" size={28} color="#FFD400" style={{ marginLeft: "auto" }} />
-        )}
-      </Pressable>
-
-      {/* CASH OPTION */}
-      <Pressable
-        style={({ pressed }) => [
-          styles.methodBox,
-          method === "cash" && styles.methodSelected,
-          pressed && styles.methodPressed,
-        ]}
-        onPress={() => setMethod("cash")}
-      >
-        <MaterialIcons name="payments" size={32} color="#555" />
-        <View style={{ marginLeft: 15 }}>
-          <Text style={styles.methodTitle}>{t('cashAtLocation')}</Text>
-          <Text style={styles.methodSub}>{t('payOnArrival')}</Text>
-        </View>
-
-        {method === "cash" && (
-          <Ionicons name="checkmark-circle" size={28} color="#FFD400" style={{ marginLeft: "auto" }} />
-        )}
-      </Pressable>
-
-      {/* UPI OPTION */}
-      <Pressable
-        style={({ pressed }) => [
-          styles.methodBox,
-          method === "upi" && styles.methodSelected,
-          pressed && styles.methodPressed,
-        ]}
-        onPress={() => setMethod("upi")}
-      >
-        <Ionicons name="wallet" size={25} color="#555" />
-        <View style={{ marginLeft: 15 }}>
-          <Text style={styles.methodTitle}>{t('upiWallet')}</Text>
-          <Text style={styles.methodSub}>{t('upiDesc')}</Text>
-        </View>
-
-        {method === "upi" && (
-          <Ionicons name="checkmark-circle" size={28} color="#FFD400" style={{ marginLeft: "auto" }} />
-        )}
-      </Pressable>
-
-      {/* CARD DETAILS — only when Credit/Debit Card selected */}
-      {method === "card" && (
-        <>
-          <Text style={styles.sectionTitle}>{t('addCardDetails')}</Text>
-
-          <Text style={styles.label}>{t('cardNumber')}</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="1234 5678 9012 3456"
-            placeholderTextColor="#aaa"
-            keyboardType="numeric"
-            value={cardNumber}
-            onChangeText={setCardNumber}
-          />
-
-          <View style={styles.row}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.label}>{t('expiry')}</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="MM/YY"
-                placeholderTextColor="#aaa"
-                value={expiry}
-                onChangeText={setExpiry}
-              />
-            </View>
-
-            <View style={{ width: 120, marginLeft: 10 }}>
-              <Text style={styles.label}>{t('cvv')}</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="123"
-                placeholderTextColor="#aaa"
-                keyboardType="numeric"
-                value={cvv}
-                onChangeText={setCvv}
-                secureTextEntry
-              />
-            </View>
-          </View>
-        </>
-      )}
-
-      {/* PAY BUTTON */}
-      <Pressable
-        style={({ pressed }) => [
-          styles.payBtn,
-          pressed && {
-            backgroundColor: "#FFE04D",
-            shadowColor: "#FFD400",
-            shadowOffset: { width: 0, height: 0 },
-            shadowOpacity: 1,
-            shadowRadius: 25,
-            elevation: 15,
-          },
-        ]}
-        onPress={handlePayment}
-      >
-        <Text style={styles.payText}>{t('payReserve')}</Text>
-      </Pressable>
-
-      {/* CANCEL */}
-      <TouchableOpacity onPress={() => router.back()}>
-        <Text style={styles.cancelText}>{t('cancelBooking')}</Text>
-      </TouchableOpacity>
-    </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 }
 
-/* ------------ STYLES ------------- */
-
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", padding: 20 },
+  container: { flex: 1 },
 
-  header: { flexDirection: "row", alignItems: "center", marginBottom: 20, marginTop: 10 },
-  headerTitle: { fontSize: 24, fontWeight: "800", marginLeft: 15, color: "#333", letterSpacing: 0.5 },
+  header: {
+    flexDirection: "row", alignItems: "center",
+    paddingHorizontal: 20, paddingVertical: 15,
+    marginBottom: 10
+  },
+  headerTitle: { fontSize: 28, fontWeight: "800", marginLeft: 15, letterSpacing: 0.5 },
+  backBtn: {
+    padding: 8, borderRadius: 12, backgroundColor: "#111", borderWidth: 1, borderColor: "#222"
+  },
 
   summaryCard: {
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 20,
-    elevation: 8,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 25,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
+    marginHorizontal: 20, padding: 25, borderRadius: 24,
+    flexDirection: "row", justifyContent: "space-between", alignItems: 'center',
     borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.05)",
+    marginBottom: 30
   },
+  summaryTitle: { fontSize: 18, fontWeight: "700", marginBottom: 6 },
+  summarySub: { fontSize: 14, fontWeight: "500" },
+  priceTag: { padding: 10, borderRadius: 12, backgroundColor: "rgba(0,0,0,0.3)" },
+  priceText: { fontSize: 18, fontWeight: "800" },
 
-  title: { fontSize: 18, fontWeight: "800", color: "#333" },
-  subText: { color: "#666", marginTop: 4, fontWeight: "500" },
-  price: { fontSize: 24, fontWeight: "900", color: "#FFD400" },
-
-  sectionTitle: { fontSize: 18, fontWeight: "800", marginTop: 15, marginBottom: 15, color: "#333" },
+  sectionTitle: { fontSize: 18, fontWeight: "700", marginLeft: 20, marginBottom: 15 },
 
   methodBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 18,
-    borderRadius: 18,
-    backgroundColor: "#fff",
-    marginBottom: 15,
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
+    flexDirection: "row", alignItems: "center",
+    marginHorizontal: 20, marginBottom: 15,
+    padding: 18, borderRadius: 20,
     borderWidth: 1,
-    borderColor: "#f0f0f0",
+    shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8
+  },
+  iconBox: {
+    width: 45, height: 45, borderRadius: 14, justifyContent: 'center', alignItems: 'center'
+  },
+  methodTitle: { fontSize: 16, fontWeight: "700" },
+  methodSub: { fontSize: 12, marginTop: 2 },
+
+  cardForm: { marginHorizontal: 20, marginTop: 10 },
+  inputLabel: { fontSize: 14, marginBottom: 8, fontWeight: "600" },
+  inputContainer: {
+    flexDirection: 'row', alignItems: 'center',
+    paddingHorizontal: 15, paddingVertical: 14, borderRadius: 16,
+    borderWidth: 1, marginBottom: 20
+  },
+  input: { flex: 1, fontSize: 16, fontWeight: "600" },
+  row: { flexDirection: "row" },
+
+  secureBadge: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: 6, marginTop: 10, marginBottom: 20, opacity: 0.7
   },
 
-  methodSelected: {
-    borderWidth: 2,
-    borderColor: "#FFD400",
-    backgroundColor: "#FFFDF0",
-  },
-
-  methodPressed: {
-    borderColor: "#FFD400",
-    borderWidth: 2,
-    shadowColor: "#FFD400",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.6,
-    shadowRadius: 15,
-    elevation: 8,
-  },
-
-  methodTitle: { fontSize: 17, fontWeight: "700", color: "#333" },
-  methodSub: { color: "#888", marginTop: 4, fontSize: 13 },
-
-  visaTag: {
-    backgroundColor: "#1A237E",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    marginRight: 6,
-  },
-  masterTag: {
-    backgroundColor: "#d50000",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-
-  label: { fontSize: 15, marginTop: 8, marginBottom: 6, color: "#555", fontWeight: "600" },
-
-  input: {
-    backgroundColor: "#f9f9f9",
-    padding: 16,
-    borderRadius: 14,
-    fontSize: 16,
-    marginBottom: 15,
-    borderWidth: 1,
-    borderColor: "#eee",
-    color: "#333",
-  },
-
-  row: { flexDirection: "row", justifyContent: "space-between" },
-
+  footer: { paddingHorizontal: 20, paddingBottom: 30, paddingTop: 10 },
   payBtn: {
-    backgroundColor: "#FFD400",
-    paddingVertical: 18,
-    borderRadius: 30, // Gold Pill
-    marginTop: 30,
-    marginBottom: 20,
-    shadowColor: "#FFD400",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-    elevation: 8,
+    height: 60, borderRadius: 30,
+    justifyContent: 'center', alignItems: 'center',
+    shadowColor: "#FFD400", shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.5, shadowRadius: 15,
+    elevation: 10,
+    marginBottom: 15,
+    overflow: 'hidden'
   },
-  payText: {
-    textAlign: "center",
-    fontSize: 18,
-    fontWeight: "800",
-    color: "#000",
-    letterSpacing: 1,
-    textTransform: "uppercase",
+  payText: { fontSize: 18, fontWeight: "900", color: "#000", textTransform: "uppercase", letterSpacing: 1 },
+  // Simple Shine Effect (Static for now)
+  shine: {
+    position: 'absolute', top: -30, right: -20, width: 60, height: 100, backgroundColor: 'rgba(255,255,255,0.2)', transform: [{ rotate: '25deg' }]
   },
 
-  cancelText: {
-    textAlign: "center",
-    color: "#999",
-    fontSize: 16,
-    marginBottom: 40,
-    fontWeight: "600",
-  },
+  cancelBtn: { alignItems: 'center', padding: 10 },
+  cancelText: { color: "#666", fontWeight: "600", fontSize: 16 }
 });

@@ -1,50 +1,70 @@
-# Welcome to your Expo app 👋
+# ParkHere - Premium Smart Parking App 🚗✨
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+ParkHere is a modern, premium mobile application designed to streamline the parking experience. It features a high-end "Gold & Black" aesthetic, advanced animations, and a seamless booking flow.
 
-## Get started
+## 🌟 Key Features
 
-1. Install dependencies
+### 1. Premium UI/UX
+- **Theme**: distinct "Dark Mode" with Gold Accents (`#FFD400`) and Glassmorphism effects.
+- **Animations**:
+  - **Radar Scan**: `ParkMapScanUpgraded.tsx` features a rotating radar sweep with particle effects.
+  - **Pulse Effects**: Used on slots, payment, and QR generation.
+  - **Transitions**: Smooth fade and slide entry animations for all screens.
 
-   ```bash
-   npm install
-   ```
+### 2. Advanced Booking Flow
+The app features a connected, linear booking journey:
+1.  **Radar Scan**: Scans for nearby spots.
+2.  **Select Parking**: List/Map view of available garages.
+3.  **Select Slot**:
+    - Visual grid layout (Level 1, Zone B).
+    - Status indicators (Available, Occupied, Reserved).
+    - **Logic**: Enforces slot selection before continuing.
+4.  **Set Time & Services (`setTime.tsx`)**:
+    - **Custom Time Picker**: A vertical, physics-based scrolling wheel (implemented via `Animated.ScrollView` for performance and to avoid nesting errors).
+    - **Dynamic Pricing**: Real-time calculation of Duration * Price + Services (EV, Car Wash).
+    - **Smart Check-In**: Defaults to the current system time.
+5.  **Payment**:
+    - Supports Card and Cash flows.
+    - Validates inputs (Luhn algorithm for cards).
+6.  **Success & QR**:
+    - Generates a **Dynamic QR Ticket**.
+    - Displays actual booking details (Slot, Time, Price, Unique ID).
 
-2. Start the app
+### 3. Technical Highlights
+- **Navigation**: Built with **Expo Router**. verified absolute paths (e.g., `/parking/selectSlot`) for reliability.
+- **Data Flow**: Booking parameters (`slot`, `price`, `time`) represent a robust chain passed from screen to screen.
+- **Performance**:
+  - `Animated.ScrollView` used for the time picker to correct `VirtualizedList` nesting warnings.
+  - Optimized layouts with `SafeAreaView`.
 
-   ```bash
-   npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## 🚀 Get Started
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+1.  **Install dependencies**
+    ```bash
+    npm install
+    ```
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+2.  **Start the app**
+    ```bash
+    npx expo start
+    ```
 
-## Get a fresh project
+3.  **Test the Parking Flow**
+    - Navigate to **"Parking"** tab.
+    - Let the **Radar Scan** finish (3s).
+    - Pick a Spot -> Pick a Slot (e.g., B20).
+    - Scroll the **Time Picker** to set duration.
+    - Add Services (optional).
+    - Pay -> View your **QR Ticket**.
 
-When you're ready, run:
+---
 
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## 🛠 Project Structure
+- **`/app/parking/`**: Core booking flow components.
+  - `ParkMapScanUpgraded.tsx`: Animation logic.
+  - `selectSlot.tsx`: Grid logic.
+  - `setTime.tsx`: Pricing & Time Picker logic.
+  - `paymentCard.tsx`: Form validation.
+  - `QR.tsx`: Final ticket generation.

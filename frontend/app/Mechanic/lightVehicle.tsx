@@ -1,144 +1,154 @@
-// import React from "react";
-// import {
-//     View,
-//     Text,
-//     Image,
-//     StyleSheet,
-//     Pressable,
-//     ScrollView,
-// } from "react-native";
-// import { SafeAreaView } from "react-native-safe-area-context";
-// import { router } from "expo-router";
+import React, { useState, useEffect, useRef } from "react";
+import { View, Text, StyleSheet, Pressable, ScrollView, StatusBar, Animated, Easing, Alert } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { router } from "expo-router";
+import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from "@expo/vector-icons";
+import { supabase } from "../../config/supabaseClient";
+import api from "../../services/api";
 
-// export default function LightVehicle() {
-//     return (
-//         <SafeAreaView style={styles.container}>
-//             <ScrollView contentContainerStyle={{ paddingBottom: 30 }}>
+import { useTheme } from "../../context/themeContext";
 
-//                 {/* Header */}
-//                 <View style={styles.headerRow}>
-//                     <Pressable onPress={() => router.back()}>
-//                         <View style={styles.backBtn}>
-//                             <Text style={{ fontSize: 28 }}>←</Text>
-//                         </View>
-//                     </Pressable>
+export default function LightVehicle() {
+    const { colors, theme } = useTheme();
 
-//                     <Text style={styles.headerText}>Light Vehicle</Text>
+    // THEME COLORS
+    const bg = colors.background;
+    const cardBg = colors.card;
+    const accent = colors.primary;
+    const textPrimary = colors.text;
+    const textSecondary = colors.subText;
 
-//                     <Image
-//                         source={require("../../assets/profile.jpg")}
-//                         style={styles.profileImg}
-//                     />
-//                 </View>
+    const [selectedService, setSelectedService] = useState<string | null>(null);
+    const fadeAnim = useRef(new Animated.Value(0)).current;
 
-//                 {/* Two Wheeler */}
-//                 <Pressable style={styles.card} onPress={() => router.push("../Mechanic/twoWheeler")}>
-//                     <View style={styles.iconWrapper}>
-//                         <Image
-//                             source={require("../../assets/two_wheeler.png")}
-//                             style={styles.icon}
-//                         />
-//                     </View>
-//                     <Text style={styles.cardText}>Two wheeler</Text>
-//                 </Pressable>
+    useEffect(() => {
+        Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 800,
+            useNativeDriver: true,
+        }).start();
+    }, []);
 
-//                 {/* Three Wheeler */}
-//                 <Pressable
-//                     style={styles.card}
-//                     onPress={() => router.push("../Mechanic/threeWheeler")}
-//                 >
-//                     <View style={styles.iconWrapper}>
-//                         <Image
-//                             source={require("../../assets/three_wheeler.png")}
-//                             style={styles.icon}
-//                         />
-//                     </View>
-//                     <Text style={styles.cardText}>Three wheeler</Text>
-//                 </Pressable>
+    const services = [
+        { id: 'engine', title: 'Engine Diagnostics', price: '2500', icon: 'engine-outline', lib: MaterialCommunityIcons },
+        { id: 'tire', title: 'Tire Change', price: '1500', icon: 'disc-outline', lib: Ionicons },
+        { id: 'jump', title: 'Jump Start', price: '1000', icon: 'bolt', lib: FontAwesome5 },
+        { id: 'wash', title: 'Premium Wash', price: '2000', icon: 'water-outline', lib: Ionicons },
+    ];
 
-//                 {/* Four Wheeler */}
-//                 <Pressable
-//                     style={styles.card}
-//                     onPress={() => router.push("../Mechanic/fourWheeler")}
-//                 >
-//                     <View style={styles.iconWrapper}>
-//                         <Image
-//                             source={require("../../assets/four_wheeler.png")}
-//                             style={styles.icon}
-//                         />
-//                     </View>
-//                     <Text style={styles.cardText}>Four Wheeler</Text>
-//                 </Pressable>
-//             </ScrollView>
-//         </SafeAreaView>
-//     );
-// }
+    // ... inside component ...
+    const handleRequest = async () => {
+        if (!selectedService) return;
 
-// const styles = StyleSheet.create({
-//     container: {
-//         flex: 1,
-//         backgroundColor: "#000",
-//         paddingHorizontal: 15,
-//     },
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            const userId = session?.user?.id || 'guest_user'; // Fallback if testing
 
-//     headerRow: {
-//         flexDirection: "row",
-//         alignItems: "center",
-//         justifyContent: "space-between",
-//         marginVertical: 15,
-//     },
+            const selectedItem = services.find(s => s.id === selectedService);
 
-//     backBtn: {
-//         width: 50,
-//         height: 50,
-//         backgroundColor: "#FFD700",
-//         borderRadius: 50,
-//         justifyContent: "center",
-//         alignItems: "center",
-//     },
+            // Create Service Request in Backend
+            await api.post('/services', {
+                userId,
+                serviceType: selectedService,
+                notes: `Requested ${selectedItem?.title}`,
+                price: selectedItem?.price
+            });
 
-//     headerText: {
-//         color: "#E8E813",
-//         fontSize: 24,
-//         fontWeight: "900",
-//     },
+            // Navigate to Payment
+            router.push('../parking/paymentCard');
+        } catch (error) {
+            console.error("Failed to request service:", error);
+            Alert.alert("Error", "Failed to submit request. Please try again.");
+        }
+    };
 
-//     profileImg: {
-//         width: 50,
-//         height: 50,
-//         borderRadius: 50,
-//     },
+    return (
+        <SafeAreaView style={[styles.container, { backgroundColor: bg }]}>
+            <StatusBar barStyle={theme === 'dark' ? "light-content" : "dark-content"} />
 
-//     card: {
-//         backgroundColor: "rgba(255,255,0,0.10)",
-//         borderWidth: 2,
-//         borderColor: "#FFD700",
-//         borderRadius: 20,
-//         padding: 20,
-//         marginTop: 25,
-//         flexDirection: "row",
-//         alignItems: "center",
-//     },
+            <View style={styles.header}>
+                <Pressable onPress={() => router.back()} style={styles.backBtn}>
+                    <Ionicons name="arrow-back" size={24} color={textPrimary} />
+                </Pressable>
+                <Text style={[styles.headerTitle, { color: textPrimary }]}>Light Vehicle Service</Text>
+            </View>
 
-//     iconWrapper: {
-//         width: 70,
-//         height: 70,
-//         borderRadius: 50,
-//         backgroundColor: "#F7FF00",
-//         alignItems: "center",
-//         justifyContent: "center",
-//         marginRight: 20,
-//     },
+            <ScrollView contentContainerStyle={{ padding: 20 }}>
 
-//     icon: {
-//         width: 45,
-//         height: 45,
-//         resizeMode: "contain",
-//     },
+                <Animated.Text style={[styles.sectionTitle, { color: accent, opacity: fadeAnim }]}>
+                    Available Services
+                </Animated.Text>
+                <Text style={{ color: textSecondary, marginBottom: 20 }}>Select a service for your car, van, or jeep.</Text>
 
-//     cardText: {
-//         color: "#FFD700",
-//         fontSize: 22,
-//         fontWeight: "700",
-//     },
-// });
+                <View style={styles.grid}>
+                    {services.map((item, index) => {
+                        const IconLib = item.lib;
+                        const isSelected = selectedService === item.id;
+
+                        return (
+                            <Pressable
+                                key={item.id}
+                                style={({ pressed }) => [
+                                    styles.card,
+                                    {
+                                        backgroundColor: isSelected ? "rgba(255, 212, 0, 0.15)" : cardBg,
+                                        borderColor: isSelected ? accent : "transparent",
+                                        transform: [{ scale: pressed ? 0.98 : 1 }]
+                                    }
+                                ]}
+                                onPress={() => setSelectedService(item.id)}
+                            >
+                                <View style={[styles.iconCircle, { backgroundColor: isSelected ? accent : "#2A3B55" }]}>
+                                    <IconLib name={item.icon as any} size={28} color={isSelected ? "#000" : textSecondary} />
+                                </View>
+                                <View style={{ flex: 1 }}>
+                                    <Text style={[styles.serviceTitle, { color: textPrimary }]}>{item.title}</Text>
+                                    <Text style={[styles.servicePrice, { color: accent }]}>LKR {item.price}</Text>
+                                </View>
+                                {isSelected && <Ionicons name="checkmark-circle" size={24} color={accent} />}
+                            </Pressable>
+                        )
+                    })}
+                </View>
+
+            </ScrollView>
+
+            {/* FLOATING ACTION BUTTON */}
+            {selectedService && (
+                <Animated.View style={[styles.footer, { opacity: fadeAnim }]}>
+                    <Pressable style={[styles.btn, { backgroundColor: accent }]} onPress={handleRequest}>
+                        <Text style={styles.btnText}>REQUEST SERVICE</Text>
+                        <Ionicons name="arrow-forward" size={24} color="#000" />
+                    </Pressable>
+                </Animated.View>
+            )}
+
+        </SafeAreaView>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: { flex: 1 },
+    header: { flexDirection: "row", alignItems: "center", paddingHorizontal: 20, marginBottom: 10 },
+    backBtn: { padding: 10, backgroundColor: "rgba(255,255,255,0.1)", borderRadius: 20, marginRight: 15 },
+    headerTitle: { fontSize: 20, fontWeight: "700" },
+
+    sectionTitle: { fontSize: 24, fontWeight: "800", marginBottom: 5 },
+    grid: { gap: 15 },
+
+    card: {
+        flexDirection: "row", alignItems: "center",
+        padding: 15, borderRadius: 16, borderWidth: 1,
+        elevation: 3
+    },
+    iconCircle: { width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center', marginRight: 15 },
+    serviceTitle: { fontSize: 16, fontWeight: "700", marginBottom: 4 },
+    servicePrice: { fontSize: 14, fontWeight: "600" },
+
+    footer: { position: 'absolute', bottom: 30, left: 20, right: 20 },
+    btn: {
+        flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 10,
+        padding: 18, borderRadius: 30, elevation: 10, shadowColor: "#FFD400", shadowOpacity: 0.4, shadowRadius: 10
+    },
+    btnText: { fontSize: 16, fontWeight: "800", color: "#000" }
+});

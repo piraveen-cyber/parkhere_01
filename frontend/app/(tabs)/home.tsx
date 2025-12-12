@@ -1,352 +1,362 @@
-import React from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
-  TextInput,
   Image,
   Alert,
-  Pressable,
+  TouchableOpacity,
+  Animated,
+  Dimensions,
+  Easing,
+  StatusBar
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { supabase } from "../../config/supabaseClient";
-import { useTheme } from "../../context/themeContext";
 import { useTranslation } from "react-i18next";
-import { router } from "expo-router";   // 👈 ADDED
+import { router } from "expo-router";
+import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
+import ParkingSlot from "../../components/ParkingSlot";
+import { useTheme } from "../../context/themeContext";
+import * as bookingService from "../../services/bookingService";
+
+const { width } = Dimensions.get("window");
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
-  const { theme, colors } = useTheme();
   const { t } = useTranslation();
+
+  // GLOBAL THEME CONTEXT
+  const { theme, colors, toggleTheme } = useTheme();
   const isDark = theme === "dark";
+  const THEME = colors;
 
-  /* THEME COLORS */
-  const bg = isDark ? "#0D1B2A" : "#FAFAFA";
-  const cardBg = isDark ? "#1B263B" : "#FFFFFF";
-  const textColor = isDark ? "#FFFFFF" : "#111";
-  const descColor = isDark ? "#9FB5C2" : "#6F6F6F";
-  const borderColor = isDark ? "#415A77" : "#EDEDED";
+  // ANIMATIONS
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) Alert.alert(t("error"), error.message);
-  };
+  // LIVE BOOKING LOGIC
+  const [activeBooking, setActiveBooking] = useState<any>(null);
 
-  const services = [
-    { key: "parking", title: t("parking"), icon: require("../../assets/images/car.png") },
-    { key: "mechanics", title: t("mechanics"), icon: require("../../assets/images/wrench.png") },
-    { key: "washing", title: t("washing"), icon: require("../../assets/images/wash.png") },
-    { key: "evCharging", title: t("evCharging"), icon: require("../../assets/images/ev.png") },
-    { key: "towing", title: t("towing"), icon: require("../../assets/images/tow.png") },
-    { key: "hiring", title: t("hiring"), icon: require("../../assets/images/check.png") },
-  ];
+  useEffect(() => {
+    // Mount Animation
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 800,
+      useNativeDriver: true,
+      easing: Easing.out(Easing.cubic)
+    }).start();
 
-  const handleServiceNavigation = (key: string) => {
-    if (key === "parking") {
-      router.push("/parking/selectVehicle");
-    } else if (key === "mechanics") {
-      router.push("/Mechanic/vehicleType");
+    // Poll for active booking
+    fetchActiveBooking();
+    const interval = setInterval(fetchActiveBooking, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchActiveBooking = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const booking = await bookingService.getActiveBooking(session.user.id);
+        setActiveBooking(booking);
+      }
+    } catch (e) {
+      console.log("Error fetching active booking", e);
     }
   };
 
+  const handleScan = async () => {
+    if (!activeBooking) return;
+    try {
+      Alert.alert(
+        "Simulate QR Scan",
+        "Scanning QR Code...",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Scan Success",
+            onPress: async () => {
+              const res = await bookingService.scanBooking(activeBooking._id);
+              Alert.alert("Success", res.message);
+              fetchActiveBooking();
+            }
+          }
+        ]
+      );
+    } catch (e: any) {
+      Alert.alert("Error", e.message || "Scan failed");
+    }
+  };
 
+  const handleExtend = async () => {
+    if (!activeBooking) return;
+    Alert.alert(
+      "Extend Parking",
+      "Add 1 hour for LKR 200?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Confirm",
+          onPress: async () => {
+            try {
+              await bookingService.extendBooking(activeBooking._id, 1);
+              Alert.alert("Success", "Time extended by 1 hour!");
+              fetchActiveBooking();
+            } catch (e: any) {
+              Alert.alert("Error", e.message || "Extension failed");
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  // Timer Component
+  const LiveTimer = ({ endTime }: { endTime: string }) => {
+    const [left, setLeft] = useState(0);
+
+    useEffect(() => {
+      const tick = () => {
+        const end = new Date(endTime).getTime();
+        const now = new Date().getTime();
+        const diff = Math.floor((end - now) / 1000);
+        setLeft(diff > 0 ? diff : 0);
+      };
+      tick();
+      const tmr = setInterval(tick, 1000);
+      return () => clearInterval(tmr);
+    }, [endTime]);
+
+    const hrs = Math.floor(left / 3600);
+    const mins = Math.floor((left % 3600) / 60);
+    const secs = left % 60;
+
+    return (
+      <Text style={[styles.timerValue, { color: colors.primary }]}>
+        {`${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`}
+      </Text>
+    );
+  };
+
+  const handleServiceNavigation = (key: string) => {
+    if (key === "parking") router.push("/parking/selectVehicle");
+  };
+
+  const services = [
+    { key: "parking", title: "Find Parking", icon: "car-sport", lib: Ionicons },
+    { key: "mechanics", title: "Mechanic", icon: "wrench", lib: MaterialCommunityIcons },
+    { key: "washing", title: "Car Wash", icon: "water", lib: Ionicons },
+    { key: "evCharging", title: "EV Charge", icon: "ev-station", lib: MaterialCommunityIcons },
+    { key: "towing", title: "Towing", icon: "tow-truck", lib: MaterialCommunityIcons },
+    { key: "hiring", title: "Rent / Hire", icon: "key", lib: Ionicons },
+  ];
+
+  const parkingSlotsMock = [
+    { id: "A1", status: "occupied", type: "standard" },
+    { id: "A2", status: "available", type: "standard" },
+    { id: "A3", status: "occupied", type: "ev" },
+    { id: "A4", status: "available", type: "disabled" },
+    { id: "A5", status: "available", type: "standard" },
+  ];
+
+  const recentActivity = [
+    { id: 1, title: "Parking - Zone A", date: "2 hrs ago", amount: "-$5.00", icon: "car-sport" },
+    { id: 2, title: "Top-up", date: "Yesterday", amount: "+$50.00", icon: "wallet" },
+  ];
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: bg }]}>
-      <ScrollView
+    <SafeAreaView style={[styles.safe, { backgroundColor: THEME.background }]}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
+      <Animated.ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingBottom: insets.bottom + 140 },
+          { paddingBottom: insets.bottom + 100, opacity: fadeAnim }
         ]}
       >
+
         {/* HEADER */}
-        <Text style={[styles.welcome, { color: textColor }]}>
-          {t("welcomeUser")}
-        </Text>
+        <View style={styles.headerRow}>
+          <View>
+            <Text style={[styles.greeting, { color: THEME.subText }]}>{t("goodMorning") || "Hello,"}</Text>
+            <Text style={[styles.userName, { color: THEME.text }]}>Alex Doe</Text>
+          </View>
 
-        <Text style={[styles.subtitle, { color: descColor }]}>
-          {t("findEverything")}
-        </Text>
+          <View style={{ flexDirection: 'row', gap: 12 }}>
+            <TouchableOpacity
+              style={[styles.iconBtn, { backgroundColor: THEME.headerIconBg }]}
+              onPress={toggleTheme}
+            >
+              <Feather name={isDark ? "sun" : "moon"} size={20} color={THEME.text} />
+            </TouchableOpacity>
 
-        {/* SEARCH BAR */}
-        <View
-          style={[
-            styles.searchBox,
-            { backgroundColor: cardBg, borderColor: colors.primary, borderWidth: 1.5 },
-          ]}
-        >
-          <Text style={[styles.searchIcon, { color: colors.primary }]}>🔍</Text>
-          <TextInput
-            placeholder={t("searchPlaceholder")}
-            placeholderTextColor={descColor}
-            style={[styles.searchInput, { color: textColor }]}
-          />
+            <TouchableOpacity style={[styles.iconBtn, { backgroundColor: THEME.headerIconBg }]}>
+              <Ionicons name="notifications-outline" size={20} color={THEME.text} />
+              <View style={[styles.badge, { backgroundColor: THEME.error }]} />
+            </TouchableOpacity>
+          </View>
         </View>
 
-        {/* GRID */}
-        <View style={styles.grid}>
-          {services.map((item) => (
-            <Pressable
-              key={item.key}
-              style={({ pressed }) => [
-                styles.card,
-                { backgroundColor: cardBg },
-                pressed && {
-                  borderColor: "#FFD400",
-                  borderWidth: 2,
-                  shadowColor: "#FFD400",
-                  shadowOffset: { width: 0, height: 0 },
-                  shadowOpacity: 0.8,
-                  shadowRadius: 20,
-                  elevation: 10,
-                },
-              ]}
-              onPress={() => handleServiceNavigation(item.key)}
-            >
-              <View style={styles.iconWrapper}>
-                <Image source={item.icon} style={styles.iconImg} />
+        {/* LIVE STATUS BAR */}
+        {activeBooking && (
+          <Animated.View style={{ opacity: fadeAnim, marginBottom: 20 }}>
+            <View style={[styles.liveStatusCard, { backgroundColor: colors.card, borderColor: colors.primary }]}>
+
+              <View style={styles.liveHeader}>
+                <View style={[styles.liveBadge, { backgroundColor: "rgba(255, 212, 0, 0.15)" }]}>
+                  <View style={[styles.pulseDot, { backgroundColor: colors.primary }]} />
+                  <Text style={[styles.liveText, { color: colors.primary }]}>
+                    {activeBooking.status === 'pending' ? "ARRIVING SOON" : "LIVE PARKING"}
+                  </Text>
+                </View>
+                <Text style={{ color: colors.subText, fontSize: 12, fontWeight: "600" }}>
+                  {activeBooking.status === 'active' ? `Slot ${activeBooking.parkingSpotId?.name || "Unknown"}` : "Navigating..."}
+                </Text>
               </View>
-              <Text style={[styles.cardTitle, { color: textColor }]}>
-                {item.title}
-              </Text>
-            </Pressable>
+
+              <View style={styles.timerRow}>
+                {activeBooking.status === 'active' ? (
+                  <View>
+                    <Text style={[styles.timerValue, { color: colors.text }]}>
+                      <LiveTimer endTime={activeBooking.endTime} />
+                    </Text>
+                    <Text style={{ color: colors.subText, fontSize: 12 }}>Time Remaining</Text>
+                  </View>
+                ) : (
+                  <View>
+                    <Text style={{ color: colors.text, fontSize: 24, fontWeight: "700" }}>
+                      {new Date(activeBooking.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </Text>
+                    <Text style={{ color: colors.subText, fontSize: 12 }}>Expected Arrival</Text>
+                  </View>
+                )}
+
+                {/* ACTION BUTTONS */}
+                {activeBooking.status === 'active' ? (
+                  <View style={{ gap: 10 }}>
+                    <TouchableOpacity onPress={handleExtend} style={[styles.actionBtnSmall, { backgroundColor: colors.background, borderColor: colors.primary }]}>
+                      <Feather name="plus-circle" size={16} color={colors.primary} />
+                      <Text style={{ color: colors.primary, fontWeight: "700", fontSize: 12 }}>EXTEND</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={handleScan} style={[styles.actionBtnSmall, { backgroundColor: colors.primary }]}>
+                      <Ionicons name="exit-outline" size={16} color="#000" />
+                      <Text style={{ color: "#000", fontWeight: "700", fontSize: 12 }}>CHECK OUT</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <TouchableOpacity onPress={handleScan} style={[styles.actionBtn, { backgroundColor: colors.primary }]}>
+                    <Ionicons name="qr-code-outline" size={20} color="#000" />
+                    <Text style={{ color: "#000", fontWeight: "700" }}>CHECK IN</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+
+            </View>
+          </Animated.View>
+        )}
+
+        {/* SERVICES GRID */}
+        <Text style={[styles.sectionTitle, { color: THEME.text, marginTop: 10 }]}>Services</Text>
+        <View style={styles.gridContainer}>
+          {services.map((service) => {
+            const IconLib = service.lib;
+            return (
+              <TouchableOpacity
+                key={service.key}
+                style={[styles.gridItem, { backgroundColor: THEME.card, borderColor: THEME.border }]}
+                onPress={() => handleServiceNavigation(service.key)}
+                activeOpacity={0.7}
+              >
+                <View style={[styles.gridIcon, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#F2F2F7" }]}>
+                  <IconLib name={service.icon as any} size={24} color={THEME.primary} />
+                </View>
+                <View>
+                  <Text style={[styles.gridTitle, { color: THEME.text }]}>{service.title}</Text>
+                </View>
+              </TouchableOpacity>
+            )
+          })}
+        </View>
+
+        {/* LIVE ZONE STRIP */}
+        <View style={[styles.liveZoneStrip, { backgroundColor: isDark ? "#111" : "#EEEEEE", borderColor: THEME.border }]}>
+          <View style={{ paddingHorizontal: 15, paddingVertical: 10, flexDirection: "row", justifyContent: "space-between" }}>
+            <Text style={{ color: THEME.subText, fontSize: 12, fontWeight: "600" }}>NEARBY ZONE STATUS</Text>
+            <TouchableOpacity><Text style={{ color: THEME.primary, fontSize: 12 }}>View Map</Text></TouchableOpacity>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 15, paddingBottom: 12 }}>
+            {parkingSlotsMock.map((slot, index) => (
+              <ParkingSlot
+                key={index}
+                label={slot.id}
+                status={slot.status as any}
+                type={slot.type as any}
+                style={{ marginRight: 10, transform: [{ scale: 0.9 }] }}
+              />
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* RECENT ACTIVITY */}
+        <Text style={[styles.sectionTitle, { color: THEME.text, marginTop: 15 }]}>Recent</Text>
+        <View style={styles.activityList}>
+          {recentActivity.map((item) => (
+            <View key={item.id} style={[styles.activityRow, { backgroundColor: THEME.card }]}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                <Ionicons name={item.icon as any} size={18} color={THEME.subText} />
+                <View>
+                  <Text style={{ color: THEME.text, fontWeight: "600", fontSize: 13 }}>{item.title}</Text>
+                  <Text style={{ color: THEME.subText, fontSize: 11 }}>{item.date}</Text>
+                </View>
+              </View>
+              <Text style={{ color: item.amount.startsWith('+') ? THEME.success : THEME.text, fontWeight: "700" }}>{item.amount}</Text>
+            </View>
           ))}
         </View>
 
-        {/* BIG CARD */}
-        <View style={[styles.bigCard, { backgroundColor: cardBg }]}>
-          <Text style={[styles.bigCardTitle, { color: textColor }]}>
-            {t("bookSpot")}
-          </Text>
-          <Text style={[styles.bigCardSubtitle, { color: descColor }]}>
-            {t("secureEasy")}
-          </Text>
-
-          <Pressable
-            style={({ pressed }) => [
-              styles.bookNowBtn,
-              pressed && {
-                backgroundColor: "#FFE04D", // Lighter gold
-                shadowColor: "#FFD400",
-                shadowOffset: { width: 0, height: 0 },
-                shadowOpacity: 1,
-                shadowRadius: 25,
-                elevation: 15,
-              },
-            ]}
-          >
-            <Text style={styles.bookNowText}>{t("bookNow")}</Text>
-          </Pressable>
-        </View>
-
-        {/* PROMOS */}
-        <View style={styles.promoYellow}>
-          <Text style={styles.promoTitle}>{t("promoWashing")}</Text>
-          <Text style={styles.promoSubtitle}>{t("validUntil")}</Text>
-        </View>
-
-        <View
-          style={[
-            styles.promoWhite,
-            { backgroundColor: cardBg, borderColor: "#FFD400" },
-          ]}
-        >
-          <Text
-            style={[
-              styles.promoTitle,
-              { color: isDark ? "#FFFFFF" : "#000" },
-            ]}
-          >
-            {t("freeCharging")}
-          </Text>
-          <Text style={[styles.promoSubtitle, { color: descColor }]}>
-            {t("first30Min")}
-          </Text>
-        </View>
-
-        {/* LOGOUT BUTTON */}
-        <Pressable
-          onPress={handleLogout}
-          style={({ pressed }) => [
-            styles.logoutBtn,
-            pressed && {
-              backgroundColor: "#FF5E55", // Lighter red
-              shadowColor: "#FF3B30",
-              shadowOffset: { width: 0, height: 0 },
-              shadowOpacity: 1,
-              shadowRadius: 25,
-              elevation: 15,
-            },
-          ]}
-        >
-          <Text style={styles.logoutText}>{t("logout")}</Text>
-        </Pressable>
-      </ScrollView>
+      </Animated.ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-  },
+  safe: { flex: 1 },
+  scrollContent: { padding: 20 },
 
-  scrollContent: {
-    paddingHorizontal: 25,
-    paddingTop: 15,
-  },
+  // TEXT
+  greeting: { fontSize: 12, fontWeight: "500", textTransform: 'uppercase', letterSpacing: 1 },
+  userName: { fontSize: 22, fontWeight: "700" },
+  sectionTitle: { fontSize: 17, fontWeight: "700", marginBottom: 12 },
 
-  welcome: {
-    fontSize: 28,
-    fontWeight: "700",
-  },
+  // HEADER
+  headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 25 },
+  iconBtn: { padding: 8, borderRadius: 10 },
+  badge: { position: "absolute", top: 8, right: 8, width: 6, height: 6, borderRadius: 3 },
 
-  subtitle: {
-    marginTop: 5,
-    fontSize: 15,
-  },
+  // LIVE STATUS BAR
+  liveStatusCard: { borderRadius: 20, padding: 20, borderWidth: 1 },
+  liveHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 15 },
+  liveBadge: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10 },
+  pulseDot: { width: 8, height: 8, borderRadius: 4 },
+  liveText: { fontSize: 12, fontWeight: "800", letterSpacing: 0.5 },
+  timerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  timerValue: { fontSize: 32, fontWeight: "700" },
+  actionBtn: { paddingVertical: 10, paddingHorizontal: 20, borderRadius: 20, justifyContent: 'center', alignItems: 'center', flexDirection: 'row', gap: 6 },
+  actionBtnSmall: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: 15, justifyContent: 'center', alignItems: 'center', flexDirection: 'row', gap: 4, borderWidth: 1, borderColor: "transparent" },
 
-  searchBox: {
-    marginTop: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 15,
-    paddingVertical: 14,
-    borderRadius: 14,
-    borderWidth: 1,
-  },
+  // LIVE ZONE STRIP
+  liveZoneStrip: { borderRadius: 12, borderWidth: 1, marginBottom: 25, overflow: 'hidden' },
 
-  searchIcon: { fontSize: 20, marginRight: 10 },
-  searchInput: { flex: 1, fontSize: 16 },
+  // GRID
+  gridContainer: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: 12, marginBottom: 15 },
+  gridItem: {
+    width: "48%", padding: 15, borderRadius: 14, borderWidth: 1,
+    flexDirection: "row", alignItems: "center", gap: 12
+  },
+  gridIcon: { width: 36, height: 36, borderRadius: 18, justifyContent: "center", alignItems: "center" },
+  gridTitle: { fontSize: 13, fontWeight: "600" },
 
-  grid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    marginTop: 20,
-  },
-
-  card: {
-    width: "47%",
-    padding: 20,
-    borderRadius: 20,
-    marginBottom: 20,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
-    borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.05)",
-  },
-
-  iconWrapper: {
-    backgroundColor: "#FFD400",
-    padding: 18,
-    borderRadius: 14,
-    marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-
-  iconImg: { width: 35, height: 35, tintColor: "#000" },
-
-  cardTitle: {
-    fontSize: 17,
-    fontWeight: "600",
-  },
-
-  bigCard: {
-    padding: 25,
-    borderRadius: 20,
-    marginTop: 10,
-    borderWidth: 2,
-    borderColor: "#FFD400",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 6,
-  },
-
-  bigCardTitle: {
-    fontSize: 24,
-    fontWeight: "800",
-    letterSpacing: 0.5,
-  },
-
-  bigCardSubtitle: {
-    marginTop: 4,
-    marginBottom: 15,
-  },
-
-  bookNowBtn: {
-    backgroundColor: "#FFD400",
-    paddingVertical: 16,
-    borderRadius: 12,
-  },
-  bookNowText: {
-    textAlign: "center",
-    fontSize: 18,
-    fontWeight: "600",
-  },
-
-  promoYellow: {
-    backgroundColor: "#FFD400",
-    padding: 20,
-    borderRadius: 20,
-    marginTop: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-
-  promoWhite: {
-    padding: 20,
-    borderWidth: 1,
-    borderRadius: 20,
-    marginTop: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    elevation: 2,
-  },
-
-  promoTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-  },
-  promoSubtitle: {
-    marginTop: 5,
-    color: "#666",
-  },
-
-  logoutBtn: {
-    marginTop: 40,
-    backgroundColor: "#FF3B30",
-    paddingVertical: 18,
-    borderRadius: 30, // Pill shape
-    shadowColor: "#FF3B30",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  logoutText: {
-    textAlign: "center",
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "700",
-    letterSpacing: 1,
-    textTransform: "uppercase",
-  },
+  // RECENT
+  activityList: { gap: 10 },
+  activityRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 12, borderRadius: 10 },
 });

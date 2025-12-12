@@ -1,131 +1,174 @@
-import React from "react";
-import { View, Text, Image, StyleSheet, Pressable, ScrollView } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { View, Text, StyleSheet, Pressable, ScrollView, StatusBar, Animated, Easing } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 
-export default function NeedMechanicHelp() {
+import { useTheme } from "../../context/themeContext";
+
+export default function MechanicVehicleType() {
+    const { colors } = useTheme();
+
+    // PREMIUM THEME COLORS
+    const bg = colors.background;
+    const cardBg = colors.card;
+    const accent = colors.primary;
+    const textPrimary = colors.text;
+    const textSecondary = colors.subText;
+
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const slideAnim = useRef(new Animated.Value(50)).current;
+
+    useEffect(() => {
+        Animated.parallel([
+            Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 800,
+                useNativeDriver: true,
+            }),
+            Animated.timing(slideAnim, {
+                toValue: 0,
+                duration: 800,
+                easing: Easing.out(Easing.back(1.5)),
+                useNativeDriver: true,
+            }),
+        ]).start();
+    }, []);
+
+    const vehicleTypes = [
+        {
+            id: 'light',
+            title: 'Light Vehicle',
+            subtitle: 'Car, Van, Jeep',
+            icon: 'car-sport',
+            lib: Ionicons,
+            route: '../Mechanic/lightVehicle'
+        },
+        {
+            id: 'heavy',
+            title: 'Heavy Vehicle',
+            subtitle: 'Bus, Lorry, Truck',
+            icon: 'bus',
+            lib: Ionicons, // Ionicons has 'bus'
+            route: '../Mechanic/hevyVehicle'
+        },
+        {
+            id: 'ev',
+            title: 'Electric Vehicle',
+            subtitle: 'EV Car, Scooter',
+            icon: 'flash',
+            lib: Ionicons,
+            route: '../Mechanic/EV'
+        },
+    ];
+
     return (
-        <SafeAreaView style={styles.container}>
-            <ScrollView contentContainerStyle={{ paddingBottom: 30 }}>
+        <SafeAreaView style={[styles.container, { backgroundColor: bg }]}>
+            <StatusBar barStyle={bg === "#0D1B2A" ? "light-content" : "dark-content"} />
 
-                {/* Header */}
-                <View style={styles.headerRow}>
-                    <Pressable onPress={() => router.back()}>
-                        <View style={styles.backBtn}>
-                            <Text style={{ fontSize: 24 }}>←</Text>
-                        </View>
+            <ScrollView contentContainerStyle={{ padding: 20 }}>
+
+                {/* HEADER */}
+                <Animated.View style={[styles.header, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+                    <Pressable onPress={() => router.back()} style={styles.backBtn}>
+                        <Ionicons name="arrow-back" size={24} color={textPrimary} />
                     </Pressable>
+                    <Text style={[styles.headerTitle, { color: textPrimary }]}>Request Assistance</Text>
+                </Animated.View>
 
-                    <Text style={styles.headerText}>Need Mechanic Help</Text>
+                <Animated.View style={[styles.intro, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+                    <Text style={[styles.introTitle, { color: accent }]}>Which vehicle needs help?</Text>
+                    <Text style={[styles.introSub, { color: textSecondary }]}>Select your vehicle type to continue.</Text>
+                </Animated.View>
 
-                    <Image
-                        source={require("../../assets/images/carpark.png")}
-                        style={styles.profileImg}
-                    />
+                {/* CARDS LIST */}
+                <View style={styles.list}>
+                    {vehicleTypes.map((item, index) => {
+                        const IconLib = item.lib;
+                        // Staggered Animation for cards
+                        const cardAnim = useRef(new Animated.Value(50)).current;
+                        const cardFade = useRef(new Animated.Value(0)).current;
+
+                        useEffect(() => {
+                            Animated.parallel([
+                                Animated.timing(cardAnim, {
+                                    toValue: 0,
+                                    duration: 600,
+                                    delay: index * 100,
+                                    easing: Easing.out(Easing.back(1.2)),
+                                    useNativeDriver: true,
+                                }),
+                                Animated.timing(cardFade, {
+                                    toValue: 1,
+                                    duration: 600,
+                                    delay: index * 100,
+                                    useNativeDriver: true,
+                                }),
+                            ]).start();
+                        }, []);
+
+                        return (
+                            <Animated.View
+                                key={item.id}
+                                style={{ opacity: cardFade, transform: [{ translateY: cardAnim }] }}
+                            >
+                                <Pressable
+                                    style={({ pressed }) => [
+                                        styles.card,
+                                        { backgroundColor: cardBg, borderColor: pressed ? accent : 'transparent' },
+                                        pressed && { transform: [{ scale: 0.98 }] }
+                                    ]}
+                                    onPress={() => router.push(item.route as any)}
+                                >
+                                    <View style={[styles.iconContainer, { backgroundColor: "rgba(255, 212, 0, 0.1)" }]}>
+                                        <IconLib name={item.icon as any} size={32} color={accent} />
+                                    </View>
+                                    <View style={styles.textContainer}>
+                                        <Text style={[styles.cardTitle, { color: textPrimary }]}>{item.title}</Text>
+                                        <Text style={[styles.cardSubtitle, { color: textSecondary }]}>{item.subtitle}</Text>
+                                    </View>
+                                    <Ionicons name="chevron-forward" size={24} color={accent} />
+                                </Pressable>
+                            </Animated.View>
+                        );
+                    })}
                 </View>
 
-                {/* Light Vehicle */}
-                <Pressable style={styles.card} onPress={() => router.push("../Mechanic/lightVehicle")}>
-                    <View style={styles.iconWrapper}>
-                        <Image
-                            source={require("../../assets/images/carpark.png")}
-                            style={styles.icon}
-                        />
-                    </View>
-                    <Text style={styles.cardText}>Light Vehicle</Text>
-                </Pressable>
-
-                {/* Heavy Vehicle */}
-                <Pressable style={styles.card} onPress={() => router.push("../Mechanic/hevyVehicle")}>
-                    <View style={styles.iconWrapper}>
-                        <Image
-                            source={require("../../assets/images/carpark.png")}
-                            style={styles.icon}
-                        />
-                    </View>
-                    <Text style={styles.cardText}>Heavy Vehicle</Text>
-                </Pressable>
-
-                {/* Electric Vehicle */}
-                <Pressable style={styles.card} onPress={() => router.push("../Mechanic/EV")}>
-                    <View style={styles.iconWrapper}>
-                        <Image
-                            source={require("../../assets/images/carpark.png")}
-                            style={styles.icon}
-                        />
-                    </View>
-                    <Text style={styles.cardText}>Electric Vehicle</Text>
-                </Pressable>
             </ScrollView>
         </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#000",
-        paddingHorizontal: 15,
-    },
+    container: { flex: 1 },
 
-    headerRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        marginVertical: 15,
+    header: {
+        flexDirection: "row", alignItems: "center", marginBottom: 30,
     },
-
     backBtn: {
-        width: 45,
-        height: 45,
-        backgroundColor: "#FFD700",
-        borderRadius: 50,
-        alignItems: "center",
-        justifyContent: "center",
+        width: 40, height: 40, borderRadius: 20,
+        backgroundColor: "rgba(255,255,255,0.1)",
+        alignItems: "center", justifyContent: "center", marginRight: 15
     },
+    headerTitle: { fontSize: 20, fontWeight: "700" },
 
-    headerText: {
-        color: "#E8E813",
-        fontSize: 22,
-        fontWeight: "800",
-    },
+    intro: { marginBottom: 30 },
+    introTitle: { fontSize: 28, fontWeight: "800", marginBottom: 8 },
+    introSub: { fontSize: 16 },
 
-    profileImg: {
-        width: 45,
-        height: 45,
-        borderRadius: 50,
-    },
+    list: { gap: 15 },
 
     card: {
-        backgroundColor: "rgba(255,255,0,0.1)",
-        borderWidth: 2,
-        borderColor: "#FFD700",
-        borderRadius: 20,
-        padding: 20,
-        marginTop: 20,
-        flexDirection: "row",
-        alignItems: "center",
+        flexDirection: "row", alignItems: "center",
+        padding: 20, borderRadius: 20,
+        borderWidth: 1,
+        elevation: 4, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2
     },
-
-    iconWrapper: {
-        width: 70,
-        height: 70,
-        borderRadius: 50,
-        backgroundColor: "#F7FF00",
-        alignItems: "center",
-        justifyContent: "center",
-        marginRight: 20,
+    iconContainer: {
+        width: 60, height: 60, borderRadius: 30,
+        alignItems: "center", justifyContent: "center", marginRight: 15
     },
-
-    icon: {
-        width: 45,
-        height: 45,
-        resizeMode: "contain",
-    },
-
-    cardText: {
-        color: "#FFD700",
-        fontSize: 22,
-        fontWeight: "700",
-    },
+    textContainer: { flex: 1 },
+    cardTitle: { fontSize: 18, fontWeight: "700", marginBottom: 4 },
+    cardSubtitle: { fontSize: 14 },
 });

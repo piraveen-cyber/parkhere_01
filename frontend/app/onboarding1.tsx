@@ -17,14 +17,14 @@ const { width, height } = Dimensions.get("window");
 export default function Onboarding1() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, colors } = useTheme();
   const { t } = useTranslation();
 
   const isDark = theme === "dark";
 
-  const bg = isDark ? "#0D1B2A" : "#FAFAFA";
-  const textColor = isDark ? "#FFFFFF" : "#222";
-  const descColor = isDark ? "#C7D1D9" : "#444";
+  const bg = colors.background;
+  const textColor = colors.text;
+  const descColor = colors.subText;
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: bg }]}>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -7,226 +7,247 @@ import {
   ScrollView,
   Image,
   Pressable,
+  Animated,
+  Easing,
+  StatusBar,
+  Dimensions
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+const { width } = Dimensions.get("window");
+
+import { useTheme } from "../../context/themeContext";
+
+import QRCode from 'react-native-qrcode-svg';
 
 export default function QRScreen() {
+  const { colors, theme } = useTheme();
   const { t } = useTranslation();
+  const params = useLocalSearchParams();
+
+  /* --- DYNAMIC DATA --- */
+  const bookingId = params.bookingId?.toString() || "CPA-DEMO"; // Real ID or Demo
+  const slot = params.slot?.toString() || "N/A";
+  const checkIn = params.checkInTime?.toString() || "--:--";
+  const duration = parseInt(params.duration?.toString() || "0");
+  const parkingName = params.parkingName?.toString() || "Unknown Parking";
+  const totalAmount = params.totalPrice ? `LKR ${params.totalPrice}` : "Paid";
+
+  // ... (Keep existing setup)
+  // Remove static uniqueId ref since we have real bookingId
+
+  // Animation Values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  const accent = colors.primary;
+  const bgDark = colors.background;
+  const cardBg = colors.card;
+
+  const checkOutDisplay = `${duration} hours duration`;
+
   const booking = {
-    parkingName: "Lekki Gardens Car Park A",
-    slot: "B20",
-    checkIn: "11:00 am",
-    checkOut: "05:00 pm",
-    spec: t('none'),
-    uniqueId: "CPA-0129",
+    parkingName: parkingName,
+    slot: slot,
+    checkIn: checkIn,
+    checkOut: checkOutDisplay,
+    spec: t('standard'),
+    amount: totalAmount
   };
 
+  useEffect(() => {
+    // 1. Enter Animation
+    Animated.parallel([
+      Animated.timing(fadeAnim, { toValue: 1, duration: 800, useNativeDriver: true }),
+      Animated.timing(slideAnim, { toValue: 0, duration: 800, easing: Easing.out(Easing.back(1.5)), useNativeDriver: true }),
+    ]).start();
+
+    // 2. Continuous Pulse
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, { toValue: 1.05, duration: 1500, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1, duration: 1500, useNativeDriver: true }),
+      ])
+    ).start();
+  }, []);
+
+  const bookingRows = [
+    { label: t('slot'), value: booking.slot, icon: "car-outline" },
+    { label: t('checkInTime'), value: booking.checkIn, icon: "time-outline" },
+    { label: t('checkOutTime'), value: booking.checkOut, icon: "timer-outline" },
+    { label: "Total Amount", value: booking.amount, icon: "cash-outline" },
+  ];
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+    <View style={[styles.container, { backgroundColor: bgDark }]}>
+      <StatusBar barStyle={theme === 'dark' ? "light-content" : "dark-content"} />
+      <SafeAreaView style={{ flex: 1 }}>
 
-      <View style={styles.header}>
-        <Pressable onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={28} />
-        </Pressable>
-        <Text style={styles.headerTitle}>{t('bookingQr')}</Text>
-      </View>
+        {/* HEADER */}
+        <Animated.View style={[styles.header, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+            <Ionicons name="chevron-back" size={24} color={accent} />
+          </TouchableOpacity>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>{t('bookingQr')}</Text>
+        </Animated.View>
 
-      {/* PARKING NAME */}
-      <View style={styles.parkingNameCard}>
-        <Text style={styles.parkingName}>
-          {booking.parkingName} <Text style={styles.spaceText}>{t('space')} 4c</Text>
-        </Text>
-      </View>
+        <ScrollView contentContainerStyle={{ paddingBottom: 50, paddingTop: 10 }} showsVerticalScrollIndicator={false}>
+          <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
 
-      {/* QR Code */}
-      <View style={styles.qrWrapper}>
-        <View style={styles.qrBorder}>
-          <Image
-            source={require("../../assets/images/QR.png")} // 🔥 Put your QR image here
-            style={styles.qrImage}
-          />
-        </View>
-        <Text style={styles.uniqueId}>{t('uniqueId')}: <Text style={{ color: "#FFD400" }}>{booking.uniqueId}</Text></Text>
-      </View>
+            <View style={[styles.parkingCard, { borderColor: accent, backgroundColor: cardBg }]}>
+              <MaterialCommunityIcons name="parking" size={28} color={accent} />
+              <View style={{ flex: 1, marginLeft: 15 }}>
+                <Text style={[styles.parkingName, { color: colors.text }]}>{booking.parkingName}</Text>
+                <Text style={[styles.addressText, { color: colors.subText }]}>{slot} • Level 1</Text>
+              </View>
+            </View>
 
-      {/* Booking Details */}
-      <View style={styles.detailsCard}>
-        <Text style={styles.sectionTitle}>{t('bookingDetails')}</Text>
+            {/* QR CODE SECTION */}
+            <View style={styles.qrSection}>
+              <Animated.View
+                style={[
+                  styles.qrContainer,
+                  {
+                    transform: [{ scale: pulseAnim }],
+                    shadowColor: accent,
+                    shadowOpacity: 0.3,
+                    shadowRadius: 20
+                  }
+                ]}
+              >
+                {/* DYNAMIC QR CODE */}
+                <QRCode
+                  value={bookingId}
+                  size={180}
+                  color="black"
+                  backgroundColor="white"
+                />
 
-        <View style={styles.row}>
-          <Text style={styles.label}>{t('slot')} :</Text>
-          <Text style={styles.value}>{booking.slot}</Text>
-        </View>
+                <View style={styles.cornerTL} />
+                <View style={styles.cornerTR} />
+                <View style={styles.cornerBL} />
+                <View style={styles.cornerBR} />
+              </Animated.View>
 
-        <View style={styles.row}>
-          <Text style={styles.label}>{t('checkInTime')}:</Text>
-          <Text style={styles.value}>{booking.checkIn}</Text>
-        </View>
+              <View style={styles.idContainer}>
+                <Text style={styles.idLabel}>{t('uniqueId')}</Text>
+                <Text style={styles.uniqueId} numberOfLines={1}>{bookingId}</Text>
+              </View>
+            </View>
 
-        <View style={styles.row}>
-          <Text style={styles.label}>{t('checkOutTime')}:</Text>
-          <Text style={styles.value}>{booking.checkOut}</Text>
-        </View>
+            {/* DETAILS CARD */}
+            <View style={[styles.detailsCard, { backgroundColor: cardBg, borderColor: theme === 'dark' ? '#222' : 'rgba(0,0,0,0.1)' }]}>
+              <Text style={[styles.cardHeader, { color: colors.text }]}>{t('bookingDetails')}</Text>
+              <View style={styles.divider} />
 
-        <View style={styles.row}>
-          <Text style={styles.label}>{t('specifications')}:</Text>
-          <Text style={styles.value}>{booking.spec}</Text>
-        </View>
-      </View>
+              {bookingRows.map((item, index) => (
+                <View key={index} style={styles.row}>
+                  <View style={styles.labelRow}>
+                    <Ionicons name={item.icon as any} size={18} color={colors.subText} />
+                    <Text style={[styles.label, { color: colors.subText }]}>{item.label}</Text>
+                  </View>
+                  <Text style={[styles.value, { color: colors.text }]}>{item.value}</Text>
+                </View>
+              ))}
+            </View>
 
-      {/* Buttons */}
-      <Pressable
-        style={({ pressed }) => [
-          styles.btnYellow,
-          pressed && {
-            backgroundColor: "#FFE04D",
-            shadowColor: "#FFD400",
-            shadowOffset: { width: 0, height: 0 },
-            shadowOpacity: 1,
-            shadowRadius: 25,
-            elevation: 15,
-          },
-        ]}
-        onPress={() => router.push("../(tabs)/home")}
-      >
-        <Text style={styles.btnText}>{t('goHome')}</Text>
-      </Pressable>
+            {/* ACTION BUTTONS */}
+            <View style={{ marginTop: 30, paddingHorizontal: 20 }}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.btnPrimary,
+                  { backgroundColor: accent, transform: [{ scale: pressed ? 0.98 : 1 }] }
+                ]}
+                onPress={() => router.push("../parking/navigate")}
+              >
+                <Ionicons name="navigate-circle-outline" size={24} color="#000" />
+                <Text style={styles.btnTextPrimary}>{t('navigateToLocation')}</Text>
+              </Pressable>
 
-      <Pressable
-        style={({ pressed }) => [
-          styles.btnYellow,
-          pressed && {
-            backgroundColor: "#FFE04D",
-            shadowColor: "#FFD400",
-            shadowOffset: { width: 0, height: 0 },
-            shadowOpacity: 1,
-            shadowRadius: 25,
-            elevation: 15,
-          },
-        ]}
-        onPress={() => router.push("../parking/navigate")}
-      >
-        <Text style={styles.btnText}>{t('navigateToLocation')}</Text>
-      </Pressable>
-    </ScrollView>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.btnSecondary,
+                  { borderColor: theme === 'dark' ? "#333" : "#CCC", backgroundColor: theme === 'dark' ? "#000" : "#FFF", transform: [{ scale: pressed ? 0.98 : 1 }] }
+                ]}
+                onPress={() => router.push("../(tabs)/home")}
+              >
+                <Text style={[styles.btnTextSecondary, { color: colors.text }]}>{t('goHome')}</Text>
+              </Pressable>
+            </View>
+
+          </Animated.View>
+        </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 }
 
-/* ===================== STYLES ===================== */
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    paddingHorizontal: 20,
-    paddingTop: 10,
+  container: { flex: 1 },
+
+  header: {
+    flexDirection: "row", alignItems: "center",
+    paddingHorizontal: 20, paddingVertical: 15,
+    marginBottom: 10
+  },
+  headerTitle: { fontSize: 24, fontWeight: "800", marginLeft: 15, color: "#FFF", letterSpacing: 0.5 },
+  backBtn: {
+    padding: 8, borderRadius: 12, backgroundColor: "#111", borderWidth: 1, borderColor: "#222"
   },
 
-  header: { flexDirection: "row", alignItems: "center", marginBottom: 20, marginTop: 10 },
-  headerTitle: { fontSize: 24, fontWeight: "800", marginLeft: 15, color: "#333", letterSpacing: 0.5 },
+  parkingCard: {
+    flexDirection: 'row', alignItems: 'center',
+    marginHorizontal: 20, padding: 20,
+    backgroundColor: "#111", borderRadius: 20,
+    borderWidth: 1, elevation: 5
+  },
+  parkingName: { color: "#FFF", fontSize: 16, fontWeight: "700" },
+  addressText: { color: "#888", fontSize: 13, marginTop: 4 },
 
-  parkingNameCard: {
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 20,
-    elevation: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.05)",
-  },
-  parkingName: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: "#333",
-  },
-  spaceText: {
-    color: "#FFD400",
-    fontWeight: "900",
-    fontSize: 20,
+  qrSection: { alignItems: 'center', marginTop: 40, marginBottom: 20 },
+  qrContainer: {
+    padding: 20, backgroundColor: "#FFF", borderRadius: 24, elevation: 15,
+    position: 'relative', alignItems: 'center', justifyContent: 'center'
   },
 
-  qrWrapper: {
-    marginTop: 30,
-    alignItems: "center",
-  },
-  qrBorder: {
-    padding: 15,
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    elevation: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-  },
-  qrImage: {
-    width: 180,
-    height: 180,
-  },
-  uniqueId: {
-    marginTop: 15,
-    fontSize: 18,
-    fontWeight: "800",
-    color: "#333",
-    letterSpacing: 1,
-  },
+  // Gold Corners
+  cornerTL: { position: 'absolute', top: -2, left: -2, width: 20, height: 20, borderTopWidth: 4, borderLeftWidth: 4, borderColor: "#FFD400", borderTopLeftRadius: 10 },
+  cornerTR: { position: 'absolute', top: -2, right: -2, width: 20, height: 20, borderTopWidth: 4, borderRightWidth: 4, borderColor: "#FFD400", borderTopRightRadius: 10 },
+  cornerBL: { position: 'absolute', bottom: -2, left: -2, width: 20, height: 20, borderBottomWidth: 4, borderLeftWidth: 4, borderColor: "#FFD400", borderBottomLeftRadius: 10 },
+  cornerBR: { position: 'absolute', bottom: -2, right: -2, width: 20, height: 20, borderBottomWidth: 4, borderRightWidth: 4, borderColor: "#FFD400", borderBottomRightRadius: 10 },
+
+  idContainer: { alignItems: 'center', marginTop: 25 },
+  idLabel: { color: "#888", fontSize: 12, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 5 },
+  uniqueId: { color: "#FFD400", fontSize: 16, fontWeight: "800", letterSpacing: 1 },
 
   detailsCard: {
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 20,
-    elevation: 8,
-    marginTop: 30,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.05)",
+    marginHorizontal: 20, marginTop: 20, padding: 20, borderRadius: 20,
+    borderWidth: 1, borderColor: "#222"
   },
+  cardHeader: { color: "#FFF", fontSize: 18, fontWeight: "700", textAlign: 'center' },
+  divider: { height: 1, backgroundColor: "#222", marginVertical: 15 },
 
-  sectionTitle: {
-    textAlign: "center",
-    fontSize: 18,
-    fontWeight: "800",
-    marginBottom: 15,
-    color: "#333",
-  },
+  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 },
+  labelRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  label: { color: "#888", fontSize: 14, fontWeight: "500" },
+  value: { color: "#FFF", fontSize: 15, fontWeight: "700" },
 
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
-    paddingBottom: 8,
+  btnPrimary: {
+    flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 10,
+    paddingVertical: 18, borderRadius: 30,
+    shadowColor: "#FFD400", shadowOpacity: 0.4, shadowRadius: 10, elevation: 10,
+    marginBottom: 15
   },
+  btnTextPrimary: { color: "#000", fontSize: 16, fontWeight: "800", textTransform: 'uppercase', letterSpacing: 1 },
 
-  label: { color: "#777", fontSize: 15, fontWeight: "500" },
-  value: { fontSize: 16, fontWeight: "700", color: "#000" },
-
-  btnYellow: {
-    backgroundColor: "#FFD400",
-    paddingVertical: 18,
-    borderRadius: 30, // Gold Pill
-    marginTop: 20,
-    shadowColor: "#FFD400",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-    elevation: 8,
+  btnSecondary: {
+    flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
+    paddingVertical: 18, borderRadius: 30,
+    borderWidth: 1, backgroundColor: "#000"
   },
-  btnText: {
-    textAlign: "center",
-    fontWeight: "800",
-    fontSize: 18,
-    color: "#000",
-    letterSpacing: 1,
-    textTransform: "uppercase",
-  },
+  btnTextSecondary: { color: "#FFF", fontSize: 16, fontWeight: "700" }
 });

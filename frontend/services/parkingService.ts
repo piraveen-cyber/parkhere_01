@@ -1,6 +1,7 @@
 import api from './api';
 
 export interface ParkingSpot {
+
     _id: string;
     name: string;
     latitude: number;
@@ -20,4 +21,13 @@ export const getParkingSpots = async (): Promise<ParkingSpot[]> => {
 export const createParkingSpot = async (spotData: Partial<ParkingSpot>): Promise<ParkingSpot> => {
     const response = await api.post('/parking', spotData);
     return response.data;
+};
+
+export const updateParkingSpot = async (id: string, spotData: Partial<ParkingSpot>): Promise<ParkingSpot> => {
+    const response = await api.put(`/parking/${id}`, spotData);
+    return response.data;
+};
+
+export const deleteParkingSpot = async (id: string): Promise<void> => {
+    await api.delete(`/parking/${id}`);
 };
