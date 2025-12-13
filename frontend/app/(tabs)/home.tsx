@@ -178,7 +178,7 @@ export default function HomeScreen() {
         {/* HEADER */}
         <View style={styles.headerRow}>
           <View>
-            <Text style={[styles.greeting, { color: THEME.subText }]}>{t("goodMorning") || "Good Morning"}</Text>
+            <Text style={[styles.greeting, { color: THEME.subText }]}>{t("goodMorning")}</Text>
             <Text style={[styles.userName, { color: THEME.text }]}>Alex Doe</Text>
           </View>
 
@@ -292,6 +292,16 @@ export default function HomeScreen() {
                 status={slot.status as any}
                 type={slot.type as any}
                 style={{ marginRight: 10, transform: [{ scale: 0.9 }] }}
+                onPress={() => {
+                  router.push({
+                    pathname: "/parking/selectVehicle",
+                    params: {
+                      nextRoute: "/parking/selectSlot",
+                      parkingName: "City Centre Zone A", // Mock data
+                      price: "450" // Mock price
+                    }
+                  });
+                }}
               />
             ))}
           </ScrollView>
@@ -314,6 +324,38 @@ export default function HomeScreen() {
           ))}
         </View>
 
+        {/* PROMO CAROUSEL */}
+        <Text style={[styles.sectionTitle, { color: THEME.text, marginTop: 25 }]}>{t("offers")}</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 15, paddingRight: 20 }}>
+          {/* Card 1 */}
+          <View style={[styles.promoCard, { backgroundColor: THEME.card }]}>
+            <View style={[styles.promoIconBox, { backgroundColor: "rgba(255, 212, 0, 0.15)" }]}>
+              <Ionicons name="water" size={24} color={THEME.primary} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.promoTitle, { color: THEME.text }]}>{t("promoWashTitle")}</Text>
+              <Text style={[styles.promoDesc, { color: THEME.subText }]}>{t("promoWashDesc")}</Text>
+            </View>
+            <TouchableOpacity style={[styles.claimBtn, { backgroundColor: THEME.primary }]}>
+              <Text style={styles.claimBtnText}>{t("claim")}</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Card 2 */}
+          <View style={[styles.promoCard, { backgroundColor: THEME.card }]}>
+            <View style={[styles.promoIconBox, { backgroundColor: "rgba(255, 212, 0, 0.15)" }]}>
+              <Ionicons name="construct" size={24} color={THEME.primary} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.promoTitle, { color: THEME.text }]}>{t("promoOilTitle")}</Text>
+              <Text style={[styles.promoDesc, { color: THEME.subText }]}>{t("promoOilDesc")}</Text>
+            </View>
+            <TouchableOpacity style={[styles.claimBtn, { backgroundColor: THEME.primary }]}>
+              <Text style={styles.claimBtnText}>{t("claim")}</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+
       </Animated.ScrollView>
     </SafeAreaView>
   );
@@ -324,9 +366,9 @@ const styles = StyleSheet.create({
   scrollContent: { padding: 20 },
 
   // TEXT
-  greeting: { fontSize: 12, fontWeight: "500", textTransform: 'uppercase', letterSpacing: 1 },
-  userName: { fontSize: 22, fontWeight: "700" },
-  sectionTitle: { fontSize: 17, fontWeight: "700", marginBottom: 12 },
+  greeting: { fontSize: 13, fontWeight: "500", marginTop: 4, lineHeight: 20 }, // Added lineHeight
+  userName: { fontSize: 22, fontWeight: "700", lineHeight: 30 },
+  sectionTitle: { fontSize: 17, fontWeight: "700", marginBottom: 12, lineHeight: 24 }, // Added lineHeight
 
   // HEADER
   headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 25 },
@@ -336,9 +378,9 @@ const styles = StyleSheet.create({
   // LIVE STATUS BAR
   liveStatusCard: { borderRadius: 20, padding: 20, borderWidth: 1 },
   liveHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 15 },
-  liveBadge: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10 },
+  liveBadge: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 10 }, // Increased padding
   pulseDot: { width: 8, height: 8, borderRadius: 4 },
-  liveText: { fontSize: 12, fontWeight: "800", letterSpacing: 0.5 },
+  liveText: { fontSize: 13, fontWeight: "800" }, // Reduced 14 -> 13
   timerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   timerValue: { fontSize: 32, fontWeight: "700" },
   actionBtn: { paddingVertical: 10, paddingHorizontal: 20, borderRadius: 20, justifyContent: 'center', alignItems: 'center', flexDirection: 'row', gap: 6 },
@@ -350,13 +392,24 @@ const styles = StyleSheet.create({
   // GRID
   gridContainer: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: 12, marginBottom: 15 },
   gridItem: {
-    width: "48%", padding: 15, borderRadius: 14, borderWidth: 1,
-    flexDirection: "row", alignItems: "center", gap: 12
+    width: "48%", paddingVertical: 15, paddingHorizontal: 12, borderRadius: 14, borderWidth: 1, // Adjusted padding
+    flexDirection: "row", alignItems: "center", gap: 10
   },
   gridIcon: { width: 36, height: 36, borderRadius: 18, justifyContent: "center", alignItems: "center" },
-  gridTitle: { fontSize: 13, fontWeight: "600" },
+  gridTitle: { fontSize: 14, fontWeight: "600", flex: 1, flexWrap: 'wrap', lineHeight: 20 }, // Added lineHeight
 
   // RECENT
   activityList: { gap: 10 },
   activityRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 12, borderRadius: 10 },
+
+  // PROMOS
+  promoCard: {
+    width: width * 0.75, padding: 16, borderRadius: 16, flexDirection: 'row', alignItems: 'center', gap: 12,
+    borderWidth: 1, borderColor: "rgba(255,255,255,0.05)"
+  },
+  promoIconBox: { width: 44, height: 44, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
+  promoTitle: { fontSize: 14, fontWeight: "700", marginBottom: 4, lineHeight: 20 },
+  promoDesc: { fontSize: 12, lineHeight: 16 },
+  claimBtn: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: 8 },
+  claimBtnText: { fontSize: 12, fontWeight: "700", color: "#000" }
 });

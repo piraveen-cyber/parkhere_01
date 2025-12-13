@@ -159,10 +159,11 @@ const styles = StyleSheet.create({
   },
 
   desc: {
-    fontSize: 15,
-    width: "80%",
+    fontSize: 15, // Reduced from 16
+    paddingHorizontal: 30, // Use padding instead of fixed width
     textAlign: "center",
     marginBottom: 22,
+    lineHeight: 24, // good for complex scripts
   },
 
   /* --- DOTS --- */

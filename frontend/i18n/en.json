@@ -216,5 +216,13 @@
   "totalAmount": "Total Amount",
   "level1": "Level 1",
   "turnRightInstruction": "Turn right in 200m",
-  "arrival": "arrival"
+  "arrival": "arrival",
+  "parkingFullTitle": "Parking Full",
+  "parkingFullMsg": "This parking is full. Please select another parking.",
+  "offers": "Offers & Promos",
+  "promoWashTitle": "20% Off Car Wash",
+  "promoWashDesc": "Get a sparkling clean car today!",
+  "promoOilTitle": "Free Oil Check",
+  "promoOilDesc": "With every full service",
+  "claim": "Claim"
 }

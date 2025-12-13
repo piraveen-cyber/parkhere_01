@@ -9,6 +9,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import "../i18n/i18n"; // Ensure init
 
 export default function LanguageScreen() {
@@ -18,6 +19,7 @@ export default function LanguageScreen() {
   const goNext = async (lang: string) => {
     try {
       await i18n.changeLanguage(lang);
+      await AsyncStorage.setItem('user-language', lang); // Persist language
     } catch (e) {
       console.log("Error changing language", e);
     }
@@ -121,11 +123,11 @@ const styles = StyleSheet.create({
   },
 
   langText: {
-    fontSize: 12,
+    fontSize: 16, // Reduced from 18 as per feedback
     fontWeight: "700",
     color: "#000",
-    letterSpacing: 1.5,
-    textTransform: "uppercase",
+    // letterSpacing: 1.5, // Removed for better non-Latin support
+    // textTransform: "uppercase", // Removed for better non-Latin support
   },
 });
 

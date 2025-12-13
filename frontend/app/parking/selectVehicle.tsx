@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Animated, Dimensions, StatusBar } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
 // import { LinearGradient } from 'expo-linear-gradient'; // Optional, using View fallback if missing
@@ -40,6 +40,7 @@ export default function SelectVehicle() {
   const { t } = useTranslation();
   const { colors, theme } = useTheme();
   const [selected, setSelected] = useState("car");
+  const params = useLocalSearchParams(); // Get params
 
   // Animation for Floating Button
   const scaleValue = useRef(new Animated.Value(1)).current;
@@ -62,6 +63,19 @@ export default function SelectVehicle() {
   const handleSelect = (id: string) => {
     setSelected(id);
     animateButton();
+  };
+
+  const handleContinue = () => {
+    if (params.nextRoute) {
+      // If a next route is specified (e.g., from Home -> Select Slot)
+      router.push({
+        pathname: params.nextRoute as any,
+        params: { ...params, vehicleType: selected } // Pass forward existing params + vehicle
+      });
+    } else {
+      // Default flow
+      router.push("../parking/parkMap");
+    }
   };
 
   return (
@@ -137,7 +151,7 @@ export default function SelectVehicle() {
         <Animated.View style={[styles.fabContainer, { transform: [{ scale: scaleValue }] }]}>
           <TouchableOpacity
             style={[styles.fab, { backgroundColor: colors.primary, shadowColor: colors.primary }]}
-            onPress={() => router.push("../parking/parkMap")}
+            onPress={handleContinue}
           >
             <Text style={[styles.fabText, { color: colors.background === '#0D1B2A' ? '#000' : '#FFF' }]}>{t("continue")}</Text>
             <Ionicons name="arrow-forward" size={24} color={colors.background === '#0D1B2A' ? '#000' : '#FFF'} />
