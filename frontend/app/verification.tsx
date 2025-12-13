@@ -23,13 +23,13 @@ export default function VerificationScreen() {
 
     const submitVerification = async () => {
         if (!documentName) {
-            Alert.alert("Error", "Please upload a document.");
+            Alert.alert(t("error"), t("uploadErrorMsg"));
             return;
         }
         setLoading(true);
         setTimeout(() => {
             setLoading(false);
-            Alert.alert("Success", "Verification Requested! Our admin will review it shortly.");
+            Alert.alert(t("success"), t("verificationRequested"));
             router.back();
         }, 1500);
     };
@@ -42,29 +42,28 @@ export default function VerificationScreen() {
                 <TouchableOpacity onPress={() => router.back()}>
                     <Ionicons name="chevron-back" size={28} color={colors.primary} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Disability Verification</Text>
+                <Text style={styles.headerTitle}>{t("disabilityVerification")}</Text>
             </View>
 
             <View style={styles.content}>
                 <Ionicons name="shield-checkmark" size={60} color={colors.primary} style={{ alignSelf: 'center', marginBottom: 20 }} />
 
                 <Text style={styles.description}>
-                    Parking in designated accessible spots requires a verified disability certificate.
-                    Please upload your official ID or medical certificate below.
+                    {t("verificationDesc")}
                 </Text>
 
                 <TouchableOpacity style={styles.uploadBox} onPress={pickDocument}>
                     <Ionicons name="cloud-upload-outline" size={40} color={colors.subText} />
                     <Text style={styles.uploadText}>
-                        {documentName || "Tap to Upload Document"}
+                        {documentName || t("tapToUpload")}
                     </Text>
                 </TouchableOpacity>
 
                 <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Notes (Optional)</Text>
+                    <Text style={styles.label}>{t("notesOptional")}</Text>
                     <TextInput
                         style={styles.input}
-                        placeholder="Additional details..."
+                        placeholder={t("additionalDetails")}
                         placeholderTextColor={colors.subText}
                         value={notes}
                         onChangeText={setNotes}
@@ -78,7 +77,7 @@ export default function VerificationScreen() {
                     disabled={loading}
                 >
                     <Text style={styles.submitText}>
-                        {loading ? "Submitting..." : "Request Verification"}
+                        {loading ? t("submitting") : t("requestVerification")}
                     </Text>
                 </TouchableOpacity>
             </View>

@@ -125,7 +125,7 @@ export default function Navigate() {
         </Pressable>
         <View style={styles.directionBox}>
           <FontAwesome5 name="arrow-up" size={20} color={accent} />
-          <Text style={styles.directionText}>Turn right in 200m</Text>
+          <Text style={styles.directionText}>{t("turnRightInstruction")}</Text>
         </View>
       </View>
 
@@ -140,8 +140,8 @@ export default function Navigate() {
 
         <View style={styles.infoRow}>
           <View>
-            <Text style={styles.timeValue}>15 {t('min')}</Text>
-            <Text style={styles.distanceValue}>6.7 km • 1:42 PM arrival</Text>
+            <Text style={styles.timeValue}>15 {t("min")}</Text>
+            <Text style={styles.distanceValue}>6.7 km • 1:42 PM {t("arrival")}</Text>
           </View>
           <View style={styles.btnRow}>
             {/* Expand / Graph Button */}
@@ -158,7 +158,7 @@ export default function Navigate() {
               onPress={() => router.push("../(tabs)/home")}
             >
               <Ionicons name="close-circle" size={20} color="#FFF" />
-              <Text style={styles.exitText}>{t('exit')}</Text>
+              <Text style={styles.exitText}>{t("exit")}</Text>
             </Pressable>
           </View>
         </View>

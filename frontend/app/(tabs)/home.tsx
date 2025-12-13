@@ -69,15 +69,15 @@ export default function HomeScreen() {
     if (!activeBooking) return;
     try {
       Alert.alert(
-        "Simulate QR Scan",
-        "Scanning QR Code...",
+        t("scanQrTitle"),
+        t("scanQrMessage"),
         [
-          { text: "Cancel", style: "cancel" },
+          { text: t("cancel"), style: "cancel" },
           {
-            text: "Scan Success",
+            text: t("scanSuccess"),
             onPress: async () => {
               const res = await bookingService.scanBooking(activeBooking._id);
-              Alert.alert("Success", res.message);
+              Alert.alert(t("success"), res.message);
               fetchActiveBooking();
             }
           }
@@ -91,19 +91,19 @@ export default function HomeScreen() {
   const handleExtend = async () => {
     if (!activeBooking) return;
     Alert.alert(
-      "Extend Parking",
-      "Add 1 hour for LKR 200?",
+      t("extendParkingTitle"),
+      t("extendParkingMsg"),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t("cancel"), style: "cancel" },
         {
-          text: "Confirm",
+          text: t("confirm"),
           onPress: async () => {
             try {
               await bookingService.extendBooking(activeBooking._id, 1);
-              Alert.alert("Success", "Time extended by 1 hour!");
+              Alert.alert(t("success"), t("timeExtended"));
               fetchActiveBooking();
             } catch (e: any) {
-              Alert.alert("Error", e.message || "Extension failed");
+              Alert.alert(t("error"), e.message || t("extensionFailed"));
             }
           }
         }
@@ -143,12 +143,12 @@ export default function HomeScreen() {
   };
 
   const services = [
-    { key: "parking", title: "Find Parking", icon: "car-sport", lib: Ionicons },
-    { key: "mechanics", title: "Mechanic", icon: "wrench", lib: MaterialCommunityIcons },
-    { key: "washing", title: "Car Wash", icon: "water", lib: Ionicons },
-    { key: "evCharging", title: "EV Charge", icon: "ev-station", lib: MaterialCommunityIcons },
-    { key: "towing", title: "Towing", icon: "tow-truck", lib: MaterialCommunityIcons },
-    { key: "hiring", title: "Rent / Hire", icon: "key", lib: Ionicons },
+    { key: "parking", title: t("findParking"), icon: "car-sport", lib: Ionicons },
+    { key: "mechanics", title: t("mechanic"), icon: "wrench", lib: MaterialCommunityIcons },
+    { key: "washing", title: t("washing"), icon: "water", lib: Ionicons },
+    { key: "evCharging", title: t("evCharging"), icon: "ev-station", lib: MaterialCommunityIcons },
+    { key: "towing", title: t("towing"), icon: "tow-truck", lib: MaterialCommunityIcons },
+    { key: "hiring", title: t("rentHire"), icon: "key", lib: Ionicons },
   ];
 
   const parkingSlotsMock = [
@@ -178,7 +178,7 @@ export default function HomeScreen() {
         {/* HEADER */}
         <View style={styles.headerRow}>
           <View>
-            <Text style={[styles.greeting, { color: THEME.subText }]}>{t("goodMorning") || "Hello,"}</Text>
+            <Text style={[styles.greeting, { color: THEME.subText }]}>{t("goodMorning") || "Good Morning"}</Text>
             <Text style={[styles.userName, { color: THEME.text }]}>Alex Doe</Text>
           </View>
 
@@ -206,11 +206,11 @@ export default function HomeScreen() {
                 <View style={[styles.liveBadge, { backgroundColor: "rgba(255, 212, 0, 0.15)" }]}>
                   <View style={[styles.pulseDot, { backgroundColor: colors.primary }]} />
                   <Text style={[styles.liveText, { color: colors.primary }]}>
-                    {activeBooking.status === 'pending' ? "ARRIVING SOON" : "LIVE PARKING"}
+                    {activeBooking.status === 'pending' ? t("arrivingSoon") : t("liveParking")}
                   </Text>
                 </View>
                 <Text style={{ color: colors.subText, fontSize: 12, fontWeight: "600" }}>
-                  {activeBooking.status === 'active' ? `Slot ${activeBooking.parkingSpotId?.name || "Unknown"}` : "Navigating..."}
+                  {activeBooking.status === 'active' ? `${t("slot")} ${activeBooking.parkingSpotId?.name || "Unknown"}` : t("navigating")}
                 </Text>
               </View>
 
@@ -220,14 +220,14 @@ export default function HomeScreen() {
                     <Text style={[styles.timerValue, { color: colors.text }]}>
                       <LiveTimer endTime={activeBooking.endTime} />
                     </Text>
-                    <Text style={{ color: colors.subText, fontSize: 12 }}>Time Remaining</Text>
+                    <Text style={{ color: colors.subText, fontSize: 12 }}>{t("timeRemaining")}</Text>
                   </View>
                 ) : (
                   <View>
                     <Text style={{ color: colors.text, fontSize: 24, fontWeight: "700" }}>
                       {new Date(activeBooking.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </Text>
-                    <Text style={{ color: colors.subText, fontSize: 12 }}>Expected Arrival</Text>
+                    <Text style={{ color: colors.subText, fontSize: 12 }}>{t("expectedArrival")}</Text>
                   </View>
                 )}
 
@@ -236,17 +236,17 @@ export default function HomeScreen() {
                   <View style={{ gap: 10 }}>
                     <TouchableOpacity onPress={handleExtend} style={[styles.actionBtnSmall, { backgroundColor: colors.background, borderColor: colors.primary }]}>
                       <Feather name="plus-circle" size={16} color={colors.primary} />
-                      <Text style={{ color: colors.primary, fontWeight: "700", fontSize: 12 }}>EXTEND</Text>
+                      <Text style={{ color: colors.primary, fontWeight: "700", fontSize: 12 }}>{t("extend")}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={handleScan} style={[styles.actionBtnSmall, { backgroundColor: colors.primary }]}>
                       <Ionicons name="exit-outline" size={16} color="#000" />
-                      <Text style={{ color: "#000", fontWeight: "700", fontSize: 12 }}>CHECK OUT</Text>
+                      <Text style={{ color: "#000", fontWeight: "700", fontSize: 12 }}>{t("checkOut")}</Text>
                     </TouchableOpacity>
                   </View>
                 ) : (
                   <TouchableOpacity onPress={handleScan} style={[styles.actionBtn, { backgroundColor: colors.primary }]}>
                     <Ionicons name="qr-code-outline" size={20} color="#000" />
-                    <Text style={{ color: "#000", fontWeight: "700" }}>CHECK IN</Text>
+                    <Text style={{ color: "#000", fontWeight: "700" }}>{t("checkIn")}</Text>
                   </TouchableOpacity>
                 )}
               </View>
@@ -256,7 +256,7 @@ export default function HomeScreen() {
         )}
 
         {/* SERVICES GRID */}
-        <Text style={[styles.sectionTitle, { color: THEME.text, marginTop: 10 }]}>Services</Text>
+        <Text style={[styles.sectionTitle, { color: THEME.text, marginTop: 10 }]}>{t("services")}</Text>
         <View style={styles.gridContainer}>
           {services.map((service) => {
             const IconLib = service.lib;
@@ -281,8 +281,8 @@ export default function HomeScreen() {
         {/* LIVE ZONE STRIP */}
         <View style={[styles.liveZoneStrip, { backgroundColor: isDark ? "#111" : "#EEEEEE", borderColor: THEME.border }]}>
           <View style={{ paddingHorizontal: 15, paddingVertical: 10, flexDirection: "row", justifyContent: "space-between" }}>
-            <Text style={{ color: THEME.subText, fontSize: 12, fontWeight: "600" }}>NEARBY ZONE STATUS</Text>
-            <TouchableOpacity><Text style={{ color: THEME.primary, fontSize: 12 }}>View Map</Text></TouchableOpacity>
+            <Text style={{ color: THEME.subText, fontSize: 12, fontWeight: "600" }}>{t("nearbyZoneStatus")}</Text>
+            <TouchableOpacity><Text style={{ color: THEME.primary, fontSize: 12 }}>{t("viewMap")}</Text></TouchableOpacity>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 15, paddingBottom: 12 }}>
             {parkingSlotsMock.map((slot, index) => (
@@ -298,7 +298,7 @@ export default function HomeScreen() {
         </View>
 
         {/* RECENT ACTIVITY */}
-        <Text style={[styles.sectionTitle, { color: THEME.text, marginTop: 15 }]}>Recent</Text>
+        <Text style={[styles.sectionTitle, { color: THEME.text, marginTop: 15 }]}>{t("recent")}</Text>
         <View style={styles.activityList}>
           {recentActivity.map((item) => (
             <View key={item.id} style={[styles.activityRow, { backgroundColor: THEME.card }]}>

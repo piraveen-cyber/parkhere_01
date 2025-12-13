@@ -3,9 +3,11 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Switch, St
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import { supabase } from "../../config/supabaseClient";
 
 export default function ProfileTab() {
+  const { t } = useTranslation();
   const [isDark, setIsDark] = useState(true);
 
   // Theme Colors
@@ -19,10 +21,10 @@ export default function ProfileTab() {
   };
 
   const handleLogout = async () => {
-    Alert.alert("Logout", "Are you sure you want to logout?", [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert(t("logoutTitle"), t("logoutMsg"), [
+      { text: t("cancel"), style: "cancel" },
       {
-        text: "Logout",
+        text: t("logoutTitle"),
         style: "destructive",
         onPress: async () => {
           await supabase.auth.signOut();
@@ -51,7 +53,7 @@ export default function ProfileTab() {
 
         {/* HEADER */}
         <View style={styles.header}>
-          <Text style={[styles.headerTitle, { color: COLORS.text }]}>My Profile</Text>
+          <Text style={[styles.headerTitle, { color: COLORS.text }]}>{t("myProfile")}</Text>
           <TouchableOpacity>
             <Ionicons name="settings-outline" size={24} color={COLORS.text} />
           </TouchableOpacity>
@@ -68,7 +70,7 @@ export default function ProfileTab() {
               <Text style={[styles.userName, { color: COLORS.text }]}>John Doe</Text>
               <Text style={[styles.userEmail, { color: COLORS.subText }]}>john.doe@example.com</Text>
               <View style={styles.badge}>
-                <Text style={styles.badgeText}>Gold Member</Text>
+                <Text style={styles.badgeText}>{t("goldMember")}</Text>
               </View>
             </View>
           </View>
@@ -77,33 +79,33 @@ export default function ProfileTab() {
           <View style={styles.statsRow}>
             <View style={[styles.statCard, { backgroundColor: COLORS.card }]}>
               <Text style={[styles.statValue, { color: COLORS.accent }]}>12</Text>
-              <Text style={[styles.statLabel, { color: COLORS.subText }]}>Bookings</Text>
+              <Text style={[styles.statLabel, { color: COLORS.subText }]}>{t("bookings")}</Text>
             </View>
             <View style={[styles.statCard, { backgroundColor: COLORS.card }]}>
               <Text style={[styles.statValue, { color: COLORS.accent }]}>4.8</Text>
-              <Text style={[styles.statLabel, { color: COLORS.subText }]}>Rating</Text>
+              <Text style={[styles.statLabel, { color: COLORS.subText }]}>{t("rating")}</Text>
             </View>
           </View>
 
           {/* MENUS */}
-          <Text style={[styles.sectionTitle, { color: COLORS.subText }]}>Account</Text>
+          <Text style={[styles.sectionTitle, { color: COLORS.subText }]}>{t("account")}</Text>
           <View style={[styles.menuGroup, { backgroundColor: COLORS.card }]}>
-            <MenuItem icon="person-outline" title="Edit Profile" />
-            <MenuItem icon="card-outline" title="Payment Methods" />
-            <MenuItem icon="notifications-outline" title="Notifications" />
+            <MenuItem icon="person-outline" title={t("editProfile")} />
+            <MenuItem icon="card-outline" title={t("paymentMethods")} />
+            <MenuItem icon="notifications-outline" title={t("notifications")} />
           </View>
 
 
 
-          <Text style={[styles.sectionTitle, { color: COLORS.subText }]}>Preferences</Text>
+          <Text style={[styles.sectionTitle, { color: COLORS.subText }]}>{t("preferences")}</Text>
           <View style={[styles.menuGroup, { backgroundColor: COLORS.card }]}>
-            <MenuItem icon="language-outline" title="Language" />
+            <MenuItem icon="language-outline" title={t("language")} />
             <View style={styles.menuItem}>
               <View style={styles.menuLeft}>
                 <View style={[styles.iconBox, { backgroundColor: "rgba(255, 212, 0, 0.1)" }]}>
                   <Ionicons name="moon-outline" size={20} color={COLORS.accent} />
                 </View>
-                <Text style={[styles.menuText, { color: COLORS.text }]}>Dark Mode</Text>
+                <Text style={[styles.menuText, { color: COLORS.text }]}>{t("darkMode")}</Text>
               </View>
               <Switch
                 value={isDark}
@@ -114,14 +116,14 @@ export default function ProfileTab() {
             </View>
           </View>
 
-          <Text style={[styles.sectionTitle, { color: COLORS.subText }]}>Support</Text>
+          <Text style={[styles.sectionTitle, { color: COLORS.subText }]}>{t("support")}</Text>
           <View style={[styles.menuGroup, { backgroundColor: COLORS.card }]}>
-            <MenuItem icon="help-circle-outline" title="Help Center" />
-            <MenuItem icon="shield-checkmark-outline" title="Privacy Policy" />
+            <MenuItem icon="help-circle-outline" title={t("helpCenter")} />
+            <MenuItem icon="shield-checkmark-outline" title={t("privacyPolicy")} />
           </View>
 
           <View style={[styles.menuGroup, { backgroundColor: COLORS.card, marginTop: 20, marginBottom: 40 }]}>
-            <MenuItem icon="log-out-outline" title="Log Out" isDestructive onPress={handleLogout} showArrow={false} />
+            <MenuItem icon="log-out-outline" title={t("logOut")} isDestructive onPress={handleLogout} showArrow={false} />
           </View>
 
         </ScrollView>

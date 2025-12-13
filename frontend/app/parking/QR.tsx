@@ -34,7 +34,7 @@ export default function QRScreen() {
   const checkIn = params.checkInTime?.toString() || "--:--";
   const duration = parseInt(params.duration?.toString() || "0");
   const parkingName = params.parkingName?.toString() || "Unknown Parking";
-  const totalAmount = params.totalPrice ? `LKR ${params.totalPrice}` : "Paid";
+  const totalAmount = params.totalPrice ? `LKR ${params.totalPrice}` : t("paid");
 
   // ... (Keep existing setup)
   // Remove static uniqueId ref since we have real bookingId
@@ -48,7 +48,7 @@ export default function QRScreen() {
   const bgDark = colors.background;
   const cardBg = colors.card;
 
-  const checkOutDisplay = `${duration} hours duration`;
+  const checkOutDisplay = `${duration} ${t("hoursDuration")}`;
 
   const booking = {
     parkingName: parkingName,
@@ -79,7 +79,7 @@ export default function QRScreen() {
     { label: t('slot'), value: booking.slot, icon: "car-outline" },
     { label: t('checkInTime'), value: booking.checkIn, icon: "time-outline" },
     { label: t('checkOutTime'), value: booking.checkOut, icon: "timer-outline" },
-    { label: "Total Amount", value: booking.amount, icon: "cash-outline" },
+    { label: t("totalAmount"), value: booking.amount, icon: "cash-outline" },
   ];
 
   return (
@@ -102,7 +102,7 @@ export default function QRScreen() {
               <MaterialCommunityIcons name="parking" size={28} color={accent} />
               <View style={{ flex: 1, marginLeft: 15 }}>
                 <Text style={[styles.parkingName, { color: colors.text }]}>{booking.parkingName}</Text>
-                <Text style={[styles.addressText, { color: colors.subText }]}>{slot} • Level 1</Text>
+                <Text style={[styles.addressText, { color: colors.subText }]}>{slot} • {t("level1")}</Text>
               </View>
             </View>
 

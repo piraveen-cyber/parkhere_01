@@ -42,7 +42,7 @@ export default function Detail() {
       const { data: { session } } = await supabase.auth.getSession();
 
       if (!session?.user?.id) {
-        alert(t("loginRequired") || "Login required");
+        alert(t("loginRequired"));
         return;
       }
 

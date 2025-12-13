@@ -65,7 +65,7 @@ export default function SelectSlot() {
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={textMain} />
           </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: textMain }]}>Pick Your Parking Slot</Text>
+          <Text style={[styles.headerTitle, { color: textMain }]} numberOfLines={1} adjustsFontSizeToFit>{t("pickSlotTitle")}</Text>
         </View>
 
         {/* PARKING INFO CARD */}
@@ -74,9 +74,9 @@ export default function SelectSlot() {
             <Ionicons name="location" size={24} color={primary} />
           </View>
           <View>
-            <Text style={[styles.infoTitle, { color: textMain }]}>{parkingName}</Text>
+            <Text style={[styles.infoTitle, { color: textMain }]} numberOfLines={1} adjustsFontSizeToFit>{parkingName}</Text>
             <Text style={[styles.infoPrice, { color: textSub }]}>
-              <Text style={{ color: primary, fontWeight: '800' }}>LKR {price}</Text> / per hour
+              <Text style={{ color: primary, fontWeight: '800' }}>LKR {price}</Text> {t("perHour")}
             </Text>
           </View>
         </View>
@@ -87,7 +87,7 @@ export default function SelectSlot() {
           <View style={[styles.filterRow, { borderBottomColor: border, borderBottomWidth: 1 }]}>
             <View style={styles.filterLabelContainer}>
               <Ionicons name="accessibility" size={20} color={textMain} />
-              <Text style={[styles.filterLabel, { color: textMain }]}>Disabled Parking Only</Text>
+              <Text style={[styles.filterLabel, { color: textMain }]} numberOfLines={1} adjustsFontSizeToFit>{t("disabledParkingOnly")}</Text>
             </View>
             <Switch
               value={disabledParking}
@@ -101,7 +101,7 @@ export default function SelectSlot() {
           <View style={styles.filterRow}>
             <View style={styles.filterLabelContainer}>
               <Ionicons name="time" size={20} color={textMain} />
-              <Text style={[styles.filterLabel, { color: textMain }]}>Reserve Spot Later</Text>
+              <Text style={[styles.filterLabel, { color: textMain }]} numberOfLines={1} adjustsFontSizeToFit>{t("reserveSpotLater")}</Text>
             </View>
             <Switch
               value={reserveLater}
@@ -113,7 +113,7 @@ export default function SelectSlot() {
         </View>
 
         {/* SLOTS GRID */}
-        <Text style={[styles.sectionHeader, { color: textMain }]}>Zone B Level 1</Text>
+        <Text style={[styles.sectionHeader, { color: textMain }]} numberOfLines={1} adjustsFontSizeToFit>{t("zoneBLevel1")}</Text>
         <View style={styles.grid}>
           {slots.map((slot) => {
             const isAccessible = accessibleSlots.includes(slot);
@@ -151,8 +151,8 @@ export default function SelectSlot() {
       {/* FOOTER CTA */}
       <View style={[styles.footer, { backgroundColor: cardBg }]}>
         <View>
-          <Text style={{ color: textSub, fontSize: 12 }}>Selected Slot</Text>
-          <Text style={{ color: primary, fontSize: 20, fontWeight: '800' }}>{selectedSlot || "None"}</Text>
+          <Text style={{ color: textSub, fontSize: 12 }}>{t("selectedSlot")}</Text>
+          <Text style={{ color: primary, fontSize: 20, fontWeight: '800' }}>{selectedSlot || t("none")}</Text>
         </View>
         <TouchableOpacity
           style={[styles.continueBtn, { backgroundColor: selectedSlot ? primary : "#333" }]}
@@ -170,7 +170,7 @@ export default function SelectSlot() {
             }
           }}
         >
-          <Text style={styles.continueText}>CONTINUE</Text>
+          <Text style={styles.continueText} numberOfLines={1} adjustsFontSizeToFit>{t("continue")}</Text>
           <Ionicons name="arrow-forward" size={20} color="#000" />
         </TouchableOpacity>
       </View>

@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { router } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { useTheme } from "../../context/themeContext";
 
 const { width } = Dimensions.get("window");
@@ -25,6 +26,7 @@ const darkMapStyle = [
 ];
 
 export default function ParkMapScanUpgraded() {
+  const { t } = useTranslation();
   const { colors, theme } = useTheme();
   const isDark = theme === 'dark';
 
@@ -243,8 +245,8 @@ export default function ParkMapScanUpgraded() {
 
         {/* text */}
         <Animated.View style={[styles.textBox, { opacity: fadeText }]}>
-          <Text style={[styles.title, { color: accent }]}>Scanning Nearby Parking...</Text>
-          <Text style={styles.subtitle}>Finding safest & closest locations for you</Text>
+          <Text style={[styles.title, { color: accent }]}>{t("scanningNearby")}</Text>
+          <Text style={styles.subtitle}>{t("findingSafest")}</Text>
         </Animated.View>
 
         {/* progress / loader - using scaleX (native driver friendly) */}

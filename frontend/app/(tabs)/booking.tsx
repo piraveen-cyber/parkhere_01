@@ -60,7 +60,7 @@ export default function BookingTab() {
   };
 
   const renderItem = ({ item }: { item: Booking }) => {
-    const spotName = spots[item.parkingSpotId] || "Unknown Parking Lot";
+    const spotName = spots[item.parkingSpotId] || t("unknownParkingLot");
     const startDate = new Date(item.startTime).toLocaleDateString();
     const startTime = new Date(item.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const status = item.status || "Completed";
@@ -72,7 +72,7 @@ export default function BookingTab() {
           <Text style={[styles.parkName, { color: COLORS.text }]}>{spotName}</Text>
           <View style={[styles.statusBadge, { backgroundColor: isCompleted ? "#333" : "rgba(255, 212, 0, 0.15)" }]}>
             <Text style={{ color: isCompleted ? COLORS.subText : COLORS.accent, fontWeight: "700", fontSize: 12 }}>
-              {status.toUpperCase()}
+              {status === 'Completed' ? t("statusCompleted").toUpperCase() : status.toUpperCase()}
             </Text>
           </View>
         </View>
@@ -81,15 +81,15 @@ export default function BookingTab() {
 
         <View style={styles.detailsRow}>
           <View>
-            <Text style={[styles.label, { color: COLORS.subText }]}>Date</Text>
+            <Text style={[styles.label, { color: COLORS.subText }]}>{t("date")}</Text>
             <Text style={[styles.value, { color: COLORS.text }]}>{startDate}</Text>
           </View>
           <View>
-            <Text style={[styles.label, { color: COLORS.subText }]}>Time</Text>
+            <Text style={[styles.label, { color: COLORS.subText }]}>{t("time")}</Text>
             <Text style={[styles.value, { color: COLORS.text }]}>{startTime}</Text>
           </View>
           <View>
-            <Text style={[styles.label, { color: COLORS.subText }]}>Price</Text>
+            <Text style={[styles.label, { color: COLORS.subText }]}>{t("price")}</Text>
             <Text style={[styles.value, { color: COLORS.accent }]}>LKR {item.totalPrice}</Text>
           </View>
         </View>
@@ -104,7 +104,7 @@ export default function BookingTab() {
 
         {/* HEADER */}
         <View style={styles.header}>
-          <Text style={[styles.headerTitle, { color: COLORS.text }]}>My Tickets</Text>
+          <Text style={[styles.headerTitle, { color: COLORS.text }]}>{t("myTickets")}</Text>
         </View>
 
         {loading ? (
@@ -114,7 +114,7 @@ export default function BookingTab() {
         ) : bookings.length === 0 ? (
           <View style={styles.center}>
             <Ionicons name="ticket-outline" size={60} color="#333" />
-            <Text style={{ color: COLORS.subText, marginTop: 20 }}>No bookings yet.</Text>
+            <Text style={{ color: COLORS.subText, marginTop: 20 }}>{t("noBookings")}</Text>
           </View>
         ) : (
           <FlatList

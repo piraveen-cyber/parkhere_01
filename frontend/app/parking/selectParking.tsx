@@ -15,6 +15,7 @@ import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { BlurView } from "expo-blur";
+import { useTranslation } from "react-i18next";
 import { useTheme } from "../../context/themeContext";
 
 /* ----------------------------- CONFIG ----------------------------- */
@@ -81,6 +82,7 @@ export default function ParkingMapScreenUpgraded() {
   const mapRef = useRef<MapView>(null);
   const flatRef = useRef<FlatList>(null);
 
+  const { t } = useTranslation();
   const { colors, theme } = useTheme();
 
   // Construct dynamic THEME object
@@ -224,7 +226,7 @@ export default function ParkingMapScreenUpgraded() {
         ]}
       >
         <View style={styles.cardHeader}>
-          <Text style={styles.cardTitle} numberOfLines={1}>{item.name}</Text>
+          <Text style={styles.cardTitle} numberOfLines={1} adjustsFontSizeToFit>{item.name}</Text>
           <View style={styles.priceBox}>
             <Text style={styles.priceText}>LKR {item.price}</Text>
             <Text style={styles.priceSub}>/hr</Text>
@@ -234,7 +236,7 @@ export default function ParkingMapScreenUpgraded() {
         <View style={styles.cardStats}>
           <View style={[styles.stat, { borderColor: "rgba(255,255,255,0.04)" }]}>
             <Ionicons name="car-sport" size={16} color={slotColor} />
-            <Text style={[styles.statText, { color: slotColor }]}>{item.slots > 0 ? `${item.slots} Slots` : "FULL"}</Text>
+            <Text style={[styles.statText, { color: slotColor }]} numberOfLines={1} adjustsFontSizeToFit>{item.slots > 0 ? `${item.slots} ${t("slots")}` : t("full")}</Text>
           </View>
 
           <View style={[styles.stat, { borderColor: "rgba(255,255,255,0.04)" }]}>
@@ -258,7 +260,7 @@ export default function ParkingMapScreenUpgraded() {
             });
           }}
         >
-          <Text style={styles.selectBtnText}>SELECT PARKING</Text>
+          <Text style={styles.selectBtnText} numberOfLines={1} adjustsFontSizeToFit>{t("selectParkingBtn")}</Text>
           <Ionicons name="arrow-forward" size={18} color="#000" />
         </TouchableOpacity>
       </Animated.View>
@@ -277,7 +279,7 @@ export default function ParkingMapScreenUpgraded() {
     return (
       <View style={[styles.container, { alignItems: "center", justifyContent: "center" }]}>
         <ActivityIndicator size="large" color={THEME.accent} />
-        <Text style={{ color: THEME.sub, marginTop: 12 }}>Loading parkings...</Text>
+        <Text style={{ color: THEME.sub, marginTop: 12 }}>{t("loadingParkings")}</Text>
       </View>
     );
   }
@@ -359,7 +361,7 @@ export default function ParkingMapScreenUpgraded() {
           activeOpacity={0.85}
         >
           <Ionicons name="list" size={20} color="#000" />
-          <Text style={styles.pickerBtnText}>Parkings</Text>
+          <Text style={styles.pickerBtnText} numberOfLines={1} adjustsFontSizeToFit>{t("parkingsPicker")}</Text>
         </TouchableOpacity>
 
         {pickerOpen && (

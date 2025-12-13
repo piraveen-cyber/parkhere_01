@@ -45,11 +45,11 @@ export default function SelectVehicle() {
   const scaleValue = useRef(new Animated.Value(1)).current;
 
   const vehicles = [
-    { id: "car", label: "Car", icon: require("../../assets/images/carpark.png") },
-    { id: "bike", label: "Bike", icon: require("../../assets/images/bikepark.png") },
-    { id: "bus", label: "Bus", icon: require("../../assets/images/buspark.png") },
-    { id: "van", label: "Van", icon: require("../../assets/images/vanpark.png") },
-    { id: "three", label: "Tuk", icon: require("../../assets/images/tukpark.png") },
+    { id: "car", label: t("car"), icon: require("../../assets/images/carpark.png") },
+    { id: "bike", label: t("bike"), icon: require("../../assets/images/bikepark.png") },
+    { id: "bus", label: t("bus"), icon: require("../../assets/images/buspark.png") },
+    { id: "van", label: t("van"), icon: require("../../assets/images/vanpark.png") },
+    { id: "three", label: t("tuk"), icon: require("../../assets/images/tukpark.png") },
   ];
 
   const animateButton = () => {
@@ -102,7 +102,7 @@ export default function SelectVehicle() {
 
       {/* OVERLAY: VEHICLE SELECTOR */}
       <View style={[styles.bottomSheet, { backgroundColor: colors.card }]}>
-        <Text style={[styles.sheetTitle, { color: colors.text }]}>Select your vehicle</Text>
+        <Text style={[styles.sheetTitle, { color: colors.text }]}>{t("selectVehicleTitle")}</Text>
 
         <ScrollView
           horizontal
@@ -139,7 +139,7 @@ export default function SelectVehicle() {
             style={[styles.fab, { backgroundColor: colors.primary, shadowColor: colors.primary }]}
             onPress={() => router.push("../parking/parkMap")}
           >
-            <Text style={[styles.fabText, { color: colors.background === '#0D1B2A' ? '#000' : '#FFF' }]}>CONTINUE</Text>
+            <Text style={[styles.fabText, { color: colors.background === '#0D1B2A' ? '#000' : '#FFF' }]}>{t("continue")}</Text>
             <Ionicons name="arrow-forward" size={24} color={colors.background === '#0D1B2A' ? '#000' : '#FFF'} />
           </TouchableOpacity>
         </Animated.View>

@@ -144,7 +144,7 @@ export default function SetTime() {
       <View style={{ height: ITEM_HEIGHT, justifyContent: 'center', alignItems: 'center' }}>
         <Animated.Text style={[styles.timePickerText, { color: accent, transform: [{ scale }], opacity }]}>
           {item}
-          <Text style={{ fontSize: 14 }}> hrs</Text>
+          <Text style={{ fontSize: 14 }}> {t("hrs")}</Text>
         </Animated.Text>
       </View>
     );
@@ -160,7 +160,7 @@ export default function SetTime() {
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <Ionicons name="chevron-back" size={24} color={textWhite} />
           </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: textWhite }]}>{t('parkingDetails')}</Text>
+          <Text style={[styles.headerTitle, { color: textWhite }]} numberOfLines={1} adjustsFontSizeToFit>{t('parkingDetails')}</Text>
           <View style={{ width: 40 }} />
         </Animated.View>
 
@@ -172,7 +172,7 @@ export default function SetTime() {
             <View style={[styles.card, { backgroundColor: cardBg }]}>
               <View style={styles.cardHeader}>
                 <View>
-                  <Text style={[styles.parkName, { color: textWhite }]}>{parkingName}</Text>
+                  <Text style={[styles.parkName, { color: textWhite }]} numberOfLines={1} adjustsFontSizeToFit>{parkingName}</Text>
                   <View style={styles.ratingRow}>
                     <Ionicons name="star" size={14} color={accent} />
                     <Text style={[styles.ratingText, { color: textGray }]}>4.8 (120 Reviews)</Text>
@@ -180,7 +180,7 @@ export default function SetTime() {
                 </View>
                 <View style={styles.priceContainer}>
                   <Text style={[styles.priceText, { color: accent }]}>LKR {pricePerHour}</Text>
-                  <Text style={[styles.perHour, { color: textGray }]}>/ hr</Text>
+                  <Text style={[styles.perHour, { color: textGray }]}>{t("perHr")}</Text>
                 </View>
               </View>
               <View style={[styles.divider, { backgroundColor: "#2A3B55" }]} />
@@ -202,7 +202,7 @@ export default function SetTime() {
 
             {/* SLOT SELECTION BADGE */}
             <View style={styles.slotContainer}>
-              <Text style={[styles.sectionLabel, { color: textGray }]}>Selected Slot</Text>
+              <Text style={[styles.sectionLabel, { color: textGray }]} numberOfLines={1} adjustsFontSizeToFit>{t("selectedSlot")}</Text>
               <View style={[styles.slotBadge, { borderColor: accent }]}>
                 <View style={styles.pulseDot} />
                 <Text style={[styles.slotText, { color: textWhite }]}>{selectedSlot}</Text>
@@ -211,13 +211,13 @@ export default function SetTime() {
 
             {/* TIME & DURATION */}
             <View style={[styles.sectionContainer, { backgroundColor: cardBg }]}>
-              <Text style={[styles.sectionHeader, { color: textWhite }]}>{t('selectTime')}</Text>
+              <Text style={[styles.sectionHeader, { color: textWhite }]} numberOfLines={1} adjustsFontSizeToFit>{t('selectTime')}</Text>
 
               {/* Check In Time */}
               <View style={styles.timeRow}>
                 <View style={styles.timeLabelRow}>
                   <Ionicons name="time-outline" size={20} color={accent} />
-                  <Text style={[styles.timeLabel, { color: textGray }]}>{t('checkInTime')}</Text>
+                  <Text style={[styles.timeLabel, { color: textGray }]} numberOfLines={1} adjustsFontSizeToFit>{t('checkInTime')}</Text>
                 </View>
                 <TouchableOpacity style={[styles.timePickerBtn, { borderColor: "#2A3B55" }]}>
                   <Text style={[styles.timeValue, { color: textWhite }]}>{checkIn}</Text>
@@ -229,7 +229,7 @@ export default function SetTime() {
 
               {/* SCROLLING DURATION PICKER */}
               <View style={styles.durationPickerContainer}>
-                <Text style={[styles.timeLabel, { color: textGray, alignSelf: 'flex-start', marginBottom: 10 }]}>{t('estimateDuration')}</Text>
+                <Text style={[styles.timeLabel, { color: textGray, alignSelf: 'flex-start', marginBottom: 10 }]} numberOfLines={1} adjustsFontSizeToFit>{t('estimateDuration')}</Text>
 
                 <View style={{ height: PICKER_HEIGHT, width: '100%', alignItems: 'center' }}>
                   {/* Selection Highlight */}
@@ -276,14 +276,14 @@ export default function SetTime() {
               </View>
 
               <View style={styles.totalRow}>
-                <Text style={{ color: textGray }}>Estimated Cost</Text>
+                <Text style={{ color: textGray }}>{t("estimatedCost")}</Text>
                 <Text style={[styles.totalPrice, { color: accent }]}>LKR {calculatedPrice}</Text>
               </View>
             </View>
 
             {/* SERVICES */}
             <View style={styles.servicesSection}>
-              <Text style={[styles.sectionHeader, { color: textWhite, marginBottom: 15 }]}>{t('addServices')}</Text>
+              <Text style={[styles.sectionHeader, { color: textWhite, marginBottom: 15 }]} numberOfLines={1} adjustsFontSizeToFit>{t('addServices')}</Text>
               <View style={styles.servicesGrid}>
                 <ServiceCard
                   name={t('evCharging')}
@@ -325,7 +325,7 @@ export default function SetTime() {
               }
             })}
           >
-            <Text style={styles.continueText}>{t('continueToPayment')}</Text>
+            <Text style={styles.continueText} numberOfLines={1} adjustsFontSizeToFit>{t('continueToPayment')}</Text>
             <Ionicons name="arrow-forward" size={20} color="#000" />
           </TouchableOpacity>
         </Animated.View>

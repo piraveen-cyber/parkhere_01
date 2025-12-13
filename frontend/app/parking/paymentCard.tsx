@@ -278,7 +278,7 @@ export default function PaymentCard() {
 
                 <View style={styles.secureBadge}>
                   <MaterialIcons name="verified-user" size={14} color={accent} />
-                  <Text style={{ color: textGray, fontSize: 12 }}>Payments are secure and encrypted</Text>
+                  <Text style={{ color: textGray, fontSize: 12 }}>{t("securePaymentMsg")}</Text>
                 </View>
               </View>
             )}

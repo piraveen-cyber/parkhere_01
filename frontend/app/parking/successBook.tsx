@@ -106,7 +106,7 @@ export default function LoadingPopup() {
         {/* Custom Loader or Text */}
         <View style={styles.loaderRow}>
           <ActivityIndicator size="small" color={accent} />
-          <Text style={styles.redirectText}>Redirecting...</Text>
+          <Text style={styles.redirectText}>{t("redirecting")}</Text>
         </View>
 
       </Animated.View>
