@@ -1,133 +1,228 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   Image,
+  Dimensions,
+  StatusBar,
+  Animated,
+  Platform
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
 import "../i18n/i18n"; // Ensure init
+import { useTheme } from "../context/themeContext";
+
+const { width } = Dimensions.get("window");
 
 export default function LanguageScreen() {
   const router = useRouter();
   const { t, i18n } = useTranslation();
+  const { colors, theme } = useTheme();
+  const isDark = theme === 'dark';
 
-  const goNext = async (lang: string) => {
-    try {
-      await i18n.changeLanguage(lang);
-      await AsyncStorage.setItem('user-language', lang); // Persist language
-    } catch (e) {
-      console.log("Error changing language", e);
-    }
-    router.push("/onboarding1");
+  // Animations
+  const fadeAnim = React.useRef(new Animated.Value(0)).current;
+  const slideAnim = React.useRef(new Animated.Value(50)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        friction: 8,
+        tension: 40,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
+  const goNext = (lang: string) => {
+    i18n.changeLanguage(lang).catch(err => console.log("Lang change error:", err));
+    AsyncStorage.setItem('user-language', lang).catch(err => console.log("Storage error:", err));
+    router.push("/onboarding");
   };
 
+  const LanguageButton = ({ lang, label, subLabel, delay }: any) => (
+    <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
+      <TouchableOpacity
+        style={[styles.langButton, { borderColor: isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0,0,0,0.1)' }]}
+        activeOpacity={0.8}
+        onPress={() => goNext(lang)}
+      >
+        <LinearGradient
+          colors={isDark ? ['rgba(255,255,255,0.1)', 'rgba(255,255,255,0.05)'] : ['#FFF', '#F9F9F9']}
+          style={styles.langGradient}
+        >
+          <View style={[styles.langIcon, {
+            backgroundColor: colors.primary + '1A',
+            borderColor: colors.primary + '33'
+          }]}>
+            <Text style={[styles.langIconText, { color: colors.primary }]}>{label.charAt(0)}</Text>
+          </View>
+          <View style={styles.langInfo}>
+            <Text style={[styles.langLabel, { color: colors.text }]}>{label}</Text>
+            {subLabel && <Text style={[styles.langSub, { color: colors.subText }]}>{subLabel}</Text>}
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={colors.primary} />
+        </LinearGradient>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Top Yellow Section */}
-      <View style={styles.topSection}>
-        <Image
-          source={require("../assets/images/iconblack.png")}
-          style={styles.logo}
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
+
+      {/* Background Gradient */}
+      {isDark && (
+        <LinearGradient
+          colors={['#000000', '#141414', '#000000']}
+          style={StyleSheet.absoluteFill}
         />
-      </View>
+      )}
 
-      {/* Bottom White Section */}
-      <View style={styles.bottomSection}>
-        <Text style={styles.title}>{t("chooseLanguage")}</Text>
+      {/* Decorative Circles */}
+      <View style={[styles.circle, { top: -100, right: -100, backgroundColor: colors.primary + '15' }]} />
+      <View style={[styles.circle, { bottom: -50, left: -50, backgroundColor: colors.primary + '0D', width: 200, height: 200 }]} />
 
-        <TouchableOpacity style={styles.langButton} onPress={() => goNext('en')}>
-          <Text style={styles.langText}>English</Text>
-        </TouchableOpacity>
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.content}>
 
-        <TouchableOpacity style={styles.langButton} onPress={() => goNext('ta')}>
-          <Text style={styles.langText}>தமிழ்</Text>
-        </TouchableOpacity>
+          {/* Logo Section */}
+          <Animated.View style={[styles.logoSection, { opacity: fadeAnim }]}>
+            <View style={styles.logoContainer}>
+              <Image
+                source={require("../assets/images/iconblack.png")}
+                style={styles.logo}
+              />
+              {/* Ring around logo */}
+              <View style={[styles.logoRing, { borderColor: colors.primary }]} />
+            </View>
+            <Text style={[styles.title, { color: colors.text }]}>{t("chooseLanguage")}</Text>
+            <Text style={[styles.subtitle, { color: colors.subText }]}>Select your preferred language to continue</Text>
+          </Animated.View>
 
-        <TouchableOpacity style={styles.langButton} onPress={() => goNext('si')}>
-          <Text style={styles.langText}>සිංහල</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+          {/* Buttons Section */}
+          <View style={styles.buttonsContainer}>
+            <LanguageButton lang="en" label="English" subLabel="Default" />
+            <View style={{ height: 16 }} />
+            <LanguageButton lang="ta" label="தமிழ்" subLabel="Tamil" />
+            <View style={{ height: 16 }} />
+            <LanguageButton lang="si" label="සිංහල" subLabel="Sinhala" />
+          </View>
+
+        </View>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fdcf00f5" },
-
-  topSection: {
-    flex: 1.5,
-    justifyContent: "center",
-    alignItems: "center",
+  container: {
+    flex: 1,
   },
-
+  safeArea: {
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+    justifyContent: "space-between",
+    paddingVertical: 40,
+    paddingHorizontal: 24,
+  },
+  circle: {
+    position: 'absolute',
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+  },
+  logoSection: {
+    alignItems: "center",
+    marginTop: 40,
+  },
+  logoContainer: {
+    position: 'relative',
+    width: 140,
+    height: 140,
+    marginBottom: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   logo: {
-    width: 220,
-    height: 220,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
     resizeMode: "cover",
-    borderRadius: 110, // Perfect circle
-    // borderWidth: 5,
-    // borderColor: "#050700ff",
-    shadowColor: "#000",
-    shadowOffset: { width: 10, height: 10 },
-    shadowOpacity: 0.3,
-    shadowRadius: 30,
-    elevation: 10, // Android shadow
+    zIndex: 2,
   },
-
-  bottomSection: {
-    backgroundColor: "#ffffffff",
-    borderTopLeftRadius: 50,
-    borderColor: "#f2eedaff",
-    borderWidth: 5,
-    borderTopRightRadius: 50,
-    borderBottomLeftRadius: 50,
-    borderBottomRightRadius: 50,
-    paddingVertical: 20,
-    paddingHorizontal: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    elevation: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
+  logoRing: {
+    position: 'absolute',
+    width: 136,
+    height: 136,
+    borderRadius: 68,
+    borderWidth: 2,
+    opacity: 0.5,
+    zIndex: 1,
   },
-
   title: {
     fontSize: 28,
-    fontWeight: "800",
-    marginBottom: 40,
-    letterSpacing: 0.5,
-    color: "#333",
-  },
-
-  langButton: {
-    width: "95%",
-    backgroundColor: "#FFFFFF",
-    paddingVertical: 18,
-    borderRadius: 30,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: "#000000ff", // Gold Theme
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 15,
-    elevation: 6,
-  },
-
-  langText: {
-    fontSize: 16, // Reduced from 18 as per feedback
     fontWeight: "700",
-    color: "#000",
-    // letterSpacing: 1.5, // Removed for better non-Latin support
-    // textTransform: "uppercase", // Removed for better non-Latin support
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  subtitle: {
+    fontSize: 16,
+    textAlign: "center",
+    maxWidth: '80%',
+  },
+  buttonsContainer: {
+    marginBottom: 40,
+  },
+  langButton: {
+    width: '100%',
+    borderRadius: 16,
+    overflow: 'hidden',
+    borderWidth: 1,
+  },
+  langGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+  },
+  langIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+    borderWidth: 1,
+  },
+  langIconText: {
+    fontSize: 20,
+    fontWeight: "700",
+  },
+  langInfo: {
+    flex: 1,
+  },
+  langLabel: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 2,
+  },
+  langSub: {
+    fontSize: 12,
   },
 });
 

@@ -11,6 +11,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get("window");
 
@@ -42,6 +43,32 @@ export default function LoadingPopup() {
         useNativeDriver: true,
       }),
     ]).start();
+
+    // SAVE LOCAL for Demo Consistency
+    const saveLocal = async () => {
+      try {
+        const newBooking = {
+          id: Math.random().toString(36).substr(2, 9),
+          type: 'parking',
+          title: params.parkingName || 'Parking Session',
+          subtitle: `Slot ${params.slot} • ${params.duration} hr`,
+          date: new Date().toISOString(),
+          startTime: new Date().toISOString(),
+          time: params.checkInTime || 'Now',
+          price: params.totalPrice,
+          status: 'Confirmed',
+          parkingSpotId: params.slot
+        };
+        const existing = await AsyncStorage.getItem('LOCAL_BOOKINGS');
+        const bookings = existing ? JSON.parse(existing) : [];
+        bookings.push(newBooking);
+        await AsyncStorage.setItem('LOCAL_BOOKINGS', JSON.stringify(bookings));
+        console.log("Parking Saved Locally:", newBooking);
+      } catch (e) {
+        console.log("Failed to save local parking", e);
+      }
+    };
+    saveLocal();
 
     // 2. Continuous Pulse Animation for Icon
     Animated.loop(

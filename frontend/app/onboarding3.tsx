@@ -1,169 +1,226 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {
   View,
   Text,
   Image,
-  TouchableOpacity,
   StyleSheet,
+  TouchableOpacity,
   Dimensions,
+  StatusBar,
+  Animated
 } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import { StatusBar } from "expo-status-bar";
-import { useTheme } from "../context/themeContext";
 import { useTranslation } from "react-i18next";
+import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
 
 const { width, height } = Dimensions.get("window");
 
 export default function Onboarding3() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { theme, toggleTheme, colors } = useTheme();
   const { t } = useTranslation();
 
-  const isDark = theme === "dark";
+  // Animations
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
 
-  // Theme colors
-  const bg = colors.background;
-  const textColor = colors.text;
-  const descColor = colors.subText;
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        friction: 8,
+        tension: 40,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: bg }]}>
-      <StatusBar style={isDark ? "light" : "dark"} />
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" />
 
-      {/* --- TOP BAR --- */}
-      <View
-        style={[
-          styles.topRow,
-          { marginTop: insets.top + 15 }, // extra spacing
-        ]}
-      >
-        {/* Back Button */}
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={[styles.roundButton, styles.shadow]}
-        >
-          <Text style={styles.backIcon}>{"<"}</Text>
-        </TouchableOpacity>
+      {/* Background Gradient */}
+      <LinearGradient
+        colors={['#0D1B2A', '#1B263B', '#000000']}
+        style={StyleSheet.absoluteFill}
+      />
 
-        {/* Theme Toggle */}
-        <TouchableOpacity
-          onPress={toggleTheme}
-          style={[styles.roundButton, styles.shadow]}
-        >
-          <Text style={styles.toggleIcon}>{isDark ? "☀️" : "🌙"}</Text>
-        </TouchableOpacity>
-      </View>
+      <SafeAreaView style={styles.safeArea}>
+        {/* TOP BAR */}
+        <View style={styles.topBar}>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={styles.iconButton}
+          >
+            <Ionicons name="chevron-back" size={24} color="#FFF" />
+          </TouchableOpacity>
+        </View>
 
-      {/* --- CONTENT --- */}
-      <View style={styles.centerContent}>
-        <Image
-          source={require("../assets/images/payment.png")}
-          style={styles.image}
-          resizeMode="contain"
-        />
+        {/* CONTENT */}
+        <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
 
-        <Text style={[styles.title, { color: textColor }]}>{t("easyPayment")}</Text>
+          <View style={styles.imageContainer}>
+            {/* Glow effect behind illustration */}
+            <View style={styles.glow} />
+            <Image
+              source={require("../assets/images/payment.png")}
+              style={styles.image}
+              resizeMode="contain"
+            />
+          </View>
 
-        <Text style={[styles.subtitle, { color: descColor }]}>
-          {t("loremIpsum")}
-        </Text>
+          <View style={styles.textContainer}>
+            <Text style={styles.title}>{t("easyPayment")}</Text>
+            <Text style={styles.desc}>
+              Secure and fast payments with multiple options. Hassle-free parking every time.
+            </Text>
 
-        {/* Get Started Button */}
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.push("/phoneAuth")}
-        >
-          <Text style={styles.buttonText}>{t("getStarted")}</Text>
-        </TouchableOpacity>
-      </View>
+            {/* DOTS */}
+            <View style={styles.dotsContainer}>
+              <View style={styles.dot} />
+              <View style={styles.dot} />
+              <View style={[styles.dot, styles.dotActive]} />
+              <View style={styles.dot} />
+            </View>
 
-      {/* Keep spacing above bottom nav bar */}
-      <View style={{ height: insets.bottom + 15 }} />
-    </SafeAreaView>
+            {/* NEXT BUTTON */}
+            <TouchableOpacity
+              style={styles.mainButton}
+              activeOpacity={0.8}
+              onPress={() => router.push("/phoneAuth")}
+            >
+              <LinearGradient
+                colors={['#FFD400', '#FFEA00']}
+                style={styles.mainButtonGradient}
+              >
+                <Text style={styles.mainButtonText}>{t("next")}</Text>
+                <Ionicons name="arrow-forward" size={20} color="#000" />
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+
+        </Animated.View>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: {
+  container: {
+    flex: 1,
+    backgroundColor: "#0D1B2A",
+  },
+  safeArea: {
     flex: 1,
   },
-
-  /* --- TOP BAR --- */
-  topRow: {
-    width: "100%",
-    paddingHorizontal: 22,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingTop: 10,
+    zIndex: 10,
   },
-
-  roundButton: {
-    width: 50,
-    height: 50,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 25,
-    justifyContent: "center",
-    alignItems: "center",
+  iconButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
-
-  backIcon: {
-    fontSize: 26,
-    fontWeight: "600",
-  },
-
-  toggleIcon: {
-    fontSize: 24,
-  },
-
-  shadow: {
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-  },
-
-  /* --- CONTENT --- */
-  centerContent: {
+  content: {
     flex: 1,
-    marginTop: 25,
-    paddingHorizontal: 30,
-    alignItems: "center",
+    justifyContent: 'space-between',
+    paddingBottom: 40,
   },
-
+  imageContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
+    position: 'relative',
+  },
+  glow: {
+    position: 'absolute',
+    width: width * 0.7,
+    height: width * 0.7,
+    borderRadius: width * 0.35,
+    backgroundColor: 'rgba(255, 212, 0, 0.1)',
+    shadowColor: '#FFD400',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+  },
   image: {
-    width: width * 0.8,
+    width: width * 0.85,
     height: height * 0.35,
-    marginBottom: 30,
+    zIndex: 2,
   },
-
+  textContainer: {
+    paddingHorizontal: 30,
+    alignItems: 'center',
+  },
   title: {
-    fontSize: 28,
-    fontWeight: "700",
+    fontSize: 32,
+    fontWeight: "800",
+    color: "#FFFFFF",
     textAlign: "center",
-    marginBottom: 10,
+    marginBottom: 16,
+    lineHeight: 40,
   },
-
-  subtitle: {
-    fontSize: 15,
-    textAlign: "center",
-    marginBottom: 40,
-    width: "85%",
-  },
-
-  button: {
-    width: "100%",
-    backgroundColor: "#FFD11A",
-    paddingVertical: 16,
-    borderRadius: 12,
-    elevation: 3,
-  },
-
-  buttonText: {
-    textAlign: "center",
+  desc: {
     fontSize: 16,
-    fontWeight: "700",
-    color: "black",
+    color: "#A0A0A0",
+    textAlign: "center",
+    marginBottom: 30,
+    lineHeight: 24,
+  },
+  dotsContainer: {
+    flexDirection: "row",
+    marginBottom: 30,
+    gap: 8,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+  dotActive: {
+    width: 24,
+    backgroundColor: '#FFD400',
+  },
+  mainButton: {
+    width: '100%',
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: "#FFD400",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  mainButtonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 18,
+    gap: 10,
+  },
+  mainButtonText: {
+    color: '#000',
+    fontSize: 18,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
 });

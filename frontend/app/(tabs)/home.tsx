@@ -12,6 +12,7 @@ import {
   Easing,
   StatusBar
 } from "react-native";
+import Storage from '@react-native-async-storage/async-storage';
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { supabase } from "../../config/supabaseClient";
 import { useTranslation } from "react-i18next";
@@ -38,6 +39,9 @@ export default function HomeScreen() {
   // LIVE BOOKING LOGIC
   const [activeBooking, setActiveBooking] = useState<any>(null);
 
+  // RECENT HISTORY
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
+
   useEffect(() => {
     // Mount Animation
     Animated.timing(fadeAnim, {
@@ -49,7 +53,12 @@ export default function HomeScreen() {
 
     // Poll for active booking
     fetchActiveBooking();
-    const interval = setInterval(fetchActiveBooking, 5000);
+    fetchRecentHistory(); // Initial fetch
+
+    const interval = setInterval(() => {
+      fetchActiveBooking();
+      fetchRecentHistory(); // Poll history too
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -62,6 +71,94 @@ export default function HomeScreen() {
       }
     } catch (e) {
       console.log("Error fetching active booking", e);
+    }
+  };
+
+  const fetchRecentHistory = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id || "guest";
+
+      // Fetch Parallel
+      const [remote, local] = await Promise.all([
+        bookingService.getUserBookings(userId).catch(() => []),
+        Storage.getItem('LOCAL_BOOKINGS')
+      ]);
+
+      const localBookings = local ? JSON.parse(local) : [];
+
+      // MOCK DATA
+      const MOCK_ITEMS = [
+        {
+          id: 'mock-1',
+          type: 'parking',
+          title: 'Central City Mall',
+          date: new Date().toISOString(),
+          subtitle: 'Zone A - Slot 4',
+          totalPrice: '450.00',
+          status: 'Active'
+        },
+        {
+          id: 'mock-2',
+          type: 'garage',
+          title: 'City Garage Services',
+          subtitle: '123 Main St, New York',
+          date: new Date(Date.now() - 86400000 * 2).toISOString(),
+          price: '2500.00',
+          status: 'Completed',
+        },
+        {
+          id: 'mock-3',
+          type: 'mechanic',
+          title: 'Mike the Mechanic',
+          subtitle: 'Tire Change',
+          date: new Date(Date.now() - 86400000 * 5).toISOString(),
+          price: '1200.00',
+          status: 'Completed',
+        }
+      ];
+
+      // Combine Real & Mock
+      let combined = [...localBookings, ...remote, ...MOCK_ITEMS];
+
+      // Deduplicate
+      const seen = new Set();
+      combined = combined.filter(b => {
+        const id = b._id || b.id;
+        if (seen.has(id)) return false;
+        seen.add(id);
+        return true;
+      });
+
+      // Sort
+      combined.sort((a: any, b: any) => {
+        return new Date(b.startTime || b.date).getTime() - new Date(a.startTime || a.date).getTime();
+      });
+
+      // Slice Top 3
+      const displayItems = combined.slice(0, 3);
+
+      const formatted = displayItems.map((item: any) => {
+        const isGarage = item.type === 'garage';
+        const isMechanic = item.type === 'mechanic';
+
+        let icon = "car-sport";
+        if (isGarage) icon = "car-wrench";
+        if (isMechanic) icon = "tools"; // 'construct' is Ionicons, 'tools' is MCI
+
+        return {
+          id: item._id || item.id,
+          title: item.title || (item.parkingSpotId ? "Parking Session" : "Service"),
+          subtitle: new Date(item.startTime || item.date).toLocaleDateString(),
+          amount: item.totalPrice ? `-$${item.totalPrice}` : (item.price ? `-$${item.price}` : '-'),
+          icon,
+          lib: (isGarage || isMechanic) ? MaterialCommunityIcons : Ionicons
+        };
+      });
+
+      setRecentActivity(formatted);
+    } catch (e) {
+      console.log("Error fetching history", e);
     }
   };
 
@@ -140,6 +237,7 @@ export default function HomeScreen() {
 
   const handleServiceNavigation = (key: string) => {
     if (key === "parking") router.push("/parking/selectVehicle");
+    if (key === "mechanics") router.push("/Mechanic/vehicleType");
   };
 
   const services = [
@@ -157,11 +255,6 @@ export default function HomeScreen() {
     { id: "A3", status: "occupied", type: "ev" },
     { id: "A4", status: "available", type: "disabled" },
     { id: "A5", status: "available", type: "standard" },
-  ];
-
-  const recentActivity = [
-    { id: 1, title: "Parking - Zone A", date: "2 hrs ago", amount: "-$5.00", icon: "car-sport" },
-    { id: 2, title: "Top-up", date: "Yesterday", amount: "+$50.00", icon: "wallet" },
   ];
 
   return (
@@ -308,20 +401,32 @@ export default function HomeScreen() {
         </View>
 
         {/* RECENT ACTIVITY */}
-        <Text style={[styles.sectionTitle, { color: THEME.text, marginTop: 15 }]}>{t("recent")}</Text>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 15, marginBottom: 12 }}>
+          <Text style={[styles.sectionTitle, { marginBottom: 0, color: THEME.text }]}>{t("recent")}</Text>
+          <TouchableOpacity onPress={() => router.push('/(tabs)/booking')}>
+            <Text style={{ color: THEME.primary, fontSize: 13, fontWeight: "600" }}>View All</Text>
+          </TouchableOpacity>
+        </View>
         <View style={styles.activityList}>
-          {recentActivity.map((item) => (
-            <View key={item.id} style={[styles.activityRow, { backgroundColor: THEME.card }]}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-                <Ionicons name={item.icon as any} size={18} color={THEME.subText} />
-                <View>
-                  <Text style={{ color: THEME.text, fontWeight: "600", fontSize: 13 }}>{item.title}</Text>
-                  <Text style={{ color: THEME.subText, fontSize: 11 }}>{item.date}</Text>
+          {recentActivity.length > 0 ? recentActivity.map((item) => {
+            const IconLib = item.lib || Ionicons;
+            return (
+              <TouchableOpacity key={item.id} style={[styles.activityRow, { backgroundColor: THEME.card }]} onPress={() => router.push('/(tabs)/booking')}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                  <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#F2F2F7', alignItems: 'center', justifyContent: 'center' }}>
+                    <IconLib name={item.icon as any} size={18} color={THEME.primary} />
+                  </View>
+                  <View>
+                    <Text style={{ color: THEME.text, fontWeight: "600", fontSize: 13 }}>{item.title}</Text>
+                    <Text style={{ color: THEME.subText, fontSize: 11 }}>{item.subtitle}</Text>
+                  </View>
                 </View>
-              </View>
-              <Text style={{ color: item.amount.startsWith('+') ? THEME.success : THEME.text, fontWeight: "700" }}>{item.amount}</Text>
-            </View>
-          ))}
+                <Text style={{ color: item.amount.startsWith('+') ? THEME.success : THEME.text, fontWeight: "700" }}>{item.amount}</Text>
+              </TouchableOpacity>
+            )
+          }) : (
+            <Text style={{ color: THEME.subText, fontStyle: 'italic' }}>No recent activity</Text>
+          )}
         </View>
 
         {/* PROMO CAROUSEL */}
@@ -366,9 +471,9 @@ const styles = StyleSheet.create({
   scrollContent: { padding: 20 },
 
   // TEXT
-  greeting: { fontSize: 13, fontWeight: "500", marginTop: 4, lineHeight: 20 }, // Added lineHeight
+  greeting: { fontSize: 13, fontWeight: "500", marginTop: 4, lineHeight: 20 },
   userName: { fontSize: 22, fontWeight: "700", lineHeight: 30 },
-  sectionTitle: { fontSize: 17, fontWeight: "700", marginBottom: 12, lineHeight: 24 }, // Added lineHeight
+  sectionTitle: { fontSize: 17, fontWeight: "700", marginBottom: 12, lineHeight: 24 },
 
   // HEADER
   headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 25 },
@@ -378,9 +483,9 @@ const styles = StyleSheet.create({
   // LIVE STATUS BAR
   liveStatusCard: { borderRadius: 20, padding: 20, borderWidth: 1 },
   liveHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 15 },
-  liveBadge: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 10 }, // Increased padding
+  liveBadge: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 10 },
   pulseDot: { width: 8, height: 8, borderRadius: 4 },
-  liveText: { fontSize: 13, fontWeight: "800" }, // Reduced 14 -> 13
+  liveText: { fontSize: 13, fontWeight: "800" },
   timerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   timerValue: { fontSize: 32, fontWeight: "700" },
   actionBtn: { paddingVertical: 10, paddingHorizontal: 20, borderRadius: 20, justifyContent: 'center', alignItems: 'center', flexDirection: 'row', gap: 6 },
@@ -392,11 +497,11 @@ const styles = StyleSheet.create({
   // GRID
   gridContainer: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: 12, marginBottom: 15 },
   gridItem: {
-    width: "48%", paddingVertical: 15, paddingHorizontal: 12, borderRadius: 14, borderWidth: 1, // Adjusted padding
+    width: "48%", paddingVertical: 15, paddingHorizontal: 12, borderRadius: 14, borderWidth: 1,
     flexDirection: "row", alignItems: "center", gap: 10
   },
   gridIcon: { width: 36, height: 36, borderRadius: 18, justifyContent: "center", alignItems: "center" },
-  gridTitle: { fontSize: 14, fontWeight: "600", flex: 1, flexWrap: 'wrap', lineHeight: 20 }, // Added lineHeight
+  gridTitle: { fontSize: 14, fontWeight: "600", flex: 1, flexWrap: 'wrap', lineHeight: 20 },
 
   // RECENT
   activityList: { gap: 10 },

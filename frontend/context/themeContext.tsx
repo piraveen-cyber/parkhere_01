@@ -6,38 +6,39 @@ export type ThemeType = "light" | "dark";
 
 export const Colors = {
   dark: {
-    background: "#0D1B2A", // Deep Premium Black / Blue
-    card: "#1B263B",       // Rich Dark Grey / Blue
-    text: "#FFFFFF",
-    subText: "#8D99AE",
-    primary: "#FFD400",    // Metallic Gold
-    secondary: "#FFD700",  // Bright Gold
-    border: "rgba(255, 255, 255, 0.1)",
-    error: "#FF3B30",      // Neon Red
-    success: "#39FF14",    // Neon Green
-    info: "#00D4FF",       // Neon Cyan
+    primary: '#f7af05', // Gold/Orange
+    background: '#000000', // Pure Black
+    text: '#FFFFFF',
+    subText: '#B3B3B3',
+    card: '#141414', // Netflix Card/Tile Gray
+    border: '#333333',
+    error: '#B9090B',
+    success: '#46D369',
+    info: "#00D4FF",
     inputBg: "#2C2C2C",
     tabBar: "#121212",
     accessibleSlot: "#3B82F6",
     evSlot: "#E0FF22",
-    headerIconBg: "#1B263B"
+    headerIconBg: "#1B263B",
+    secondary: '#B9090B' // Darker Red for secondary
   },
   light: {
-    background: "#F2F2F7", // iOS System Grey
-    card: "#FFFFFF",
-    text: "#000000",
-    subText: "#8E8E93",
-    primary: "#FFD400",    // Keep Gold Accent
-    secondary: "#FFCC00",
-    border: "rgba(0, 0, 0, 0.1)",
-    error: "#FF3B30",
-    success: "#34C759",
+    primary: '#39FF14', // Neon Green
+    background: '#FFFFFF',
+    text: '#000000',
+    subText: '#555555',
+    card: '#FAFAFA',
+    border: '#E0E0E0',
+    error: '#B9090B',
+    success: '#39FF14',
+    // Keeping existing keys not explicitly replaced in the snippet
     info: "#007AFF",
-    inputBg: "#E5E5EA",
-    tabBar: "#F9F9F9",
+    inputBg: "#F5F5F5",
+    tabBar: "#FFFFFF",
     accessibleSlot: "#007AFF",
     evSlot: "#A4C639",
-    headerIconBg: "#E5E5EA"
+    headerIconBg: "#F0F0F0",
+    secondary: "#32CD32", // Lime Green
   },
   // High Contrast Mode
   highContrast: {
@@ -77,7 +78,7 @@ type ThemeContextType = {
 const ThemeContext = createContext<ThemeContextType | null>(null);
 
 export const ThemeProvider = ({ children }: any) => {
-  const [theme, setTheme] = useState<ThemeType>("dark");
+  const [theme, setTheme] = useState<ThemeType>("light");
   const [highContrast, setHighContrast] = useState(false);
   const [largeText, setLargeText] = useState(false);
   const [voiceGuidance, setVoiceGuidance] = useState(false);

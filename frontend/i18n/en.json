@@ -224,5 +224,7 @@
   "promoWashDesc": "Get a sparkling clean car today!",
   "promoOilTitle": "Free Oil Check",
   "promoOilDesc": "With every full service",
-  "claim": "Claim"
+  "claim": "Claim",
+  "seamlessEntry": "Seamless Entry",
+  "scanQrDesc": "Quickly scan your code for ticketless entry and exit."
 }

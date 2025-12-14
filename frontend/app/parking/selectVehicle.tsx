@@ -4,77 +4,71 @@ import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
-// import { LinearGradient } from 'expo-linear-gradient'; // Optional, using View fallback if missing
-
+import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../../context/themeContext";
 
 const { width, height } = Dimensions.get("window");
 
 // PREMIUM DARK MAP STYLE
 const darkMapStyle = [
-  { "elementType": "geometry", "stylers": [{ "color": "#212121" }] },
+  { "elementType": "geometry", "stylers": [{ "color": "#121212" }] }, // Darker, cleaner
   { "elementType": "labels.icon", "stylers": [{ "visibility": "off" }] },
   { "elementType": "labels.text.fill", "stylers": [{ "color": "#757575" }] },
-  { "elementType": "labels.text.stroke", "stylers": [{ "color": "#212121" }] },
+  { "elementType": "labels.text.stroke", "stylers": [{ "color": "#121212" }] },
   { "featureType": "administrative", "elementType": "geometry", "stylers": [{ "color": "#757575" }] },
-  { "featureType": "administrative.country", "elementType": "labels.text.fill", "stylers": [{ "color": "#9e9e9e" }] },
-  { "featureType": "administrative.land_parcel", "stylers": [{ "visibility": "off" }] },
-  { "featureType": "administrative.locality", "elementType": "labels.text.fill", "stylers": [{ "color": "#bdbdbd" }] },
   { "featureType": "poi", "elementType": "labels.text.fill", "stylers": [{ "color": "#757575" }] },
   { "featureType": "poi.park", "elementType": "geometry", "stylers": [{ "color": "#181818" }] },
-  { "featureType": "poi.park", "elementType": "labels.text.fill", "stylers": [{ "color": "#616161" }] },
-  { "featureType": "poi.park", "elementType": "labels.text.stroke", "stylers": [{ "color": "#1b1b1b" }] },
   { "featureType": "road", "elementType": "geometry.fill", "stylers": [{ "color": "#2c2c2c" }] },
   { "featureType": "road", "elementType": "labels.text.fill", "stylers": [{ "color": "#8a8a8a" }] },
-  { "featureType": "road.arterial", "elementType": "geometry", "stylers": [{ "color": "#373737" }] },
-  { "featureType": "road.highway", "elementType": "geometry", "stylers": [{ "color": "#3c3c3c" }] },
-  { "featureType": "road.highway.controlled_access", "elementType": "geometry", "stylers": [{ "color": "#4e4e4e" }] },
-  { "featureType": "road.local", "elementType": "labels.text.fill", "stylers": [{ "color": "#616161" }] },
-  { "featureType": "transit", "elementType": "labels.text.fill", "stylers": [{ "color": "#757575" }] },
   { "featureType": "water", "elementType": "geometry", "stylers": [{ "color": "#000000" }] },
-  { "featureType": "water", "elementType": "labels.text.fill", "stylers": [{ "color": "#3d3d3d" }] }
 ];
 
 export default function SelectVehicle() {
   const router = useRouter();
   const { t } = useTranslation();
   const { colors, theme } = useTheme();
-  const [selected, setSelected] = useState("car");
-  const params = useLocalSearchParams(); // Get params
+  const isDark = theme === "dark";
+  const params = useLocalSearchParams();
 
-  // Animation for Floating Button
-  const scaleValue = useRef(new Animated.Value(1)).current;
+  // State
+  const [selectedType, setSelectedType] = useState("car");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Animation for Sheet
+  const sheetAnim = useRef(new Animated.Value(height)).current;
+
+  useEffect(() => {
+    Animated.spring(sheetAnim, {
+      toValue: 0,
+      damping: 25,
+      stiffness: 90,
+      useNativeDriver: true
+    }).start();
+  }, []);
 
   const vehicles = [
-    { id: "car", label: t("car"), icon: require("../../assets/images/carpark.png") },
-    { id: "bike", label: t("bike"), icon: require("../../assets/images/bikepark.png") },
-    { id: "bus", label: t("bus"), icon: require("../../assets/images/buspark.png") },
-    { id: "van", label: t("van"), icon: require("../../assets/images/vanpark.png") },
-    { id: "three", label: t("tuk"), icon: require("../../assets/images/tukpark.png") },
+    { id: "car", label: "Luxury Car", icon: require("../../assets/images/carpark.png") },
+    { id: "bike", label: "Motorbike", icon: require("../../assets/images/bikepark.png") },
+    { id: "tuk", label: "TukTuk", icon: require("../../assets/images/tukpark.png") },
+    { id: "van", label: "Van / SUV", icon: require("../../assets/images/vanpark.png") },
+    { id: "bus", label: "Bus", icon: require("../../assets/images/buspark.png") },
+    { id: "truck", label: "Heavy Truck", icon: require("../../assets/images/buspark.png") },
   ];
 
-  const animateButton = () => {
-    Animated.sequence([
-      Animated.timing(scaleValue, { toValue: 1.1, duration: 150, useNativeDriver: true }),
-      Animated.timing(scaleValue, { toValue: 1, duration: 150, useNativeDriver: true })
-    ]).start();
-  };
-
-  const handleSelect = (id: string) => {
-    setSelected(id);
-    animateButton();
-  };
-
-  const handleContinue = () => {
-    if (params.nextRoute) {
-      // If a next route is specified (e.g., from Home -> Select Slot)
-      router.push({
-        pathname: params.nextRoute as any,
-        params: { ...params, vehicleType: selected } // Pass forward existing params + vehicle
-      });
-    } else {
-      // Default flow
+  const handleContinue = async () => {
+    setIsSubmitting(true);
+    try {
+      const routeParams = { ...params, vehicleType: selectedType };
+      if (params.nextRoute) {
+        router.push({ pathname: params.nextRoute as any, params: routeParams });
+      } else {
+        router.push("../parking/parkMap");
+      }
+    } catch (e) {
+      console.error("Error", e);
       router.push("../parking/parkMap");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -82,158 +76,194 @@ export default function SelectVehicle() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar barStyle="light-content" />
 
-      {/* FULL SCREEN MAP */}
+      {/* BACKGROUND MAP */}
       <MapView
         provider={PROVIDER_GOOGLE}
         style={styles.map}
         customMapStyle={darkMapStyle}
         initialRegion={{
-          latitude: 6.9271,
-          longitude: 79.8612,
-          latitudeDelta: 0.015,
-          longitudeDelta: 0.015,
+          latitude: 6.9271, longitude: 79.8612,
+          latitudeDelta: 0.012, longitudeDelta: 0.012,
         }}
-        toolbarEnabled={false}
-        showsUserLocation={true}
+        scrollEnabled={false}
+        zoomEnabled={false}
       >
-        {/* Simulated Nearby Parking Spots */}
-        <Marker coordinate={{ latitude: 6.9271, longitude: 79.8612 }} >
-          <View style={[styles.marker, { backgroundColor: "#39FF14" }]}>
-            <Ionicons name="car-sport" size={14} color="#000" />
-          </View>
-        </Marker>
-        <Marker coordinate={{ latitude: 6.9300, longitude: 79.8640 }} >
-          <View style={[styles.marker, { backgroundColor: "#FF3B30" }]}>
-            <Ionicons name="close" size={14} color="#FFF" />
-          </View>
-        </Marker>
-        <Marker coordinate={{ latitude: 6.9250, longitude: 79.8580 }} >
-          <View style={[styles.marker, { backgroundColor: "#FFD400" }]}>
-            <Ionicons name="star" size={14} color="#000" />
+        <Marker coordinate={{ latitude: 6.9271, longitude: 79.8612 }}>
+          <View style={{
+            backgroundColor: '#D4AF37', // Gold
+            padding: 8,
+            borderRadius: 20,
+            borderWidth: 2,
+            borderColor: '#FFF',
+            elevation: 5
+          }}>
+            <Ionicons name="car" size={16} color="#000" />
           </View>
         </Marker>
       </MapView>
 
-      {/* OVERLAY: VEHICLE SELECTOR */}
-      <View style={[styles.bottomSheet, { backgroundColor: colors.card }]}>
-        <Text style={[styles.sheetTitle, { color: colors.text }]}>{t("selectVehicleTitle")}</Text>
-
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContainer}
-        >
-          {vehicles.map((item) => {
-            const isSelected = selected === item.id;
-            return (
-              <TouchableOpacity
-                key={item.id}
-                style={[
-                  styles.card,
-                  isSelected && styles.cardSelected
-                ]}
-                onPress={() => handleSelect(item.id)}
-                activeOpacity={0.8}
-              >
-                <View style={[styles.iconContainer, isSelected && { backgroundColor: "rgba(0,0,0,0.1)" }]}>
-                  <Image source={item.icon} style={styles.icon} resizeMode="contain" />
-                </View>
-                <Text style={[styles.label, isSelected && styles.labelSelected]}>{item.label}</Text>
-
-                {/* Selection Indicator Dot */}
-                {isSelected && <View style={styles.selectedDot} />}
-              </TouchableOpacity>
-            )
-          })}
-        </ScrollView>
-
-        {/* FLOATING ACTION BUTTON (INSIDE SHEET FOR LAYOUT) */}
-        <Animated.View style={[styles.fabContainer, { transform: [{ scale: scaleValue }] }]}>
-          <TouchableOpacity
-            style={[styles.fab, { backgroundColor: colors.primary, shadowColor: colors.primary }]}
-            onPress={handleContinue}
-          >
-            <Text style={[styles.fabText, { color: colors.background === '#0D1B2A' ? '#000' : '#FFF' }]}>{t("continue")}</Text>
-            <Ionicons name="arrow-forward" size={24} color={colors.background === '#0D1B2A' ? '#000' : '#FFF'} />
-          </TouchableOpacity>
-        </Animated.View>
-      </View>
-
-      {/* TOP OVERLAY GRADIENT (Using View trick for shadow) */}
-      <View style={styles.topOverlay} pointerEvents="none" />
+      <LinearGradient
+        colors={['transparent', 'rgba(0,0,0,0.8)']}
+        style={styles.shade}
+      />
 
       {/* BACK BUTTON */}
       <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-        <Ionicons name="arrow-back" size={24} color="#FFF" />
+        <Ionicons name="chevron-back" size={24} color="#FFF" />
       </TouchableOpacity>
+
+      {/* CLASSIC SHEET */}
+      <View style={{ flex: 1, justifyContent: "flex-end" }}>
+        <Animated.View style={[styles.sheetContainer, { transform: [{ translateY: sheetAnim }] }]}>
+
+          {/* Glass effect background */}
+          <LinearGradient
+            colors={isDark ? ['#1c1c1c', '#000000'] : ['#FFFFFF', '#F0F0F0']}
+            style={styles.sheetGradient}
+          >
+            <View style={styles.handle} />
+
+            <Text style={[styles.classicTitle, { color: isDark ? '#D4AF37' : '#B8860B' }]}>
+              SELECT VEHICLE
+            </Text>
+            <Text style={[styles.classicSub, { color: colors.subText }]}>
+              Choose your mode of transport
+            </Text>
+
+            <View style={{ height: 160, marginVertical: 10 }}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.scrollList}
+                snapToInterval={115} // Snap effect
+                decelerationRate="fast"
+              >
+                {vehicles.map((v) => {
+                  const isSel = selectedType === v.id;
+                  const goldColor = '#D4AF37';
+
+                  return (
+                    <TouchableOpacity
+                      key={v.id}
+                      activeOpacity={0.9}
+                      style={[
+                        styles.card,
+                        isSel ?
+                          {
+                            backgroundColor: isDark ? 'rgba(212, 175, 55, 0.15)' : '#FFF8E1',
+                            borderColor: goldColor,
+                            borderWidth: 2
+                          }
+                          :
+                          {
+                            backgroundColor: isDark ? '#252525' : '#FAFAFA',
+                            borderColor: isDark ? '#333' : '#E0E0E0',
+                            borderWidth: 1
+                          }
+                      ]}
+                      onPress={() => setSelectedType(v.id)}
+                    >
+                      <View style={styles.iconBox}>
+                        <Image source={v.icon} style={[styles.typeIcon, { opacity: isSel ? 1 : 0.7 }]} resizeMode="contain" />
+                      </View>
+                      <Text style={[styles.typeLabel, { color: isSel ? (isDark ? '#FFF' : '#333') : colors.subText }]}>
+                        {v.label}
+                      </Text>
+
+                      {isSel && (
+                        <View style={styles.goldBadge}>
+                          <Ionicons name="checkmark" size={10} color="#000" />
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  )
+                })}
+              </ScrollView>
+            </View>
+
+            {/* CONTINUE BUTTON */}
+            <View style={[styles.footer, { borderTopColor: isDark ? '#333' : '#EEE' }]}>
+              <TouchableOpacity
+                style={[styles.mainBtn, { backgroundColor: '#D4AF37', shadowColor: '#D4AF37' }]} // Classic Gold
+                onPress={handleContinue}
+                activeOpacity={0.9}
+              >
+                <Text style={styles.btnText}>{t("continue")}</Text>
+                <Ionicons name="arrow-forward" size={18} color="#000" />
+              </TouchableOpacity>
+            </View>
+          </LinearGradient>
+
+        </Animated.View>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  map: { width, height: height + 50 }, // Oversize slightly to cover
-
-  topOverlay: {
-    position: 'absolute', top: 0, left: 0, right: 0, height: 100,
-    backgroundColor: 'rgba(0,0,0,0.4)' // Simple darken
-  },
+  map: { width, height: height, position: 'absolute' },
+  shade: { ...StyleSheet.absoluteFillObject },
 
   backBtn: {
     position: 'absolute', top: 50, left: 20,
-    width: 40, height: 40, borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center'
+    width: 44, height: 44, borderRadius: 22,
+    backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', zIndex: 10,
+    borderWidth: 1, borderColor: "rgba(255,255,255,0.2)"
   },
 
-  bottomSheet: {
-    position: 'absolute', bottom: 0, width: '100%',
+  sheetContainer: {
     borderTopLeftRadius: 30, borderTopRightRadius: 30,
-    paddingTop: 25, paddingBottom: 40,
-    elevation: 20, shadowColor: "#000", shadowOffset: { height: -5, width: 0 }, shadowOpacity: 0.3, shadowRadius: 10
+    overflow: 'hidden',
+    width: '100%',
+    elevation: 20, shadowColor: "#000", shadowOffset: { width: 0, height: -10 }, shadowOpacity: 0.5, shadowRadius: 20
   },
-  sheetTitle: {
-    fontSize: 18, fontWeight: "700", marginLeft: 25, marginBottom: 15
+  sheetGradient: {
+    paddingTop: 15,
+    paddingBottom: 20
   },
-  scrollContainer: { paddingHorizontal: 20, paddingBottom: 20 },
 
+  handle: { width: 40, height: 4, borderRadius: 2, backgroundColor: '#555', alignSelf: 'center', marginBottom: 20, opacity: 0.5 },
+
+  classicTitle: {
+    fontSize: 20, fontWeight: "800", marginLeft: 25,
+    letterSpacing: 2, // Classic spacing
+    textTransform: 'uppercase'
+  },
+  classicSub: {
+    fontSize: 13, marginLeft: 25, marginBottom: 20,
+    fontStyle: 'italic', opacity: 0.7
+  },
+
+  scrollList: {
+    paddingHorizontal: 25, alignItems: 'center', gap: 15
+  },
   card: {
-    width: 90, height: 110,
-    backgroundColor: "#2A3B55",
-    borderRadius: 18,
-    marginRight: 12,
+    width: 100, height: 130,
+    borderRadius: 16,
     alignItems: 'center', justifyContent: 'center',
-    borderWidth: 2, borderColor: "transparent"
-  },
-  cardSelected: {
-    backgroundColor: "#FFD400",
-    borderColor: "#FFD400",
-    elevation: 10, shadowColor: "#FFD400", shadowOpacity: 0.5, shadowRadius: 8
+    padding: 5,
   },
 
-  iconContainer: {
-    width: 50, height: 50, marginBottom: 8, justifyContent: 'center', alignItems: 'center'
-  },
-  icon: { width: 45, height: 45 },
+  iconBox: { flex: 1, justifyContent: 'center', alignItems: 'center', marginBottom: 5 },
+  typeIcon: { width: 55, height: 40 },
+  typeLabel: { fontSize: 11, marginBottom: 8, fontWeight: "600", textTransform: 'uppercase', letterSpacing: 0.5, textAlign: 'center' },
 
-  label: { color: "#9FB5C2", fontSize: 13, fontWeight: "600" },
-  labelSelected: { color: "#000", fontWeight: "800" },
-
-  selectedDot: {
+  goldBadge: {
     position: 'absolute', top: 8, right: 8,
-    width: 8, height: 8, borderRadius: 4, backgroundColor: "#000"
+    width: 16, height: 16, borderRadius: 8,
+    backgroundColor: '#D4AF37', justifyContent: 'center', alignItems: 'center'
   },
 
-  marker: {
-    width: 30, height: 30, borderRadius: 15, justifyContent: 'center', alignItems: 'center',
-    borderWidth: 2, borderColor: "#FFF"
+  footer: {
+    width: '100%',
+    padding: 25, paddingBottom: 20, borderTopWidth: 1,
+    marginTop: 10
   },
-
-  fabContainer: { alignSelf: 'center', marginTop: 10 },
-  fab: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: "#FFD400", paddingVertical: 16, paddingHorizontal: 40,
-    borderRadius: 30,
-    elevation: 10, shadowColor: "#FFD400", shadowOpacity: 0.4, shadowRadius: 10
+  mainBtn: {
+    flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 10,
+    padding: 16, borderRadius: 12,
+    shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.4, shadowRadius: 10, elevation: 8
   },
-  fabText: { fontWeight: "800", fontSize: 16, marginRight: 8, color: "#000", letterSpacing: 1 }
+  btnText: { fontSize: 16, fontWeight: "700", color: "#000", textTransform: 'uppercase', letterSpacing: 1.5 }
 });

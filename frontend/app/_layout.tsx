@@ -95,7 +95,6 @@ export default function RootLayout() {
             <Stack.Screen name="phoneAuth" />
             <Stack.Screen name="otp" />
             <Stack.Screen name="detail" />
-            <Stack.Screen name="sample" />
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="parking" />
             <Stack.Screen name="Mechanic" />

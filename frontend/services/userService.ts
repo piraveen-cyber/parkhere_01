@@ -7,6 +7,12 @@ export interface UserProfile {
     phone?: string;
     gender?: string;
     vehiclePlate?: string;
+    avatarUrl?: string;
+    vehicleModel?: string;
+    vehicleType?: string;
+    vehicleBrand?: string;
+    fuelType?: string;
+    transmission?: string;
 }
 
 export const updateUserProfile = async (data: UserProfile) => {

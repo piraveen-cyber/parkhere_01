@@ -8,6 +8,12 @@ export const createUserSchema = object({
         phone: string().optional(),
         gender: string().optional(),
         vehiclePlate: string().optional(),
+        vehicleModel: string().optional(),
+        vehicleType: string().optional(),
+        vehicleBrand: string().optional(),
+        fuelType: string().optional(),
+        transmission: string().optional(),
+        avatarUrl: string().optional(),
     }),
 });
 
@@ -18,6 +24,12 @@ export const updateUserSchema = object({
         phone: string().optional(),
         gender: string().optional(),
         vehiclePlate: string().optional(),
+        vehicleModel: string().optional(),
+        vehicleType: string().optional(),
+        vehicleBrand: string().optional(),
+        fuelType: string().optional(),
+        transmission: string().optional(),
+        avatarUrl: string().optional(),
     }),
 });
 
