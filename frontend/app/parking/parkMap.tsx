@@ -104,7 +104,7 @@ export default function ParkMapScanUpgraded() {
 
     // Navigate
     const timer = setTimeout(() => {
-      router.replace("../parking/selectParking");
+      router.replace("/parking/selectParking");
     }, 3500);
 
     return () => clearTimeout(timer);

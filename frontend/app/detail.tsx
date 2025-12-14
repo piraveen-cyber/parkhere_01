@@ -68,6 +68,24 @@ const Toast = ({ message, visible, onHide }: { message: string, visible: boolean
 };
 
 // Extracted InputField component with Ref Forwarding support
+interface InputFieldProps {
+  icon: any;
+  label: string;
+  placeholder: string;
+  value: string;
+  onChange?: (text: string) => void;
+  optional?: boolean;
+  isSelector?: boolean;
+  onSelect?: () => void;
+  t: (key: string) => string;
+  error?: string;
+  onLayout?: (event: LayoutChangeEvent) => void;
+  inputRef?: React.RefObject<TextInput>;
+  onSubmitEditing?: () => void;
+  returnKeyType?: 'done' | 'go' | 'next' | 'search' | 'send';
+  blurOnSubmit?: boolean;
+}
+
 const InputField = ({
   icon,
   label,
@@ -80,12 +98,11 @@ const InputField = ({
   t,
   error,
   onLayout,
-  // New props for focus handling
   inputRef,
   onSubmitEditing,
   returnKeyType,
   blurOnSubmit = false
-}: any) => (
+}: InputFieldProps) => (
   <View style={styles.inputGroup} onLayout={onLayout}>
     <Text style={styles.label}>
       {label} {optional && <Text style={styles.optionalText}>({t("optional")})</Text>}
