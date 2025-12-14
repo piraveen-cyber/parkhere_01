@@ -37,7 +37,7 @@ export default function AddParkingStep7() {
             Alert.alert(t('error'), t('missingDocs'));
             return;
         }
-        router.push("/add-parking/step8");
+        router.push("../add-parking/step8");
     };
 
     const UploadCard = ({ id, label, image }: any) => (

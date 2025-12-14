@@ -38,6 +38,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const paymentController = __importStar(require("../controllers/paymentController"));
+const authMiddleware_1 = require("../middleware/authMiddleware");
 const router = express_1.default.Router();
-router.post('/create-payment-intent', paymentController.createPaymentIntent);
+router.post('/create-payment-intent', authMiddleware_1.verifyToken, paymentController.createPaymentIntent);
+router.post('/', authMiddleware_1.verifyToken, paymentController.processPayment); // Process generic/simulated payment
 exports.default = router;

@@ -39,7 +39,16 @@ const ServiceRequestSchema = new mongoose_1.Schema({
     bookingId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Booking' },
     serviceType: {
         type: String,
-        enum: ['mechanic', 'towing', 'ev_charging', 'car_wash', 'battery_jump', 'tyre_puncture'],
+        enum: [
+            // Standard
+            'mechanic', 'towing', 'ev_charging', 'car_wash', 'battery_jump', 'tyre_puncture',
+            // Light Vehicle
+            'engine', 'tire', 'jump', 'wash',
+            // Heavy Vehicle
+            'heavy_tow', 'air_brake', 'hydraulics', 'tire_heavy',
+            // EV
+            'charge', 'battery_swap', 'sw_update', 'port_check'
+        ],
         required: true
     },
     status: {

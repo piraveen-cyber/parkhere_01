@@ -41,46 +41,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.scanBooking = exports.getUserBookings = exports.createBooking = void 0;
-const Booking_1 = __importDefault(require("../models/Booking")); // Direct model access for now, or use service
+exports.extendBooking = exports.scanBooking = exports.getUserBookings = exports.createBooking = void 0;
 const bookingService = __importStar(require("../services/bookingService"));
 const createBooking = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { userId, parkingSpotId, startTime, endTime, totalPrice } = req.body;
-        const start = new Date(startTime);
-        const end = new Date(endTime);
-        // Check for overlap
-        // Overlap condition: (StartA < EndB) and (EndA > StartB)
-        const overlappingBooking = yield Booking_1.default.findOne({
-            parkingSpotId,
-            status: { $in: ['active', 'pending'] },
-            $or: [
-                {
-                    startTime: { $lt: end },
-                    endTime: { $gt: start }
-                }
-            ]
-        });
-        if (overlappingBooking) {
-            return res.status(409).json({ message: 'Parking spot is not available for the selected time period.' });
-        }
-        const savedBooking = yield bookingService.createBooking({
-            userId,
-            parkingSpotId,
-            startTime: start,
-            endTime: end,
-            totalPrice,
-            status: 'active', // Auto-activate for now, assuming payment success handled on frontend
-            paymentStatus: 'paid'
-        });
+        const savedBooking = yield bookingService.createBooking(req.body);
         res.status(201).json(savedBooking);
     }
     catch (error) {
-        res.status(500).json({ message: 'Error creating booking', error });
+        console.error("Create Booking Error:", error);
+        res.status(500).json({ message: error.message || 'Error creating booking' });
     }
 });
 exports.createBooking = createBooking;
@@ -100,57 +71,26 @@ const scanBooking = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         if (!bookingId) {
             return res.status(400).json({ message: 'Booking ID is required' });
         }
-        const booking = yield Booking_1.default.findById(bookingId);
-        if (!booking) {
-            return res.status(404).json({ message: 'Booking not found' });
-        }
-        // Logic:
-        // 1. If Active/Paid AND Not Checked In -> Check In
-        // 2. If Active/Paid AND Checked In -> Check Out and Calculate Fee
-        // Check In (Logic 1)
-        if (!booking.actualCheckInTime) {
-            if (booking.status === 'completed' || booking.status === 'cancelled') {
-                return res.status(400).json({ message: 'Booking is invalid for check-in' });
-            }
-            booking.actualCheckInTime = new Date();
-            yield booking.save();
-            return res.json({ message: 'Check-in successful', type: 'check-in', booking });
-        }
-        // Check Out (Logic 2)
-        if (booking.actualCheckInTime && !booking.actualCheckOutTime) {
-            const checkOutTime = new Date();
-            booking.actualCheckOutTime = checkOutTime;
-            // Calculate Overstay
-            let extraFee = 0;
-            const endTime = new Date(booking.endTime);
-            // If checked out after booked end time + grace period (e.g. 15 mins)
-            const gracePeriodMs = 15 * 60 * 1000;
-            if (checkOutTime.getTime() > (endTime.getTime() + gracePeriodMs)) {
-                // Determine overstay duration in hours (ceil)
-                const overstayMs = checkOutTime.getTime() - endTime.getTime();
-                const overstayHours = Math.ceil(overstayMs / (1000 * 60 * 60));
-                // Assume strict rate of $10/hour for penalty or fetching spot rate (simplified here)
-                const penaltyRate = 10;
-                extraFee = overstayHours * penaltyRate;
-                booking.extraFee = extraFee;
-                // Since user wants "Auto Deduct", we simulate it here.
-                // In real world: await stripe.chargeSavedCard(...)
-                booking.paymentStatus = 'paid'; // Marking extra fee as paid (simulated auto-deduct)
-            }
-            booking.status = 'completed';
-            yield booking.save();
-            const message = extraFee > 0
-                ? `Check-out successful. Overstay fee of $${extraFee} has been auto-deducted.`
-                : 'Check-out successful';
-            return res.json({ message, type: 'check-out', extraFee, booking });
-        }
-        // Already Checked Out
-        if (booking.actualCheckOutTime) {
-            return res.status(400).json({ message: 'Booking already checked out' });
-        }
+        const result = yield bookingService.processScan(bookingId);
+        res.json(result);
     }
     catch (error) {
         res.status(500).json({ message: error.message });
     }
 });
 exports.scanBooking = scanBooking;
+const extendBooking = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { bookingId } = req.params;
+        const { extraHours } = req.body;
+        if (!bookingId || !extraHours) {
+            return res.status(400).json({ message: 'Booking ID and extra hours are required' });
+        }
+        const result = yield bookingService.extendBooking(bookingId, parseInt(extraHours));
+        res.json(result);
+    }
+    catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+exports.extendBooking = extendBooking;

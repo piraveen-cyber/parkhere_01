@@ -1,4 +1,37 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8,31 +41,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAllUsers = exports.getAllBookings = exports.getStats = void 0;
-const Booking_1 = __importDefault(require("../models/Booking"));
-const User_1 = __importDefault(require("../models/User"));
-const ParkingSpot_1 = __importDefault(require("../models/ParkingSpot"));
+const adminService = __importStar(require("../services/adminService"));
 const getStats = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const totalUsers = yield User_1.default.countDocuments();
-        const totalBookings = yield Booking_1.default.countDocuments();
-        const totalParkingSpots = yield ParkingSpot_1.default.countDocuments();
-        // Calculate total revenue from active/completed bookings
-        const revenueResult = yield Booking_1.default.aggregate([
-            { $match: { status: { $in: ['active', 'completed'] } } },
-            { $group: { _id: null, total: { $sum: '$totalPrice' } } }
-        ]);
-        const totalRevenue = revenueResult.length > 0 ? revenueResult[0].total : 0;
-        res.json({
-            totalUsers,
-            totalBookings,
-            totalParkingSpots,
-            totalRevenue
-        });
+        const stats = yield adminService.getSystemStats();
+        res.json(stats);
     }
     catch (error) {
         res.status(500).json({ message: error.message });
@@ -41,7 +56,7 @@ const getStats = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 exports.getStats = getStats;
 const getAllBookings = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const bookings = yield Booking_1.default.find().populate('parkingSpotId');
+        const bookings = yield adminService.getAllBookings();
         res.json(bookings);
     }
     catch (error) {
@@ -51,7 +66,7 @@ const getAllBookings = (req, res) => __awaiter(void 0, void 0, void 0, function*
 exports.getAllBookings = getAllBookings;
 const getAllUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const users = yield User_1.default.find();
+        const users = yield adminService.getAllUsers();
         res.json(users);
     }
     catch (error) {
