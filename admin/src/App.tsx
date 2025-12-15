@@ -10,6 +10,8 @@ import PlaceholderPage from './pages/PlaceholderPage';
 import ReportsManagement from './pages/ReportsManagement';
 import MechanicManagement from './pages/MechanicManagement';
 import CustomerManagement from './pages/CustomerManagement';
+import BookingsManagement from './pages/BookingsManagement';
+import ServiceManagement from './pages/ServiceManagement';
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -33,8 +35,8 @@ function AppRoutes() {
         <Route path="users" element={<CustomerManagement />} />
         <Route path="partners" element={<Partners />} />
         <Route path="mechanics" element={<MechanicManagement />} />
-        <Route path="services" element={<PlaceholderPage title="Service Control" />} />
-        <Route path="bookings" element={<PlaceholderPage title="Booking Management" />} />
+        <Route path="services" element={<ServiceManagement />} />
+        <Route path="bookings" element={<BookingsManagement />} />
         <Route path="problems" element={<ReportsManagement />} />
         <Route path="notifications" element={<PlaceholderPage title="Notification Center" />} />
         <Route path="roles" element={<PlaceholderPage title="Admin Roles" />} />
