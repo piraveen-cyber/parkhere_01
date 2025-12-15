@@ -1,116 +1,126 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, StatusBar, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
+import { Ionicons, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+
+const { width } = Dimensions.get('window');
 
 export default function GarageDashboard() {
     const router = useRouter();
+    const [stats] = useState({
+        revenue: 45200,
+        appointments: 8,
+        rating: 4.7
+    });
 
-    const QuickAction = ({ icon, label, onPress, color }: any) => (
-        <TouchableOpacity style={styles.actionBtn} onPress={onPress}>
-            <View style={[styles.iconCircle, { backgroundColor: 'rgba(255,255,255,0.05)' }]}>
-                {icon}
+    const QuickAction = ({ icon, label, color, route }: any) => (
+        <TouchableOpacity style={styles.actionBtn} onPress={() => router.push(route)}>
+            <View style={[styles.actionIcon, { backgroundColor: color + '20' }]}>
+                <Ionicons name={icon} size={24} color={color} />
             </View>
-            <Text style={styles.actionLabel}>{label}</Text>
+            <Text style={styles.actionText}>{label}</Text>
         </TouchableOpacity>
     );
 
     return (
         <View style={styles.container}>
-            <LinearGradient colors={['#000000', '#1c1c1c']} style={StyleSheet.absoluteFill} />
+            <StatusBar barStyle="light-content" />
+            <LinearGradient colors={['#000000', '#0a0a1a']} style={StyleSheet.absoluteFill} />
 
             <SafeAreaView style={{ flex: 1 }}>
+
                 {/* HEADER */}
                 <View style={styles.header}>
-                    <View>
-                        <Text style={styles.greeting}>Welcome back,</Text>
-                        <Text style={styles.garageName}>AutoFix Garage</Text>
-                    </View>
-                    <TouchableOpacity onPress={() => router.push('/partner/garage/profile' as any)}>
+                    <View style={styles.profileHeader}>
                         <Image
-                            source={{ uri: 'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?q=80&w=2670&auto=format&fit=crop' }}
-                            style={styles.profilePic}
+                            source={{ uri: 'https://images.unsplash.com/photo-1487754180477-db33d3808b14?w=400&auto=format&fit=crop&q=60' }}
+                            style={styles.avatar}
                         />
+                        <View>
+                            <Text style={styles.greeting}>Welcome,</Text>
+                            <Text style={styles.name}>AutoFix Center</Text>
+                        </View>
+                    </View>
+                    <TouchableOpacity
+                        style={styles.profileIcon}
+                        onPress={() => router.push('/partner/garage/profile' as any)}
+                    >
+                        <Ionicons name="settings-outline" size={24} color="#FFF" />
                     </TouchableOpacity>
                 </View>
 
-                <ScrollView contentContainerStyle={styles.scrollContent}>
+                <ScrollView contentContainerStyle={styles.content}>
+
+                    {/* STATUS CARD */}
+                    <LinearGradient
+                        colors={['#2962FF', '#0039Cb']}
+                        style={styles.statusCard}
+                        start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+                    >
+                        <View style={styles.statusRow}>
+                            <View>
+                                <Text style={styles.statusLabel}>TODAY'S OVERVIEW</Text>
+                                <Text style={styles.statusValue}>{stats.appointments} Appointments</Text>
+                            </View>
+                            <View style={styles.iconOpac}>
+                                <MaterialCommunityIcons name="calendar-clock" size={40} color="#FFF" />
+                            </View>
+                        </View>
+                        <Text style={styles.statusSub}>3 In Progress • 2 Completed • 3 Pending</Text>
+                    </LinearGradient>
 
                     {/* STATS ROW */}
                     <View style={styles.statsRow}>
-                        <LinearGradient colors={['#1a1a1a', '#000']} style={styles.statCard}>
-                            <Text style={styles.statLabel}>Today's Revenue</Text>
-                            <Text style={styles.statValue}>$450</Text>
-                        </LinearGradient>
-                        <LinearGradient colors={['#1a1a1a', '#000']} style={styles.statCard}>
-                            <Text style={styles.statLabel}>Appointments</Text>
-                            <Text style={styles.statValue}>8 <Text style={styles.subStat}>/ 12</Text></Text>
-                        </LinearGradient>
-                    </View>
-
-                    {/* UPCOMING SCHEDULE */}
-                    <View style={styles.section}>
-                        <View style={styles.sectionHeader}>
-                            <Text style={styles.sectionTitle}>Up Next</Text>
-                            <TouchableOpacity onPress={() => router.push('/partner/garage/appointments' as any)}>
-                                <Text style={styles.seeAll}>View All</Text>
-                            </TouchableOpacity>
+                        <View style={styles.statCard}>
+                            <Text style={styles.statLabel}>Revenue</Text>
+                            <Text style={styles.statValue}>LKR {stats.revenue.toLocaleString()}</Text>
                         </View>
-
-                        {/* Appointment Card 1 */}
-                        <View style={styles.apptCard}>
-                            <View style={styles.timeTag}>
-                                <Text style={styles.timeText}>10:00 AM</Text>
-                            </View>
-                            <View style={styles.apptDetails}>
-                                <Text style={styles.clientName}>John Doe</Text>
-                                <Text style={styles.carModel}>Toyota Prius • Full Service</Text>
-                            </View>
-                            <TouchableOpacity style={styles.statusBtn}>
-                                <Text style={styles.statusText}>START</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        {/* Appointment Card 2 */}
-                        <View style={styles.apptCard}>
-                            <View style={[styles.timeTag, { backgroundColor: '#333' }]}>
-                                <Text style={[styles.timeText, { color: '#888' }]}>11:30 AM</Text>
-                            </View>
-                            <View style={styles.apptDetails}>
-                                <Text style={styles.clientName}>Sarah Smith</Text>
-                                <Text style={styles.carModel}>Suzuki Alto • Oil Change</Text>
-                            </View>
-                            <View style={styles.pendingTag}>
-                                <Text style={styles.pendingText}>PENDING</Text>
-                            </View>
+                        <View style={styles.statCard}>
+                            <Text style={styles.statLabel}>Rating</Text>
+                            <Text style={styles.statValue}>{stats.rating} ★</Text>
                         </View>
                     </View>
 
-                    {/* MENU GRID */}
-                    <Text style={styles.menuTitle}>Management</Text>
-                    <View style={styles.grid}>
-                        <QuickAction
-                            label="Appointments"
-                            icon={<Ionicons name="calendar" size={24} color="#FFD700" />}
-                            onPress={() => router.push('/partner/garage/appointments' as any)}
-                        />
-                        <QuickAction
-                            label="Services"
-                            icon={<MaterialCommunityIcons name="tools" size={24} color="#00C851" />}
-                            onPress={() => router.push('/partner/garage/services' as any)}
-                        />
-                        <QuickAction
-                            label="Reviews"
-                            icon={<Ionicons name="star" size={24} color="#FF4444" />}
-                            onPress={() => { }}
-                        />
-                        <QuickAction
-                            label="Settings"
-                            icon={<Ionicons name="settings-sharp" size={24} color="#AAA" />}
-                            onPress={() => { }}
-                        />
+                    {/* QUICK ACTIONS */}
+                    <Text style={styles.sectionTitle}>Manage Workshop</Text>
+                    <View style={styles.actionsGrid}>
+                        <QuickAction icon="calendar-outline" label="Appointments" color="#2962FF" route="/partner/garage/appointments" />
+                        <QuickAction icon="list-outline" label="Services" color="#00E5FF" route="/partner/garage/services" />
+                        <QuickAction icon="stats-chart-outline" label="Reports" color="#FFD700" route="/partner/garage/reports" />
+                        <QuickAction icon="star-outline" label="Reviews" color="#FF4444" route="/partner/garage/reviews" />
+                    </View>
+
+                    {/* UPCOMING APPOINTMENT */}
+                    <Text style={styles.sectionTitle}>Next Up</Text>
+
+                    <View style={styles.jobItem}>
+                        <View style={[styles.iconBox, { backgroundColor: '#333' }]}>
+                            <Ionicons name="car-sport" size={20} color="#AAA" />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Text style={styles.jobTitle}>Toyota Axio (CAB-1234)</Text>
+                            <Text style={styles.jobSub}>Full Service + Oil Change</Text>
+                        </View>
+                        <View style={{ alignItems: 'flex-end' }}>
+                            <Text style={styles.jobTime}>10:00 AM</Text>
+                            <Text style={styles.statusTag}>Pending</Text>
+                        </View>
+                    </View>
+
+                    <View style={styles.jobItem}>
+                        <View style={[styles.iconBox, { backgroundColor: '#333' }]}>
+                            <Ionicons name="car-sport" size={20} color="#AAA" />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Text style={styles.jobTitle}>Nissan Leaf (BE-5921)</Text>
+                            <Text style={styles.jobSub}>Battery Inspection</Text>
+                        </View>
+                        <View style={{ alignItems: 'flex-end' }}>
+                            <Text style={styles.jobTime}>11:30 AM</Text>
+                            <Text style={styles.statusTag}>Confirmed</Text>
+                        </View>
                     </View>
 
                 </ScrollView>
@@ -121,38 +131,38 @@ export default function GarageDashboard() {
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#000' },
-    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 25 },
-    greeting: { fontSize: 14, color: '#AAA' },
-    garageName: { fontSize: 24, fontWeight: 'bold', color: '#FFF' },
-    profilePic: { width: 45, height: 45, borderRadius: 25, borderWidth: 2, borderColor: '#FFD700' },
+    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20 },
+    profileHeader: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    avatar: { width: 50, height: 50, borderRadius: 25, borderWidth: 2, borderColor: '#2962FF' },
+    greeting: { color: '#888', fontSize: 12, textTransform: 'uppercase' },
+    name: { color: '#FFF', fontSize: 18, fontWeight: 'bold' },
+    profileIcon: { width: 44, height: 44, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 22, justifyContent: 'center', alignItems: 'center' },
 
-    scrollContent: { paddingHorizontal: 25, paddingBottom: 50 },
+    content: { padding: 20 },
+
+    statusCard: { borderRadius: 20, padding: 25, marginBottom: 25, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+    statusRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 },
+    statusLabel: { fontSize: 12, fontWeight: 'bold', letterSpacing: 1, color: 'rgba(255,255,255,0.8)' },
+    statusValue: { fontSize: 24, fontWeight: '900', color: '#FFF' },
+    statusSub: { color: 'rgba(255,255,255,0.9)', fontSize: 13 },
+    iconOpac: { opacity: 0.8 },
 
     statsRow: { flexDirection: 'row', gap: 15, marginBottom: 30 },
-    statCard: { flex: 1, padding: 20, borderRadius: 16, borderWidth: 1, borderColor: '#333' },
+    statCard: { flex: 1, backgroundColor: '#101018', padding: 20, borderRadius: 16, borderWidth: 1, borderColor: '#222' },
     statLabel: { color: '#888', fontSize: 12, marginBottom: 5 },
-    statValue: { color: '#FFF', fontSize: 28, fontWeight: 'bold' },
-    subStat: { fontSize: 14, color: '#666' },
+    statValue: { color: '#2962FF', fontSize: 20, fontWeight: 'bold' },
 
-    section: { marginBottom: 30 },
-    sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 },
-    sectionTitle: { color: '#FFF', fontSize: 18, fontWeight: 'bold' },
-    seeAll: { color: '#FFD700', fontSize: 14 },
+    sectionTitle: { color: '#FFF', fontSize: 18, fontWeight: 'bold', marginBottom: 15 },
 
-    apptCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#1F1F1F', padding: 15, borderRadius: 16, marginBottom: 10 },
-    timeTag: { backgroundColor: '#FFD700', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8, marginRight: 15 },
-    timeText: { fontWeight: 'bold', fontSize: 12, color: '#000' },
-    apptDetails: { flex: 1 },
-    clientName: { color: '#FFF', fontWeight: 'bold', fontSize: 16 },
-    carModel: { color: '#AAA', fontSize: 12 },
-    statusBtn: { backgroundColor: '#00C851', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
-    statusText: { color: '#FFF', fontWeight: 'bold', fontSize: 10 },
-    pendingTag: { borderWidth: 1, borderColor: '#666', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
-    pendingText: { color: '#666', fontWeight: 'bold', fontSize: 10 },
+    actionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 15, marginBottom: 30 },
+    actionBtn: { width: (width - 55) / 2, backgroundColor: '#101018', padding: 20, borderRadius: 16, alignItems: 'center', borderWidth: 1, borderColor: '#222' },
+    actionIcon: { width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center', marginBottom: 10 },
+    actionText: { color: '#FFF', fontSize: 14, fontWeight: '600' },
 
-    menuTitle: { color: '#FFF', fontSize: 18, fontWeight: 'bold', marginBottom: 15 },
-    grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 15 },
-    actionBtn: { width: '47%', backgroundColor: '#1F1F1F', padding: 20, borderRadius: 16, alignItems: 'center' },
-    iconCircle: { width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center', marginBottom: 10 },
-    actionLabel: { color: '#FFF', fontWeight: 'bold' }
+    jobItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#101018', padding: 15, borderRadius: 16, marginBottom: 10, borderWidth: 1, borderColor: '#222' },
+    iconBox: { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginRight: 15 },
+    jobTitle: { color: '#FFF', fontSize: 14, fontWeight: 'bold', marginBottom: 2 },
+    jobSub: { color: '#666', fontSize: 12 },
+    jobTime: { color: '#FFF', fontSize: 14, fontWeight: 'bold', marginBottom: 2 },
+    statusTag: { color: '#2962FF', fontSize: 10, fontWeight: 'bold', textTransform: 'uppercase' }
 });

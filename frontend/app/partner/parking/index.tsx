@@ -73,7 +73,7 @@ export default function ParkingDashboard() {
                                 <Text style={styles.heroLabel}>Weekly Revenue</Text>
                                 <Text style={styles.heroValue}>LKR 45,200<Text style={styles.currency}>.00</Text></Text>
                             </View>
-                            <TouchableOpacity style={styles.reportBtn}>
+                            <TouchableOpacity style={styles.reportBtn} onPress={() => router.push('/partner/parking/reports' as any)}>
                                 <Text style={styles.reportText}>Report ›</Text>
                             </TouchableOpacity>
                         </View>
@@ -133,7 +133,10 @@ export default function ParkingDashboard() {
                             </View>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={[styles.liveCard, { borderStyle: 'dashed', borderWidth: 1, borderColor: '#333', justifyContent: 'center', alignItems: 'center' }]}>
+                        <TouchableOpacity
+                            style={[styles.liveCard, { borderStyle: 'dashed', borderWidth: 1, borderColor: '#333', justifyContent: 'center', alignItems: 'center' }]}
+                            onPress={() => router.push('/partner/parking/addLot' as any)}
+                        >
                             <Ionicons name="add" size={30} color="#666" />
                             <Text style={{ color: '#666', fontWeight: 'bold', marginTop: 5 }}>Add Lot</Text>
                         </TouchableOpacity>
@@ -158,10 +161,22 @@ export default function ParkingDashboard() {
                             gradient={['#4facfe', '#00f2fe']}
                             onPress={() => router.push('/partner/parking/lots' as any)}
                         />
+                    </View>
+                    <View style={styles.actionsGrid}>
                         <ActionButton
                             icon="calendar-outline" label="Bookings"
                             gradient={['#FF416C', '#FF4B2B']}
                             onPress={() => router.push('/partner/parking/bookings' as any)}
+                        />
+                        <ActionButton
+                            icon="stats-chart-outline" label="Reports"
+                            gradient={['#8E2DE2', '#4A00E0']}
+                            onPress={() => router.push('/partner/parking/reports' as any)}
+                        />
+                        <ActionButton
+                            icon="star-outline" label="Reviews"
+                            gradient={['#f12711', '#f5af19']}
+                            onPress={() => router.push('/partner/parking/reviews' as any)}
                         />
                     </View>
 
@@ -248,7 +263,7 @@ const styles = StyleSheet.create({
     progressFill: { height: '100%', borderRadius: 2 },
 
     // ACTIONS
-    actionsGrid: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 35 },
+    actionsGrid: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 },
     actionBtn: { alignItems: 'center', width: 70 },
     actionIcon: { width: 56, height: 56, borderRadius: 20, justifyContent: 'center', alignItems: 'center', marginBottom: 8, shadowColor: '#FFD700', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, elevation: 5 },
     actionText: { color: '#888', fontSize: 11, fontWeight: '600' },
