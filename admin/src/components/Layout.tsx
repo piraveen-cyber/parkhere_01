@@ -25,7 +25,7 @@ export default function Layout() {
     const menuItems = [
         { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
         { icon: FileText, label: 'Reports Management', path: '/problems', badge: true },
-        { icon: Wrench, label: 'Mechanic Management', path: '/partners' }, // Mapped to Partners
+        { icon: Wrench, label: 'Mechanic Management', path: '/mechanics' },
         { icon: Users, label: 'Customer Management', path: '/users' },
         { icon: Calendar, label: 'Bookings', path: '/bookings' },
         { icon: CreditCard, label: 'Payments & Comm.', path: '/services' }, // Mapped to Services/Revenue
@@ -62,8 +62,8 @@ export default function Layout() {
                                 key={item.path}
                                 to={item.path}
                                 className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group ${active
-                                        ? 'bg-yellow-400 text-slate-900 shadow-lg shadow-yellow-400/20 translate-x-1'
-                                        : 'text-slate-300 hover:bg-white/10 hover:text-white hover:translate-x-1'
+                                    ? 'bg-yellow-400 text-slate-900 shadow-lg shadow-yellow-400/20 translate-x-1'
+                                    : 'text-slate-300 hover:bg-white/10 hover:text-white hover:translate-x-1'
                                     }`}
                             >
                                 <div className="flex items-center gap-3">

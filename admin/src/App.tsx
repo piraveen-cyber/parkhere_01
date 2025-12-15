@@ -8,6 +8,7 @@ import Partners from './pages/Partners';
 import Logs from './pages/Logs';
 import PlaceholderPage from './pages/PlaceholderPage';
 import ReportsManagement from './pages/ReportsManagement';
+import MechanicManagement from './pages/MechanicManagement';
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -30,6 +31,7 @@ function AppRoutes() {
         <Route index element={<Dashboard />} />
         <Route path="users" element={<PlaceholderPage title="User Management" />} />
         <Route path="partners" element={<Partners />} />
+        <Route path="mechanics" element={<MechanicManagement />} />
         <Route path="services" element={<PlaceholderPage title="Service Control" />} />
         <Route path="bookings" element={<PlaceholderPage title="Booking Management" />} />
         <Route path="problems" element={<ReportsManagement />} />
