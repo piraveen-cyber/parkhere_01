@@ -52,7 +52,11 @@ const BookingSchema = new mongoose_1.Schema({
         type: String,
         enum: ['paid', 'pending', 'unpaid', 'refunded'],
         default: 'paid' // Assuming initial booking is paid
-    }
+    },
+    commissionAmount: { type: Number, default: 0 },
+    platformEarning: { type: Number, default: 0 },
+    partnerEarning: { type: Number, default: 0 },
+    partnerId: { type: String } // Supabase/Partner ID
 }, {
     timestamps: true
 });

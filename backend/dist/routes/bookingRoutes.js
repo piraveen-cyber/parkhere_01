@@ -47,4 +47,6 @@ router.post('/', (0, validateResource_1.default)(booking_schema_1.createBookingS
 router.get('/:userId', bookingController.getUserBookings);
 // POST /api/bookings/scan - QR Scan for Check-In/Out
 router.post('/scan', bookingController.scanBooking);
+// POST /api/bookings/:bookingId/extend - Extend Booking Time
+router.post('/:bookingId/extend', bookingController.extendBooking);
 exports.default = router;

@@ -10,6 +10,8 @@ import userRoutes from './routes/userRoutes';
 import paymentRoutes from './routes/paymentRoutes';
 import adminRoutes from './routes/adminRoutes';
 import serviceRoutes from './routes/serviceRoutes';
+import problemRoutes from './routes/problemRoutes';
+import auditRoutes from './routes/auditRoutes';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -30,6 +32,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/services', serviceRoutes);
+app.use('/api/problems', problemRoutes);
+app.use('/api/logs', auditRoutes);
 
 // Basic Route
 app.get('/', (req, res) => {

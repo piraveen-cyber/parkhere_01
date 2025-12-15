@@ -14,6 +14,7 @@ const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
 const paymentRoutes_1 = __importDefault(require("./routes/paymentRoutes"));
 const adminRoutes_1 = __importDefault(require("./routes/adminRoutes"));
 const serviceRoutes_1 = __importDefault(require("./routes/serviceRoutes"));
+const problemRoutes_1 = __importDefault(require("./routes/problemRoutes"));
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5000;
 // Middleware
@@ -30,6 +31,7 @@ app.use('/api/users', userRoutes_1.default);
 app.use('/api/payments', paymentRoutes_1.default);
 app.use('/api/admin', adminRoutes_1.default);
 app.use('/api/services', serviceRoutes_1.default);
+app.use('/api/problems', problemRoutes_1.default);
 // Basic Route
 app.get('/', (req, res) => {
     res.send('ParkHere Backend is running');

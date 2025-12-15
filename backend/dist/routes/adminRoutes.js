@@ -1,48 +1,23 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const adminController = __importStar(require("../controllers/adminController"));
+const adminController_1 = require("../controllers/adminController");
+const authAdmin_1 = require("../middleware/authAdmin");
+const loginLimiter_1 = require("../middleware/loginLimiter");
+const superAdminController_1 = require("../controllers/superAdminController");
 const router = express_1.default.Router();
-// Get System Stats
-router.get('/stats', adminController.getStats);
-// Get All Bookings
-router.get('/bookings', adminController.getAllBookings);
-// Get All Users
-router.get('/users', adminController.getAllUsers);
+// Auth Routes
+router.post('/auth/login', loginLimiter_1.loginLimiter, adminController_1.loginAdmin); // Protected by rate limiter
+router.post('/auth/register', adminController_1.registerAdmin);
+router.get('/auth/me', authAdmin_1.protectAdmin, adminController_1.getMe);
+// Management Routes (Protected + Super Admin Only) -> Add superAdminOnly middleware later if needed
+router.get('/partners', authAdmin_1.protectAdmin, superAdminController_1.getAllPartners);
+router.put('/partners/:id/kyc', authAdmin_1.protectAdmin, superAdminController_1.updatePartnerKYC);
+router.put('/services/:id', authAdmin_1.protectAdmin, superAdminController_1.updateService);
+router.get('/config', authAdmin_1.protectAdmin, superAdminController_1.getSystemConfig);
+router.put('/config/:key', authAdmin_1.protectAdmin, superAdminController_1.updateSystemConfig);
+router.get('/stats', authAdmin_1.protectAdmin, superAdminController_1.getDashboardStats);
 exports.default = router;

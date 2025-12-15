@@ -12,50 +12,93 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllUsers = exports.getAllBookings = exports.getStats = void 0;
-const Booking_1 = __importDefault(require("../models/Booking"));
-const User_1 = __importDefault(require("../models/User"));
-const ParkingSpot_1 = __importDefault(require("../models/ParkingSpot"));
-const getStats = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const totalUsers = yield User_1.default.countDocuments();
-        const totalBookings = yield Booking_1.default.countDocuments();
-        const totalParkingSpots = yield ParkingSpot_1.default.countDocuments();
-        // Calculate total revenue from active/completed bookings
-        const revenueResult = yield Booking_1.default.aggregate([
-            { $match: { status: { $in: ['active', 'completed'] } } },
-            { $group: { _id: null, total: { $sum: '$totalPrice' } } }
-        ]);
-        const totalRevenue = revenueResult.length > 0 ? revenueResult[0].total : 0;
-        res.json({
-            totalUsers,
-            totalBookings,
-            totalParkingSpots,
-            totalRevenue
+exports.getMe = exports.registerAdmin = exports.loginAdmin = void 0;
+const bcryptjs_1 = __importDefault(require("bcryptjs")); // Need to install types
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const Admin_1 = __importDefault(require("../models/Admin"));
+// Generate JWT
+const generateToken = (id, role) => {
+    return jsonwebtoken_1.default.sign({ id, role }, process.env.JWT_SECRET || 'default_secret_key', {
+        expiresIn: '30d',
+    });
+};
+// @desc    Auth Super Admin & get token
+// @route   POST /api/admin/auth/login
+// @access  Public
+const loginAdmin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { email, password } = req.body;
+    // DEV MODE: Hardcoded Access
+    if (email === "admin@gmail.com" && password === "admin") {
+        const token = jsonwebtoken_1.default.sign({ id: "dev-super-admin", role: "SUPER_ADMIN" }, process.env.JWT_SECRET || "dev_secret", { expiresIn: "30d" });
+        return res.status(200).json({
+            _id: "dev-super-admin",
+            email: "admin@gmail.com",
+            role: "SUPER_ADMIN",
+            token,
         });
     }
-    catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
-exports.getStats = getStats;
-const getAllBookings = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const bookings = yield Booking_1.default.find().populate('parkingSpotId');
-        res.json(bookings);
+        // Check if admin exists
+        const admin = yield Admin_1.default.findOne({ email });
+        if (admin && (yield bcryptjs_1.default.compare(password, admin.passwordHash))) {
+            if (!admin.isActive) {
+                return res.status(403).json({ message: 'Account suspended' });
+            }
+            res.json({
+                _id: admin._id,
+                email: admin.email,
+                role: admin.role,
+                token: generateToken(admin._id, admin.role),
+            });
+        }
+        else {
+            res.status(401).json({ message: 'Invalid email or password' });
+        }
     }
     catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ message: 'Server error' });
     }
 });
-exports.getAllBookings = getAllBookings;
-const getAllUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.loginAdmin = loginAdmin;
+// @desc    Register a new Admin (Initial seeding usually)
+// @route   POST /api/admin/auth/register
+// @access  Super Admin only (or seeded)
+const registerAdmin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { email, password, role } = req.body;
     try {
-        const users = yield User_1.default.find();
-        res.json(users);
+        const adminExists = yield Admin_1.default.findOne({ email });
+        if (adminExists) {
+            return res.status(400).json({ message: 'Admin already exists' });
+        }
+        const salt = yield bcryptjs_1.default.genSalt(10);
+        const passwordHash = yield bcryptjs_1.default.hash(password, salt);
+        const admin = yield Admin_1.default.create({
+            email,
+            passwordHash,
+            role: role || 'SUPER_ADMIN',
+        });
+        if (admin) {
+            res.status(201).json({
+                _id: admin._id,
+                email: admin.email,
+                role: admin.role,
+                token: generateToken(admin._id, admin.role),
+            });
+        }
+        else {
+            res.status(400).json({ message: 'Invalid admin data' });
+        }
     }
     catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ message: 'Server error' });
     }
 });
-exports.getAllUsers = getAllUsers;
+exports.registerAdmin = registerAdmin;
+// @desc    Get current admin profile & validity
+// @route   GET /api/admin/auth/me
+// @access  Private (Admin)
+const getMe = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const admin = yield Admin_1.default.findById(req.admin._id).select('-passwordHash');
+    res.json(admin);
+});
+exports.getMe = getMe;

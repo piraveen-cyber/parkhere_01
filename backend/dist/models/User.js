@@ -41,5 +41,17 @@ const UserSchema = new mongoose_1.Schema({
     phone: { type: String },
     gender: { type: String },
     vehiclePlate: { type: String },
+    vehicleModel: { type: String },
+    vehicleType: { type: String },
+    vehicleBrand: { type: String },
+    fuelType: { type: String, enum: ['petrol', 'diesel', 'electric', 'hybrid'] },
+    transmission: { type: String, enum: ['auto', 'manual'] },
+    avatarUrl: { type: String },
+    disabilityStatus: {
+        type: String,
+        enum: ['none', 'pending', 'verified', 'rejected'],
+        default: 'none'
+    },
+    disabilityDocumentUrl: { type: String }
 }, { timestamps: true });
 exports.default = mongoose_1.default.model('User', UserSchema);

@@ -40,4 +40,5 @@ const express_1 = __importDefault(require("express"));
 const paymentController = __importStar(require("../controllers/paymentController"));
 const router = express_1.default.Router();
 router.post('/create-payment-intent', paymentController.createPaymentIntent);
+router.post('/', paymentController.processPayment); // Process generic/simulated payment
 exports.default = router;

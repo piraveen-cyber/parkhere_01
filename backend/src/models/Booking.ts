@@ -11,6 +11,10 @@ export interface IBooking extends Document {
     actualCheckOutTime?: Date;
     extraFee?: number;
     paymentStatus: 'paid' | 'pending' | 'unpaid' | 'refunded';
+    commissionAmount?: number;
+    platformEarning?: number;
+    partnerEarning?: number;
+    partnerId?: string; // Link to Partner
 }
 
 const BookingSchema: Schema = new Schema({
@@ -31,7 +35,11 @@ const BookingSchema: Schema = new Schema({
         type: String,
         enum: ['paid', 'pending', 'unpaid', 'refunded'],
         default: 'paid' // Assuming initial booking is paid
-    }
+    },
+    commissionAmount: { type: Number, default: 0 },
+    platformEarning: { type: Number, default: 0 },
+    partnerEarning: { type: Number, default: 0 },
+    partnerId: { type: String } // Supabase/Partner ID
 }, {
     timestamps: true
 });
