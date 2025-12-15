@@ -32,13 +32,14 @@ export default function ParkMapScanUpgraded() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   // PARTICLES
-  const particles = Array.from({ length: 6 }).map(() => ({
-    anim: useRef(new Animated.Value(0)).current,
+  // PARTICLES
+  const particles = useRef(Array.from({ length: 6 }).map(() => ({
+    anim: new Animated.Value(0),
     x: Math.random() * 200 - 100,
     y: Math.random() * 200 - 100,
     size: Math.random() * 4 + 2,
     delay: Math.random() * 2000,
-  }));
+  }))).current;
 
   useEffect(() => {
     // 1. Radar Spin

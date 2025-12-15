@@ -80,7 +80,7 @@ export default function MechanicDashboard() {
 
                     {/* DAILY STATS */}
                     <View style={styles.statsContainer}>
-                        <Text style={styles.sectionTitle}>Today's Performance</Text>
+                        <Text style={styles.sectionTitle}>Today&apos;s Performance</Text>
                         <View style={styles.statsRow}>
                             <View style={[styles.statCard, { backgroundColor: '#1B263B' }]}>
                                 <MaterialCommunityIcons name="cash-multiple" size={24} color="#FFD700" />

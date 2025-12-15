@@ -41,7 +41,7 @@ export default function GarageDashboard() {
                     {/* STATS ROW */}
                     <View style={styles.statsRow}>
                         <LinearGradient colors={['#1a1a1a', '#000']} style={styles.statCard}>
-                            <Text style={styles.statLabel}>Today's Revenue</Text>
+                            <Text style={styles.statLabel}>Today&apos;s Revenue</Text>
                             <Text style={styles.statValue}>$450</Text>
                         </LinearGradient>
                         <LinearGradient colors={['#1a1a1a', '#000']} style={styles.statCard}>

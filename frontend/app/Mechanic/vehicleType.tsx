@@ -93,69 +93,81 @@ export default function MechanicVehicleType() {
 
                     {/* CARDS LIST */}
                     <View style={styles.list}>
-                        {vehicleTypes.map((item, index) => {
-                            // Staggered Animation for cards
-                            const cardAnim = useRef(new Animated.Value(50)).current;
-                            const cardFade = useRef(new Animated.Value(0)).current;
-
-                            useEffect(() => {
-                                Animated.parallel([
-                                    Animated.timing(cardAnim, {
-                                        toValue: 0,
-                                        duration: 600,
-                                        delay: index * 100,
-                                        easing: Easing.out(Easing.back(1.2)),
-                                        useNativeDriver: true,
-                                    }),
-                                    Animated.timing(cardFade, {
-                                        toValue: 1,
-                                        duration: 600,
-                                        delay: index * 100,
-                                        useNativeDriver: true,
-                                    })
-                                ]).start();
-                            }, []);
-
-                            return (
-                                <Animated.View
-                                    key={item.id}
-                                    style={{
-                                        opacity: cardFade,
-                                        transform: [{ translateY: cardAnim }]
-                                    }}
-                                >
-                                    <Pressable
-                                        style={({ pressed }) => [
-                                            styles.card,
-                                            {
-                                                backgroundColor: isDark ? '#141414' : '#FFFFFF',
-                                                borderColor: isDark ? '#333' : '#E5E5E5',
-                                                transform: [{ scale: pressed ? 0.98 : 1 }]
-                                            }
-                                        ]}
-                                        onPress={() => router.push(item.route as any)}
-                                    >
-                                        <View style={[styles.iconBox, {
-                                            backgroundColor: isDark ? 'rgba(229, 9, 20, 0.1)' : 'rgba(57, 255, 20, 0.1)'
-                                        }]}>
-                                            <Ionicons name={item.icon as any} size={32} color={accent} />
-                                        </View>
-                                        <View style={styles.cardContent}>
-                                            <Text style={[styles.cardTitle, { color: textPrimary }]}>{item.title}</Text>
-                                            <Text style={[styles.cardSub, { color: textSecondary }]}>{item.subtitle}</Text>
-                                        </View>
-                                        <Ionicons name="chevron-forward" size={24} color={textSecondary} />
-                                    </Pressable>
-                                </Animated.View>
-                            );
-                        })}
+                        {vehicleTypes.map((item, index) => (
+                            <VehicleCard
+                                key={item.id}
+                                item={item}
+                                index={index}
+                                isDark={isDark}
+                                accent={accent}
+                                textPrimary={textPrimary}
+                                textSecondary={textSecondary}
+                            />
+                        ))}
                     </View>
-
                 </ScrollView>
             </SafeAreaView>
         </View>
     );
 }
+
+const VehicleCard = ({ item, index, isDark, accent, textPrimary, textSecondary }: any) => {
+    // Staggered Animation for cards
+    const cardAnim = useRef(new Animated.Value(50)).current;
+    const cardFade = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        Animated.parallel([
+            Animated.timing(cardAnim, {
+                toValue: 0,
+                duration: 600,
+                delay: index * 100,
+                easing: Easing.out(Easing.back(1.2)),
+                useNativeDriver: true,
+            }),
+            Animated.timing(cardFade, {
+                toValue: 1,
+                duration: 600,
+                delay: index * 100,
+                useNativeDriver: true,
+            })
+        ]).start();
+    }, []);
+
+    return (
+        <Animated.View
+            style={{
+                opacity: cardFade,
+                transform: [{ translateY: cardAnim }]
+            }}
+        >
+            <Pressable
+                style={({ pressed }) => [
+                    styles.card,
+                    {
+                        backgroundColor: isDark ? '#141414' : '#FFFFFF',
+                        borderColor: isDark ? '#333' : '#E5E5E5',
+                        transform: [{ scale: pressed ? 0.98 : 1 }]
+                    }
+                ]}
+                onPress={() => router.push(item.route as any)}
+            >
+                <View style={[styles.iconBox, {
+                    backgroundColor: isDark ? 'rgba(229, 9, 20, 0.1)' : 'rgba(57, 255, 20, 0.1)'
+                }]}>
+                    <Ionicons name={item.icon as any} size={32} color={accent} />
+                </View>
+                <View style={styles.cardContent}>
+                    <Text style={[styles.cardTitle, { color: textPrimary }]}>{item.title}</Text>
+                    <Text style={[styles.cardSub, { color: textSecondary }]}>{item.subtitle}</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={24} color={textSecondary} />
+            </Pressable>
+        </Animated.View>
+    );
+};
+
+
 
 const styles = StyleSheet.create({
     container: {

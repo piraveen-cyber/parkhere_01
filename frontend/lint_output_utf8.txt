@@ -1,0 +1,317 @@
+﻿
+> frontend@1.0.0 lint
+> expo lint
+
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\(tabs)\booking.tsx
+    1:32   warning  'C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\node_modules\expo-router\build\index.js' imported multiple times  import/no-duplicates
+    3:92   warning  'Animated' is defined but never used                                                                                         @typescript-eslint/no-unused-vars
+    3:102  warning  'Image' is defined but never used                                                                                            @typescript-eslint/no-unused-vars
+    4:44   warning  'FontAwesome5' is defined but never used                                                                                     @typescript-eslint/no-unused-vars
+    8:24   warning  'C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\node_modules\expo-router\build\index.js' imported multiple times  import/no-duplicates
+    9:27   warning  'Booking' is defined but never used                                                                                          @typescript-eslint/no-unused-vars
+   73:8    warning  React Hook useCallback has a missing dependency: 'fetchData'. Either include it or remove the dependency array               react-hooks/exhaustive-deps
+  175:11   warning  'dateStr' is assigned a value but never used                                                                                 @typescript-eslint/no-unused-vars
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\(tabs)\chat.tsx
+  1:28  warning  'View' is defined but never used                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+  7:17  error    React Hook "useTranslation" is called in function "chat" that is neither a React function component nor a custom React Hook function. React component names must start with an uppercase letter. React Hook names must start with the word "use"  react-hooks/rules-of-hooks
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\(tabs)\home.tsx
+   7:3  warning  'Image' is defined but never used                                                                            @typescript-eslint/no-unused-vars
+  63:6  warning  React Hook useEffect has a missing dependency: 'fadeAnim'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\(tabs)\profile.tsx
+   14:3   warning  'Easing' is defined but never used                                                                                                      @typescript-eslint/no-unused-vars
+   17:3   warning  'LayoutChangeEvent' is defined but never used                                                                                           @typescript-eslint/no-unused-vars
+   27:8   warning  'AsyncStorage' is defined but never used                                                                                                @typescript-eslint/no-unused-vars
+   49:6   warning  React Hook useEffect has missing dependencies: 'fadeAnim', 'hide', and 'slideAnim'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  121:10  warning  'loading' is assigned a value but never used                                                                                            @typescript-eslint/no-unused-vars
+  196:14  warning  'e' is defined but never used                                                                                                           @typescript-eslint/no-unused-vars
+  255:14  warning  'e' is defined but never used                                                                                                           @typescript-eslint/no-unused-vars
+  288:14  warning  'e' is defined but never used                                                                                                           @typescript-eslint/no-unused-vars
+  316:20  warning  'e' is defined but never used                                                                                                           @typescript-eslint/no-unused-vars
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\Mechanic\EV.tsx
+   5:44  warning  'FontAwesome5' is defined but never used                                                                                       @typescript-eslint/no-unused-vars
+   7:10  warning  'supabase' is defined but never used                                                                                           @typescript-eslint/no-unused-vars
+   8:8   warning  'api' is defined but never used                                                                                                @typescript-eslint/no-unused-vars
+  41:8   warning  React Hook useEffect has missing dependencies: 'fadeAnim' and 'slideAnim'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  58:19  warning  'userId' is assigned a value but never used                                                                                    @typescript-eslint/no-unused-vars
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\Mechanic\bookingSummary.tsx
+   2:82  warning  'Alert' is defined but never used                   @typescript-eslint/no-unused-vars
+   4:20  warning  'MaterialCommunityIcons' is defined but never used  @typescript-eslint/no-unused-vars
+   7:10  warning  'supabase' is defined but never used                @typescript-eslint/no-unused-vars
+   8:8   warning  'api' is defined but never used                     @typescript-eslint/no-unused-vars
+  28:24  warning  'setSubmitting' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\Mechanic\confirmLocation.tsx
+    3:19  warning  'Marker' is defined but never used                                                                            @typescript-eslint/no-unused-vars
+    9:10  warning  'supabase' is defined but never used                                                                          @typescript-eslint/no-unused-vars
+   10:8   warning  'api' is defined but never used                                                                               @typescript-eslint/no-unused-vars
+   12:9   warning  'width' is assigned a value but never used                                                                    @typescript-eslint/no-unused-vars
+   12:16  warning  'height' is assigned a value but never used                                                                   @typescript-eslint/no-unused-vars
+   36:12  warning  'permissionGranted' is assigned a value but never used                                                        @typescript-eslint/no-unused-vars
+   79:8   warning  React Hook useEffect has a missing dependency: 'sheetAnim'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  107:19  warning  'issueText' is assigned a value but never used                                                                @typescript-eslint/no-unused-vars
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\Mechanic\garageBookingSummary.tsx
+  4:20  warning  'MaterialCommunityIcons' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\Mechanic\garagePayment.tsx
+  2:64  warning  'Alert' is defined but never used                   @typescript-eslint/no-unused-vars
+  4:34  warning  'MaterialCommunityIcons' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\Mechanic\garageProfile.tsx
+  4:20  warning  'MaterialCommunityIcons' is defined but never used  @typescript-eslint/no-unused-vars
+  4:44  warning  'FontAwesome5' is defined but never used            @typescript-eslint/no-unused-vars
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\Mechanic\garageSuccess.tsx
+   2:52  warning  'Image' is defined but never used                                                                                             @typescript-eslint/no-unused-vars
+  10:9   warning  'width' is assigned a value but never used                                                                                    @typescript-eslint/no-unused-vars
+  32:8   warning  React Hook useEffect has missing dependencies: 'saveBooking' and 'scale'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\Mechanic\heavyVehicle.tsx
+   7:10  warning  'supabase' is defined but never used                                                                                           @typescript-eslint/no-unused-vars
+   8:8   warning  'api' is defined but never used                                                                                                @typescript-eslint/no-unused-vars
+  41:8   warning  React Hook useEffect has missing dependencies: 'fadeAnim' and 'slideAnim'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  66:19  warning  'userId' is assigned a value but never used                                                                                    @typescript-eslint/no-unused-vars
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\Mechanic\issueSelector.tsx
+    2:86   warning  'Animated' is defined but never used                             @typescript-eslint/no-unused-vars
+  102:78   error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  197:99   error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  197:113  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\Mechanic\jobCompletion.tsx
+  1:17   warning  'useState' is defined but never used     @typescript-eslint/no-unused-vars
+  2:82   warning  'Alert' is defined but never used        @typescript-eslint/no-unused-vars
+  2:89   warning  'TextInput' is defined but never used    @typescript-eslint/no-unused-vars
+  2:100  warning  'Modal' is defined but never used        @typescript-eslint/no-unused-vars
+  4:20   warning  'FontAwesome' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\Mechanic\lightVehicle.tsx
+   7:10  warning  'supabase' is defined but never used                                                                                           @typescript-eslint/no-unused-vars
+   8:8   warning  'api' is defined but never used                                                                                                @typescript-eslint/no-unused-vars
+  41:8   warning  React Hook useEffect has missing dependencies: 'fadeAnim' and 'slideAnim'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  59:19  warning  'userId' is assigned a value but never used                                                                                    @typescript-eslint/no-unused-vars
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\Mechanic\mechanicPayment.tsx
+  2:75  warning  'Image' is defined but never used         @typescript-eslint/no-unused-vars
+  4:44  warning  'FontAwesome5' is defined but never used  @typescript-eslint/no-unused-vars
+  7:10  warning  'supabase' is defined but never used      @typescript-eslint/no-unused-vars
+  8:8   warning  'api' is defined but never used           @typescript-eslint/no-unused-vars
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\Mechanic\mechanicProfile.tsx
+   8:9   warning  'width' is assigned a value but never used       @typescript-eslint/no-unused-vars
+  31:21  warning  'setBooking' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\Mechanic\mechanicSuccess.tsx
+    2:76  warning  'Easing' is defined but never used                                                                                                                                                                     @typescript-eslint/no-unused-vars
+    7:10  warning  'LinearGradient' is defined but never used                                                                                                                                                             @typescript-eslint/no-unused-vars
+   10:9   warning  'width' is assigned a value but never used                                                                                                                                                             @typescript-eslint/no-unused-vars
+  122:8   warning  React Hook useEffect has missing dependencies: 'fadeAnim', 'mechanic.id', 'mechanic.name', 'params.gps_coordinates', 'scaleAnim', and 'slideAnim'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\Mechanic\mechanicTracking.tsx
+   2:66  warning  'Animated' is defined but never used                                                                        @typescript-eslint/no-unused-vars
+   7:10  warning  'LinearGradient' is defined but never used                                                                  @typescript-eslint/no-unused-vars
+   9:9   warning  'width' is assigned a value but never used                                                                  @typescript-eslint/no-unused-vars
+  36:21  warning  'setUserLoc' is assigned a value but never used                                                             @typescript-eslint/no-unused-vars
+  67:8   warning  React Hook useEffect has a missing dependency: 'eta'. Either include it or remove the dependency array      react-hooks/exhaustive-deps
+  77:8   warning  React Hook useEffect has a missing dependency: 'userLoc'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\Mechanic\myMechanicBookings.tsx
+  1:17  warning  'useState' is defined but never used                @typescript-eslint/no-unused-vars
+  4:20  warning  'MaterialCommunityIcons' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\Mechanic\nearbyGarages.tsx
+  4:44  warning  'FontAwesome5' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\Mechanic\nearbyMechanics.tsx
+   2:80  warning  'Pressable' is defined but never used               @typescript-eslint/no-unused-vars
+   4:20  warning  'MaterialCommunityIcons' is defined but never used  @typescript-eslint/no-unused-vars
+   4:44  warning  'FontAwesome' is defined but never used             @typescript-eslint/no-unused-vars
+   7:10  warning  'supabase' is defined but never used                @typescript-eslint/no-unused-vars
+   8:8   warning  'api' is defined but never used                     @typescript-eslint/no-unused-vars
+  77:12  warning  'bookingId' is assigned a value but never used      @typescript-eslint/no-unused-vars
+  77:23  warning  'setBookingId' is assigned a value but never used   @typescript-eslint/no-unused-vars
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\Mechanic\serviceType.tsx
+  2:75  warning  'Animated' is defined but never used      @typescript-eslint/no-unused-vars
+  4:44  warning  'FontAwesome5' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\Mechanic\vehicleType.tsx
+   35:8   warning  React Hook useEffect has missing dependencies: 'fadeAnim' and 'slideAnim'. Either include them or remove the dependency array                        react-hooks/exhaustive-deps
+   98:46  error    React Hook "useRef" cannot be called inside a callback. React Hooks must be called in a React function component or a custom React Hook function     react-hooks/rules-of-hooks
+   99:46  error    React Hook "useRef" cannot be called inside a callback. React Hooks must be called in a React function component or a custom React Hook function     react-hooks/rules-of-hooks
+  101:29  error    React Hook "useEffect" cannot be called inside a callback. React Hooks must be called in a React function component or a custom React Hook function  react-hooks/rules-of-hooks
+  117:32  warning  React Hook useEffect has missing dependencies: 'cardAnim', 'cardFade', and 'index'. Either include them or remove the dependency array               react-hooks/exhaustive-deps
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\_layout.tsx
+  17:9  warning  'debugAsyncStorage' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\booking\myBookings.tsx
+   8:27  warning  'ParkingSpot' is defined but never used  @typescript-eslint/no-unused-vars
+  12:13  warning  't' is assigned a value but never used   @typescript-eslint/no-unused-vars
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\detail.tsx
+   14:3  warning  'Image' is defined but never used                                                                                                       @typescript-eslint/no-unused-vars
+   16:3  warning  'TouchableWithoutFeedback' is defined but never used                                                                                    @typescript-eslint/no-unused-vars
+   47:6  warning  React Hook useEffect has missing dependencies: 'fadeAnim', 'hide', and 'slideAnim'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  216:6  warning  React Hook useEffect has missing dependencies: 'fadeAnim' and 'slideAnim'. Either include them or remove the dependency array           react-hooks/exhaustive-deps
+  231:6  warning  React Hook useEffect has missing dependencies: 'btnOpacity' and 'glowAnim'. Either include them or remove the dependency array          react-hooks/exhaustive-deps
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\index.tsx
+   2:16  warning  'Image' is defined but never used                                                                                                                     @typescript-eslint/no-unused-vars
+   2:45  warning  'Text' is defined but never used                                                                                                                      @typescript-eslint/no-unused-vars
+  47:6   warning  React Hook useEffect has missing dependencies: 'fadeAnim', 'router', 'scaleAnim', and 'textAnim'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\language.tsx
+  11:3  warning  'Platform' is defined but never used                                                                                           @typescript-eslint/no-unused-vars
+  22:9  warning  'width' is assigned a value but never used                                                                                     @typescript-eslint/no-unused-vars
+  48:6  warning  React Hook useEffect has missing dependencies: 'fadeAnim' and 'slideAnim'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\onboarding.tsx
+   12:5   warning  'Platform' is defined but never used                                                                         @typescript-eslint/no-unused-vars
+  103:11  warning  'insets' is assigned a value but never used                                                                  @typescript-eslint/no-unused-vars
+  117:8   warning  React Hook useEffect has a missing dependency: 'fadeAnim'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\onboarding1.tsx
+  11:3   warning  'Platform' is defined but never used                                                                                           @typescript-eslint/no-unused-vars
+  18:10  warning  'useTheme' is defined but never used                                                                                           @typescript-eslint/no-unused-vars
+  24:9   warning  'insets' is assigned a value but never used                                                                                    @typescript-eslint/no-unused-vars
+  45:6   warning  React Hook useEffect has missing dependencies: 'fadeAnim' and 'slideAnim'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\onboarding2.tsx
+  22:9  warning  'insets' is assigned a value but never used                                                                                    @typescript-eslint/no-unused-vars
+  43:6  warning  React Hook useEffect has missing dependencies: 'fadeAnim' and 'slideAnim'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\onboarding3.tsx
+  22:9  warning  'insets' is assigned a value but never used                                                                                    @typescript-eslint/no-unused-vars
+  43:6  warning  React Hook useEffect has missing dependencies: 'fadeAnim' and 'slideAnim'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\otp.tsx
+  12:3  warning  'Platform' is defined but never used                                                                                           @typescript-eslint/no-unused-vars
+  21:9  warning  'width' is assigned a value but never used                                                                                     @typescript-eslint/no-unused-vars
+  51:6  warning  React Hook useEffect has missing dependencies: 'fadeAnim' and 'slideAnim'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\parking\QR.tsx
+   8:3  warning  'Image' is defined but never used                                                                                                            @typescript-eslint/no-unused-vars
+  20:9  warning  'width' is assigned a value but never used                                                                                                   @typescript-eslint/no-unused-vars
+  22:1  warning  Import in body of module; reorder to top                                                                                                     import/first
+  24:1  warning  Import in body of module; reorder to top                                                                                                     import/first
+  76:6  warning  React Hook useEffect has missing dependencies: 'fadeAnim', 'pulseAnim', and 'slideAnim'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\parking\navigate.tsx
+   1:36  warning  'useState' is defined but never used                                                                                                            @typescript-eslint/no-unused-vars
+   8:16  warning  'height' is assigned a value but never used                                                                                                     @typescript-eslint/no-unused-vars
+  10:1   warning  Import in body of module; reorder to top                                                                                                        import/first
+  66:6   warning  React Hook useEffect has missing dependencies: 'pulseAnim', 'routePoints', and 'slideAnim'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\parking\parkMap.tsx
+   10:9   warning  'width' is assigned a value but never used                                                                                                                                  @typescript-eslint/no-unused-vars
+   10:16  warning  'height' is assigned a value but never used                                                                                                                                 @typescript-eslint/no-unused-vars
+   24:11  warning  't' is assigned a value but never used                                                                                                                                      @typescript-eslint/no-unused-vars
+   25:11  warning  'colors' is assigned a value but never used                                                                                                                                 @typescript-eslint/no-unused-vars
+   26:9   warning  'isDark' is assigned a value but never used                                                                                                                                 @typescript-eslint/no-unused-vars
+   36:11  error    React Hook "useRef" cannot be called inside a callback. React Hooks must be called in a React function component or a custom React Hook function                            react-hooks/rules-of-hooks
+  111:6   warning  React Hook useEffect has missing dependencies: 'fadeAnim', 'particles', 'progressValue', 'pulseValue', and 'spinValue'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\parking\paymentCard.tsx
+   17:35  warning  'FontAwesome5' is defined but never used                                                                                                @typescript-eslint/no-unused-vars
+   22:9   warning  'width' is assigned a value but never used                                                                                              @typescript-eslint/no-unused-vars
+   24:1   warning  Import in body of module; reorder to top                                                                                                import/first
+   25:1   warning  Import in body of module; reorder to top                                                                                                import/first
+   26:1   warning  Import in body of module; reorder to top                                                                                                import/first
+   47:6   warning  React Hook useEffect has missing dependencies: 'fadeAnim', 'hide', and 'slideAnim'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  129:6   warning  React Hook useEffect has missing dependencies: 'fadeAnim' and 'slideAnim'. Either include them or remove the dependency array           react-hooks/exhaustive-deps
+  145:6   warning  React Hook useEffect has missing dependencies: 'btnOpacity' and 'glowAnim'. Either include them or remove the dependency array          react-hooks/exhaustive-deps
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\parking\paymentOTP.tsx
+   9:3  warning  'Easing' is defined but never used                                                                                             @typescript-eslint/no-unused-vars
+  73:6  warning  React Hook useEffect has missing dependencies: 'fadeAnim' and 'pulseAnim'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\parking\paymentSuccess.tsx
+   2:62  warning  'Easing' is defined but never used                                                                                             @typescript-eslint/no-unused-vars
+  21:9   warning  'successColor' is assigned a value but never used                                                                              @typescript-eslint/no-unused-vars
+  41:6   warning  React Hook useEffect has missing dependencies: 'fadeAnim' and 'scaleAnim'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\parking\selectParking.tsx
+   11:3   warning  'ActivityIndicator' is defined but never used                                                                                            @typescript-eslint/no-unused-vars
+   24:34  warning  'SCREEN_H' is assigned a value but never used                                                                                            @typescript-eslint/no-unused-vars
+  105:17  warning  'setSpots' is assigned a value but never used                                                                                            @typescript-eslint/no-unused-vars
+  106:10  warning  'loading' is assigned a value but never used                                                                                             @typescript-eslint/no-unused-vars
+  106:19  warning  'setLoading' is assigned a value but never used                                                                                          @typescript-eslint/no-unused-vars
+  123:6   warning  React Hook useEffect has missing dependencies: 'markerGlowMap' and 'markerScaleMap'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\parking\selectSlot.tsx
+  10:3  warning  'Animated' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\parking\selectVehicle.tsx
+  35:10  warning  'isSubmitting' is assigned a value but never used                                                             @typescript-eslint/no-unused-vars
+  47:6   warning  React Hook useEffect has a missing dependency: 'sheetAnim'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\parking\setTime.tsx
+  12:3  warning  'FlatList' is defined but never used                                                                                           @typescript-eslint/no-unused-vars
+  13:3  warning  'Platform' is defined but never used                                                                                           @typescript-eslint/no-unused-vars
+  20:9  warning  'width' is assigned a value but never used                                                                                     @typescript-eslint/no-unused-vars
+  22:1  warning  Import in body of module; reorder to top                                                                                       import/first
+  84:6  warning  React Hook useEffect has missing dependencies: 'fadeAnim' and 'slideAnim'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\parking\successBook.tsx
+  106:6  warning  React Hook useEffect has missing dependencies: 'fadeAnim', 'params', 'pulseAnim', and 'scaleAnim'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\partner\garage\appointments.tsx
+  2:62  warning  'ScrollView' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\partner\garage\index.tsx
+   5:44  warning  'FontAwesome5' is defined but never used                         @typescript-eslint/no-unused-vars
+  44:65  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\partner\mechanic\index.tsx
+   2:52  warning  'Image' is defined but never used                                @typescript-eslint/no-unused-vars
+   2:67  warning  'Dimensions' is defined but never used                           @typescript-eslint/no-unused-vars
+   5:20  warning  'FontAwesome5' is defined but never used                         @typescript-eslint/no-unused-vars
+  83:64  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\partner\mechanic\requests.tsx
+   2:59  warning  'Alert' is defined but never used                                                                          @typescript-eslint/no-unused-vars
+  29:8   warning  React Hook useEffect has a missing dependency: 'router'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\partner\parking\editLot.tsx
+   7:65  warning  'ParkingSpot' is defined but never used                                                                             @typescript-eslint/no-unused-vars
+  25:8   warning  React Hook useEffect has a missing dependency: 'fetchLotDetails'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  41:18  warning  'e' is defined but never used                                                                                       @typescript-eslint/no-unused-vars
+  60:18  warning  'e' is defined but never used                                                                                       @typescript-eslint/no-unused-vars
+  81:34  warning  'e' is defined but never used                                                                                       @typescript-eslint/no-unused-vars
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\partner\parking\index.tsx
+  5:20  warning  'FontAwesome5' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\partner\parking\scanner.tsx
+  2:59  warning  'Dimensions' is defined but never used      @typescript-eslint/no-unused-vars
+  7:10  warning  'LinearGradient' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\partner\parking\verification.tsx
+   2:64  warning  'Image' is defined but never used  @typescript-eslint/no-unused-vars
+  41:22  warning  'e' is defined but never used      @typescript-eslint/no-unused-vars
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\phoneAuth.tsx
+  13:3   warning  'Platform' is defined but never used                                                                                           @typescript-eslint/no-unused-vars
+  26:9   warning  'width' is assigned a value but never used                                                                                     @typescript-eslint/no-unused-vars
+  61:6   warning  React Hook useEffect has missing dependencies: 'fadeAnim' and 'slideAnim'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  90:14  warning  'error' is defined but never used                                                                                              @typescript-eslint/no-unused-vars
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\app\verification.tsx
+  2:82  warning  'Image' is defined but never used  @typescript-eslint/no-unused-vars
+  8:8   warning  'axios' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\mathi\OneDrive\Desktop\park\parkhere_01\frontend\components\ParkingSlot.tsx
+   2:62  warning  'Easing' is defined but never used                                                                            @typescript-eslint/no-unused-vars
+  41:8   warning  React Hook useEffect has a missing dependency: 'pulseAnim'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  55:8   warning  React Hook useEffect has a missing dependency: 'carAnim'. Either include it or remove the dependency array    react-hooks/exhaustive-deps
+
+Ô£û 197 problems (10 errors, 187 warnings)
+  0 errors and 8 warnings potentially fixable with the `--fix` option.
+

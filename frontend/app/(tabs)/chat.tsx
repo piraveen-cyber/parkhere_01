@@ -3,7 +3,7 @@ import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useTranslation } from "react-i18next";
 
-const chat = () => {
+const Chat = () => {
   const { t } = useTranslation();
   return (
     <SafeAreaView style={styles.container}>
@@ -12,7 +12,7 @@ const chat = () => {
   )
 }
 
-export default chat
+export default Chat
 
 const styles = StyleSheet.create({
   container: {

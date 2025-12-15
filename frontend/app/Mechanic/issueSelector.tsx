@@ -99,7 +99,7 @@ export default function IssueSelector() {
                     <Ionicons name="chevron-back" size={24} color={colors.text} />
                 </TouchableOpacity>
                 <View>
-                    <Text style={[styles.title, { color: textPrimary }]}>What's the problem?</Text>
+                    <Text style={[styles.title, { color: textPrimary }]}>What&apos;s the problem?</Text>
                     <Text style={[styles.subtitle, { color: textSecondary }]}>Identify the main issues</Text>
                 </View>
             </View>
@@ -194,7 +194,7 @@ export default function IssueSelector() {
                     onPress={() => toggleIssue('unknown')}
                 >
                     <Ionicons name="help-circle-outline" size={24} color={textSecondary} />
-                    <Text style={[styles.notSureText, { color: textSecondary }]}>Not sure? Select "Unknown Issue"</Text>
+                    <Text style={[styles.notSureText, { color: textSecondary }]}>Not sure? Select &quot;Unknown Issue&quot;</Text>
                     {selectedIssues.includes('unknown') &&
                         <Ionicons name="checkmark-circle" size={20} color={accent} style={{ marginLeft: 'auto' }} />
                     }
