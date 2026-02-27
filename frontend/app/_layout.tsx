@@ -33,7 +33,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     const checkSession = async () => {
-      await debugAsyncStorage();
+      // await debugAsyncStorage();
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -52,7 +52,7 @@ export default function RootLayout() {
       (event, session) => {
         console.log("Auth state changed:", { event, session });
         setIsAuthenticated(!!session);
-        debugAsyncStorage();
+        // debugAsyncStorage();
       }
     );
 
@@ -95,15 +95,10 @@ export default function RootLayout() {
             <Stack.Screen name="phoneAuth" />
             <Stack.Screen name="otp" />
             <Stack.Screen name="detail" />
-            <Stack.Screen name="sample" />
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="parking" />
-
-            
-
-
-            
-            
+            <Stack.Screen name="Mechanic" />
+            <Stack.Screen name="partner" />
           </Stack>
         </ThemeProvider>
       </SafeAreaProvider>

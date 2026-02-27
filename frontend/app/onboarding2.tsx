@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -6,202 +6,229 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
+  StatusBar,
+  Animated
 } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { useTheme } from "../context/themeContext";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
+import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
 
 const { width, height } = Dimensions.get("window");
 
 export default function Onboarding2() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { theme, toggleTheme } = useTheme();
   const { t } = useTranslation();
 
-  const isDark = theme === "dark";
+  // Animations
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
 
-  const bg = isDark ? "#0D1B2A" : "#FAFAFA";
-  const textColor = isDark ? "#FFFFFF" : "#222";
-  const descColor = isDark ? "#C7D1D9" : "#444";
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        friction: 8,
+        tension: 40,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: bg }]}>
-      <View style={styles.container}>
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" />
 
+      {/* Background Gradient */}
+      <LinearGradient
+        colors={['#0D1B2A', '#1B263B', '#000000']}
+        style={StyleSheet.absoluteFill}
+      />
+
+      <SafeAreaView style={styles.safeArea}>
         {/* TOP BAR */}
-        <View
-          style={[
-            styles.topRow,
-            { marginTop: insets.top + 15 }, // spacing from notch
-          ]}
-        >
-          {/* BACK BUTTON */}
+        <View style={styles.topBar}>
           <TouchableOpacity
             onPress={() => router.back()}
-            style={[styles.roundButton, styles.shadow]}
+            style={styles.iconButton}
           >
-            <Text style={styles.backIcon}>{"<"}</Text>
+            <Ionicons name="chevron-back" size={24} color="#FFF" />
           </TouchableOpacity>
 
-          {/* THEME TOGGLE */}
-          <TouchableOpacity
-            onPress={toggleTheme}
-            style={[styles.roundButton, styles.shadow]}
-          >
-            <Text style={styles.toggleIcon}>{isDark ? "☀️" : "🌙"}</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* IMAGE */}
-        <Image
-          source={require("../assets/images/maponboard.png")}
-          style={styles.image}
-          resizeMode="contain"
-        />
-
-        {/* TEXTS */}
-        <Text style={[styles.title, { color: textColor }]}>
-          {t("quickNavigation")}
-        </Text>
-
-        <Text style={[styles.desc, { color: descColor }]}>
-          {t("loremIpsum")}
-        </Text>
-
-        {/* DOTS */}
-        <View style={styles.dotsContainer}>
-          <View style={styles.dot} />
-          <View style={styles.dotActive} />
-          <View style={styles.dot} />
-        </View>
-
-        {/* BOTTOM BUTTONS */}
-        <View
-          style={[
-            styles.bottomRow,
-            { marginBottom: insets.bottom + 15 },
-          ]}
-        >
           <TouchableOpacity onPress={() => router.replace("/(tabs)/home")}>
-            <Text style={[styles.skip, { color: descColor }]}>{t("skip")}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={() => router.push("/onboarding3")}>
-            <Text style={[styles.next, { color: textColor }]}>{t("next")}</Text>
+            <Text style={styles.skipText}>{t("skip")}</Text>
           </TouchableOpacity>
         </View>
 
-      </View>
-    </SafeAreaView>
+        {/* CONTENT */}
+        <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+
+          <View style={styles.imageContainer}>
+            {/* Glow effect behind map */}
+            <View style={styles.glow} />
+            <Image
+              source={require("../assets/images/maponboard.png")}
+              style={styles.image}
+              resizeMode="contain"
+            />
+          </View>
+
+          <View style={styles.textContainer}>
+            <Text style={styles.title}>{t("quickNavigation")}</Text>
+            <Text style={styles.desc}>
+              Navigate to your selected spot effortlessly with real-time GPS directions.
+            </Text>
+
+            {/* DOTS */}
+            <View style={styles.dotsContainer}>
+              <View style={styles.dot} />
+              <View style={[styles.dot, styles.dotActive]} />
+              <View style={styles.dot} />
+            </View>
+
+            {/* NEXT BUTTON */}
+            <TouchableOpacity
+              style={styles.nextButton}
+              activeOpacity={0.8}
+              onPress={() => router.push("/onboarding3")}
+            >
+              <LinearGradient
+                colors={['#FFD400', '#FFEA00']}
+                style={styles.nextButtonGradient}
+              >
+                <Text style={styles.nextButtonText}>{t("next")}</Text>
+                <Ionicons name="arrow-forward" size={20} color="#000" />
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+
+        </Animated.View>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-  },
   container: {
     flex: 1,
-    alignItems: "center",
+    backgroundColor: "#0D1B2A",
   },
-
-  /* --- TOP BAR --- */
-  topRow: {
-    width: "100%",
-    paddingHorizontal: 22,
-    flexDirection: "row",
-    justifyContent: "space-between",
+  safeArea: {
+    flex: 1,
   },
-
-  roundButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "#FFFFFF",
-    justifyContent: "center",
-    alignItems: "center",
+  topBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingTop: 10,
+    zIndex: 10,
   },
-
-  backIcon: {
-    fontSize: 26,
-    fontWeight: "600",
+  iconButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
-
-  toggleIcon: {
-    fontSize: 24,
+  skipText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '600',
+    opacity: 0.8,
   },
-
-  shadow: {
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
+  content: {
+    flex: 1,
+    justifyContent: 'space-between',
+    paddingBottom: 40,
   },
-
-  /* --- IMAGE --- */
+  imageContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
+    position: 'relative',
+  },
+  glow: {
+    position: 'absolute',
+    width: width * 0.7,
+    height: width * 0.7,
+    borderRadius: width * 0.35,
+    backgroundColor: 'rgba(255, 212, 0, 0.1)',
+    shadowColor: '#FFD400',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+  },
   image: {
-    width: width * 0.8,
+    width: width * 0.9,
     height: height * 0.35,
-    marginTop: 30,
-    marginBottom: 40,
+    zIndex: 2,
   },
-
-  /* --- TEXTS --- */
+  textContainer: {
+    paddingHorizontal: 30,
+    alignItems: 'center',
+  },
   title: {
-    fontSize: 28,
-    fontWeight: "700",
+    fontSize: 32,
+    fontWeight: "800",
+    color: "#FFFFFF",
     textAlign: "center",
-    marginBottom: 8,
+    marginBottom: 16,
+    lineHeight: 40,
   },
-
   desc: {
-    fontSize: 15,
-    width: "80%",
+    fontSize: 16,
+    color: "#A0A0A0",
     textAlign: "center",
-    marginBottom: 22,
+    marginBottom: 30,
+    lineHeight: 24,
   },
-
-  /* --- DOTS --- */
   dotsContainer: {
     flexDirection: "row",
-    marginVertical: 15,
+    marginBottom: 30,
+    gap: 8,
   },
-
   dot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    marginHorizontal: 4,
-    backgroundColor: "#888",
+    backgroundColor: 'rgba(255,255,255,0.2)',
   },
-
   dotActive: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginHorizontal: 4,
-    backgroundColor: "#4F46E5",
+    width: 24,
+    backgroundColor: '#FFD400',
   },
-
-  /* --- bottom --- */
-  bottomRow: {
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 35,
-    position: "absolute",
-    bottom: 0,
+  nextButton: {
+    width: '100%',
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: "#FFD400",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 8,
   },
-
-  skip: {
-    fontSize: 16,
-    fontWeight: "600",
+  nextButtonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 18,
+    gap: 10,
   },
-
-  next: {
-    fontSize: 16,
-    fontWeight: "800",
+  nextButtonText: {
+    color: '#000',
+    fontSize: 18,
+    fontWeight: '700',
   },
 });

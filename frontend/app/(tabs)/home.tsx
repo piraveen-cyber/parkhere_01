@@ -1,274 +1,520 @@
-import React from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
-  TextInput,
-  TouchableOpacity,
   Image,
   Alert,
+  TouchableOpacity,
+  Animated,
+  Dimensions,
+  Easing,
+  StatusBar
 } from "react-native";
+import Storage from '@react-native-async-storage/async-storage';
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { supabase } from "../../config/supabaseClient";
-import { useTheme } from "../../context/themeContext";
 import { useTranslation } from "react-i18next";
-import { router } from "expo-router";   // 👈 ADDED
+import { router } from "expo-router";
+import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
+import ParkingSlot from "../../components/ParkingSlot";
+import { useTheme } from "../../context/themeContext";
+import * as bookingService from "../../services/bookingService";
+
+const { width } = Dimensions.get("window");
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
-  const { theme } = useTheme();
   const { t } = useTranslation();
+
+  // GLOBAL THEME CONTEXT
+  const { theme, colors, toggleTheme } = useTheme();
   const isDark = theme === "dark";
+  const THEME = colors;
 
-  /* THEME COLORS */
-  const bg = isDark ? "#0D1B2A" : "#FAFAFA";
-  const cardBg = isDark ? "#1B263B" : "#FFFFFF";
-  const textColor = isDark ? "#FFFFFF" : "#111";
-  const descColor = isDark ? "#9FB5C2" : "#6F6F6F";
-  const borderColor = isDark ? "#415A77" : "#EDEDED";
+  // ANIMATIONS
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) Alert.alert(t("error"), error.message);
-  };
+  // LIVE BOOKING LOGIC
+  const [activeBooking, setActiveBooking] = useState<any>(null);
 
-  const services = [
-    { key: "parking", title: t("parking"), icon: require("../../assets/images/car.png") },
-    { key: "mechanics", title: t("mechanics"), icon: require("../../assets/images/wrench.png") },
-    { key: "washing", title: t("washing"), icon: require("../../assets/images/wash.png") },
-    { key: "evCharging", title: t("evCharging"), icon: require("../../assets/images/ev.png") },
-    { key: "towing", title: t("towing"), icon: require("../../assets/images/tow.png") },
-    { key: "hiring", title: t("hiring"), icon: require("../../assets/images/check.png") },
-  ];
+  // RECENT HISTORY
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
 
-  const handleServiceNavigation = (key) => {
-    if (key === "parking") {
-      router.push("/parking/selectVehicle");  // 👈 UPDATED
+  useEffect(() => {
+    // Mount Animation
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 800,
+      useNativeDriver: true,
+      easing: Easing.out(Easing.cubic)
+    }).start();
+
+    // Poll for active booking
+    fetchActiveBooking();
+    fetchRecentHistory(); // Initial fetch
+
+    const interval = setInterval(() => {
+      fetchActiveBooking();
+      fetchRecentHistory(); // Poll history too
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchActiveBooking = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const booking = await bookingService.getActiveBooking(session.user.id);
+        setActiveBooking(booking);
+      }
+    } catch (e) {
+      console.log("Error fetching active booking", e);
     }
   };
 
+  const fetchRecentHistory = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id || "guest";
+
+      // Fetch Parallel
+      const [remote, local] = await Promise.all([
+        bookingService.getUserBookings(userId).catch(() => []),
+        Storage.getItem('LOCAL_BOOKINGS')
+      ]);
+
+      const localBookings = local ? JSON.parse(local) : [];
+
+      // MOCK DATA
+      const MOCK_ITEMS = [
+        {
+          id: 'mock-1',
+          type: 'parking',
+          title: 'Central City Mall',
+          date: new Date().toISOString(),
+          subtitle: 'Zone A - Slot 4',
+          totalPrice: '450.00',
+          status: 'Active'
+        },
+        {
+          id: 'mock-2',
+          type: 'garage',
+          title: 'City Garage Services',
+          subtitle: '123 Main St, New York',
+          date: new Date(Date.now() - 86400000 * 2).toISOString(),
+          price: '2500.00',
+          status: 'Completed',
+        },
+        {
+          id: 'mock-3',
+          type: 'mechanic',
+          title: 'Mike the Mechanic',
+          subtitle: 'Tire Change',
+          date: new Date(Date.now() - 86400000 * 5).toISOString(),
+          price: '1200.00',
+          status: 'Completed',
+        }
+      ];
+
+      // Combine Real & Mock
+      let combined = [...localBookings, ...remote, ...MOCK_ITEMS];
+
+      // Deduplicate
+      const seen = new Set();
+      combined = combined.filter(b => {
+        const id = b._id || b.id;
+        if (seen.has(id)) return false;
+        seen.add(id);
+        return true;
+      });
+
+      // Sort
+      combined.sort((a: any, b: any) => {
+        return new Date(b.startTime || b.date).getTime() - new Date(a.startTime || a.date).getTime();
+      });
+
+      // Slice Top 3
+      const displayItems = combined.slice(0, 3);
+
+      const formatted = displayItems.map((item: any) => {
+        const isGarage = item.type === 'garage';
+        const isMechanic = item.type === 'mechanic';
+
+        let icon = "car-sport";
+        if (isGarage) icon = "car-wrench";
+        if (isMechanic) icon = "tools"; // 'construct' is Ionicons, 'tools' is MCI
+
+        return {
+          id: item._id || item.id,
+          title: item.title || (item.parkingSpotId ? "Parking Session" : "Service"),
+          subtitle: new Date(item.startTime || item.date).toLocaleDateString(),
+          amount: item.totalPrice ? `-$${item.totalPrice}` : (item.price ? `-$${item.price}` : '-'),
+          icon,
+          lib: (isGarage || isMechanic) ? MaterialCommunityIcons : Ionicons
+        };
+      });
+
+      setRecentActivity(formatted);
+    } catch (e) {
+      console.log("Error fetching history", e);
+    }
+  };
+
+  const handleScan = async () => {
+    if (!activeBooking) return;
+    try {
+      Alert.alert(
+        t("scanQrTitle"),
+        t("scanQrMessage"),
+        [
+          { text: t("cancel"), style: "cancel" },
+          {
+            text: t("scanSuccess"),
+            onPress: async () => {
+              const res = await bookingService.scanBooking(activeBooking._id);
+              Alert.alert(t("success"), res.message);
+              fetchActiveBooking();
+            }
+          }
+        ]
+      );
+    } catch (e: any) {
+      Alert.alert("Error", e.message || "Scan failed");
+    }
+  };
+
+  const handleExtend = async () => {
+    if (!activeBooking) return;
+    Alert.alert(
+      t("extendParkingTitle"),
+      t("extendParkingMsg"),
+      [
+        { text: t("cancel"), style: "cancel" },
+        {
+          text: t("confirm"),
+          onPress: async () => {
+            try {
+              await bookingService.extendBooking(activeBooking._id, 1);
+              Alert.alert(t("success"), t("timeExtended"));
+              fetchActiveBooking();
+            } catch (e: any) {
+              Alert.alert(t("error"), e.message || t("extensionFailed"));
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  // Timer Component
+  const LiveTimer = ({ endTime }: { endTime: string }) => {
+    const [left, setLeft] = useState(0);
+
+    useEffect(() => {
+      const tick = () => {
+        const end = new Date(endTime).getTime();
+        const now = new Date().getTime();
+        const diff = Math.floor((end - now) / 1000);
+        setLeft(diff > 0 ? diff : 0);
+      };
+      tick();
+      const tmr = setInterval(tick, 1000);
+      return () => clearInterval(tmr);
+    }, [endTime]);
+
+    const hrs = Math.floor(left / 3600);
+    const mins = Math.floor((left % 3600) / 60);
+    const secs = left % 60;
+
+    return (
+      <Text style={[styles.timerValue, { color: colors.primary }]}>
+        {`${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`}
+      </Text>
+    );
+  };
+
+  const handleServiceNavigation = (key: string) => {
+    if (key === "parking") router.push("/parking/selectVehicle");
+    if (key === "mechanics") router.push("/Mechanic/vehicleType");
+  };
+
+  const services = [
+    { key: "parking", title: t("findParking"), icon: "car-sport", lib: Ionicons },
+    { key: "mechanics", title: t("mechanic"), icon: "wrench", lib: MaterialCommunityIcons },
+    { key: "washing", title: t("washing"), icon: "water", lib: Ionicons },
+    { key: "evCharging", title: t("evCharging"), icon: "ev-station", lib: MaterialCommunityIcons },
+    { key: "towing", title: t("towing"), icon: "tow-truck", lib: MaterialCommunityIcons },
+    { key: "hiring", title: t("rentHire"), icon: "key", lib: Ionicons },
+  ];
+
+  const parkingSlotsMock = [
+    { id: "A1", status: "occupied", type: "standard" },
+    { id: "A2", status: "available", type: "standard" },
+    { id: "A3", status: "occupied", type: "ev" },
+    { id: "A4", status: "available", type: "disabled" },
+    { id: "A5", status: "available", type: "standard" },
+  ];
+
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: bg }]}>
-      <ScrollView
+    <SafeAreaView style={[styles.safe, { backgroundColor: THEME.background }]}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
+      <Animated.ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingBottom: insets.bottom + 140 },
+          { paddingBottom: insets.bottom + 100, opacity: fadeAnim }
         ]}
       >
+
         {/* HEADER */}
-        <Text style={[styles.welcome, { color: textColor }]}>
-          {t("welcomeUser")}
-        </Text>
+        <View style={styles.headerRow}>
+          <View>
+            <Text style={[styles.greeting, { color: THEME.subText }]}>{t("goodMorning")}</Text>
+            <Text style={[styles.userName, { color: THEME.text }]}>Alex Doe</Text>
+          </View>
 
-        <Text style={[styles.subtitle, { color: descColor }]}>
-          {t("findEverything")}
-        </Text>
-
-        {/* SEARCH BAR */}
-        <View
-          style={[
-            styles.searchBox,
-            { backgroundColor: cardBg, borderColor: borderColor },
-          ]}
-        >
-          <Text style={[styles.searchIcon, { color: descColor }]}>🔍</Text>
-          <TextInput
-            placeholder={t("searchPlaceholder")}
-            placeholderTextColor={descColor}
-            style={[styles.searchInput, { color: textColor }]}
-          />
-        </View>
-
-        {/* GRID */}
-        <View style={styles.grid}>
-          {services.map((item) => (
+          <View style={{ flexDirection: 'row', gap: 12 }}>
             <TouchableOpacity
-              key={item.key}
-              style={[styles.card, { backgroundColor: cardBg }]}
-              onPress={() => handleServiceNavigation(item.key)}
+              style={[styles.iconBtn, { backgroundColor: THEME.headerIconBg }]}
+              onPress={toggleTheme}
             >
-              <View style={styles.iconWrapper}>
-                <Image source={item.icon} style={styles.iconImg} />
-              </View>
-              <Text style={[styles.cardTitle, { color: textColor }]}>
-                {item.title}
-              </Text>
+              <Feather name={isDark ? "sun" : "moon"} size={20} color={THEME.text} />
             </TouchableOpacity>
-          ))}
+
+            <TouchableOpacity style={[styles.iconBtn, { backgroundColor: THEME.headerIconBg }]}>
+              <Ionicons name="notifications-outline" size={20} color={THEME.text} />
+              <View style={[styles.badge, { backgroundColor: THEME.error }]} />
+            </TouchableOpacity>
+          </View>
         </View>
 
-        {/* BIG CARD */}
-        <View style={[styles.bigCard, { backgroundColor: cardBg }]}>
-          <Text style={[styles.bigCardTitle, { color: textColor }]}>
-            {t("bookSpot")}
-          </Text>
-          <Text style={[styles.bigCardSubtitle, { color: descColor }]}>
-            {t("secureEasy")}
-          </Text>
+        {/* LIVE STATUS BAR */}
+        {activeBooking && (
+          <Animated.View style={{ opacity: fadeAnim, marginBottom: 20 }}>
+            <View style={[styles.liveStatusCard, { backgroundColor: colors.card, borderColor: colors.primary }]}>
 
-          <TouchableOpacity style={styles.bookNowBtn}>
-            <Text style={styles.bookNowText}>{t("bookNow")}</Text>
+              <View style={styles.liveHeader}>
+                <View style={[styles.liveBadge, { backgroundColor: "rgba(255, 212, 0, 0.15)" }]}>
+                  <View style={[styles.pulseDot, { backgroundColor: colors.primary }]} />
+                  <Text style={[styles.liveText, { color: colors.primary }]}>
+                    {activeBooking.status === 'pending' ? t("arrivingSoon") : t("liveParking")}
+                  </Text>
+                </View>
+                <Text style={{ color: colors.subText, fontSize: 12, fontWeight: "600" }}>
+                  {activeBooking.status === 'active' ? `${t("slot")} ${activeBooking.parkingSpotId?.name || "Unknown"}` : t("navigating")}
+                </Text>
+              </View>
+
+              <View style={styles.timerRow}>
+                {activeBooking.status === 'active' ? (
+                  <View>
+                    <Text style={[styles.timerValue, { color: colors.text }]}>
+                      <LiveTimer endTime={activeBooking.endTime} />
+                    </Text>
+                    <Text style={{ color: colors.subText, fontSize: 12 }}>{t("timeRemaining")}</Text>
+                  </View>
+                ) : (
+                  <View>
+                    <Text style={{ color: colors.text, fontSize: 24, fontWeight: "700" }}>
+                      {new Date(activeBooking.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </Text>
+                    <Text style={{ color: colors.subText, fontSize: 12 }}>{t("expectedArrival")}</Text>
+                  </View>
+                )}
+
+                {/* ACTION BUTTONS */}
+                {activeBooking.status === 'active' ? (
+                  <View style={{ gap: 10 }}>
+                    <TouchableOpacity onPress={handleExtend} style={[styles.actionBtnSmall, { backgroundColor: colors.background, borderColor: colors.primary }]}>
+                      <Feather name="plus-circle" size={16} color={colors.primary} />
+                      <Text style={{ color: colors.primary, fontWeight: "700", fontSize: 12 }}>{t("extend")}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={handleScan} style={[styles.actionBtnSmall, { backgroundColor: colors.primary }]}>
+                      <Ionicons name="exit-outline" size={16} color="#000" />
+                      <Text style={{ color: "#000", fontWeight: "700", fontSize: 12 }}>{t("checkOut")}</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <TouchableOpacity onPress={handleScan} style={[styles.actionBtn, { backgroundColor: colors.primary }]}>
+                    <Ionicons name="qr-code-outline" size={20} color="#000" />
+                    <Text style={{ color: "#000", fontWeight: "700" }}>{t("checkIn")}</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+
+            </View>
+          </Animated.View>
+        )}
+
+        {/* SERVICES GRID */}
+        <Text style={[styles.sectionTitle, { color: THEME.text, marginTop: 10 }]}>{t("services")}</Text>
+        <View style={styles.gridContainer}>
+          {services.map((service) => {
+            const IconLib = service.lib;
+            return (
+              <TouchableOpacity
+                key={service.key}
+                style={[styles.gridItem, { backgroundColor: THEME.card, borderColor: THEME.border }]}
+                onPress={() => handleServiceNavigation(service.key)}
+                activeOpacity={0.7}
+              >
+                <View style={[styles.gridIcon, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#F2F2F7" }]}>
+                  <IconLib name={service.icon as any} size={24} color={THEME.primary} />
+                </View>
+                <View>
+                  <Text style={[styles.gridTitle, { color: THEME.text }]}>{service.title}</Text>
+                </View>
+              </TouchableOpacity>
+            )
+          })}
+        </View>
+
+        {/* LIVE ZONE STRIP */}
+        <View style={[styles.liveZoneStrip, { backgroundColor: isDark ? "#111" : "#EEEEEE", borderColor: THEME.border }]}>
+          <View style={{ paddingHorizontal: 15, paddingVertical: 10, flexDirection: "row", justifyContent: "space-between" }}>
+            <Text style={{ color: THEME.subText, fontSize: 12, fontWeight: "600" }}>{t("nearbyZoneStatus")}</Text>
+            <TouchableOpacity><Text style={{ color: THEME.primary, fontSize: 12 }}>{t("viewMap")}</Text></TouchableOpacity>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 15, paddingBottom: 12 }}>
+            {parkingSlotsMock.map((slot, index) => (
+              <ParkingSlot
+                key={index}
+                label={slot.id}
+                status={slot.status as any}
+                type={slot.type as any}
+                style={{ marginRight: 10, transform: [{ scale: 0.9 }] }}
+                onPress={() => {
+                  router.push({
+                    pathname: "/parking/selectVehicle",
+                    params: {
+                      nextRoute: "/parking/selectSlot",
+                      parkingName: "City Centre Zone A", // Mock data
+                      price: "450" // Mock price
+                    }
+                  });
+                }}
+              />
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* RECENT ACTIVITY */}
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 15, marginBottom: 12 }}>
+          <Text style={[styles.sectionTitle, { marginBottom: 0, color: THEME.text }]}>{t("recent")}</Text>
+          <TouchableOpacity onPress={() => router.push('/(tabs)/booking')}>
+            <Text style={{ color: THEME.primary, fontSize: 13, fontWeight: "600" }}>View All</Text>
           </TouchableOpacity>
         </View>
-
-        {/* PROMOS */}
-        <View style={styles.promoYellow}>
-          <Text style={styles.promoTitle}>{t("promoWashing")}</Text>
-          <Text style={styles.promoSubtitle}>{t("validUntil")}</Text>
+        <View style={styles.activityList}>
+          {recentActivity.length > 0 ? recentActivity.map((item) => {
+            const IconLib = item.lib || Ionicons;
+            return (
+              <TouchableOpacity key={item.id} style={[styles.activityRow, { backgroundColor: THEME.card }]} onPress={() => router.push('/(tabs)/booking')}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                  <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#F2F2F7', alignItems: 'center', justifyContent: 'center' }}>
+                    <IconLib name={item.icon as any} size={18} color={THEME.primary} />
+                  </View>
+                  <View>
+                    <Text style={{ color: THEME.text, fontWeight: "600", fontSize: 13 }}>{item.title}</Text>
+                    <Text style={{ color: THEME.subText, fontSize: 11 }}>{item.subtitle}</Text>
+                  </View>
+                </View>
+                <Text style={{ color: item.amount.startsWith('+') ? THEME.success : THEME.text, fontWeight: "700" }}>{item.amount}</Text>
+              </TouchableOpacity>
+            )
+          }) : (
+            <Text style={{ color: THEME.subText, fontStyle: 'italic' }}>No recent activity</Text>
+          )}
         </View>
 
-        <View
-          style={[
-            styles.promoWhite,
-            { backgroundColor: cardBg, borderColor: "#FFD400" },
-          ]}
-        >
-          <Text
-            style={[
-              styles.promoTitle,
-              { color: isDark ? "#FFFFFF" : "#000" },
-            ]}
-          >
-            {t("freeCharging")}
-          </Text>
-          <Text style={[styles.promoSubtitle, { color: descColor }]}>
-            {t("first30Min")}
-          </Text>
-        </View>
+        {/* PROMO CAROUSEL */}
+        <Text style={[styles.sectionTitle, { color: THEME.text, marginTop: 25 }]}>{t("offers")}</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 15, paddingRight: 20 }}>
+          {/* Card 1 */}
+          <View style={[styles.promoCard, { backgroundColor: THEME.card }]}>
+            <View style={[styles.promoIconBox, { backgroundColor: "rgba(255, 212, 0, 0.15)" }]}>
+              <Ionicons name="water" size={24} color={THEME.primary} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.promoTitle, { color: THEME.text }]}>{t("promoWashTitle")}</Text>
+              <Text style={[styles.promoDesc, { color: THEME.subText }]}>{t("promoWashDesc")}</Text>
+            </View>
+            <TouchableOpacity style={[styles.claimBtn, { backgroundColor: THEME.primary }]}>
+              <Text style={styles.claimBtnText}>{t("claim")}</Text>
+            </TouchableOpacity>
+          </View>
 
-        {/* LOGOUT BUTTON */}
-        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-          <Text style={styles.logoutText}>{t("logout")}</Text>
-        </TouchableOpacity>
-      </ScrollView>
+          {/* Card 2 */}
+          <View style={[styles.promoCard, { backgroundColor: THEME.card }]}>
+            <View style={[styles.promoIconBox, { backgroundColor: "rgba(255, 212, 0, 0.15)" }]}>
+              <Ionicons name="construct" size={24} color={THEME.primary} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.promoTitle, { color: THEME.text }]}>{t("promoOilTitle")}</Text>
+              <Text style={[styles.promoDesc, { color: THEME.subText }]}>{t("promoOilDesc")}</Text>
+            </View>
+            <TouchableOpacity style={[styles.claimBtn, { backgroundColor: THEME.primary }]}>
+              <Text style={styles.claimBtnText}>{t("claim")}</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+
+      </Animated.ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-  },
+  safe: { flex: 1 },
+  scrollContent: { padding: 20 },
 
-  scrollContent: {
-    paddingHorizontal: 25,
-    paddingTop: 15,
-  },
+  // TEXT
+  greeting: { fontSize: 13, fontWeight: "500", marginTop: 4, lineHeight: 20 },
+  userName: { fontSize: 22, fontWeight: "700", lineHeight: 30 },
+  sectionTitle: { fontSize: 17, fontWeight: "700", marginBottom: 12, lineHeight: 24 },
 
-  welcome: {
-    fontSize: 28,
-    fontWeight: "700",
-  },
+  // HEADER
+  headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 25 },
+  iconBtn: { padding: 8, borderRadius: 10 },
+  badge: { position: "absolute", top: 8, right: 8, width: 6, height: 6, borderRadius: 3 },
 
-  subtitle: {
-    marginTop: 5,
-    fontSize: 15,
-  },
+  // LIVE STATUS BAR
+  liveStatusCard: { borderRadius: 20, padding: 20, borderWidth: 1 },
+  liveHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 15 },
+  liveBadge: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 10 },
+  pulseDot: { width: 8, height: 8, borderRadius: 4 },
+  liveText: { fontSize: 13, fontWeight: "800" },
+  timerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  timerValue: { fontSize: 32, fontWeight: "700" },
+  actionBtn: { paddingVertical: 10, paddingHorizontal: 20, borderRadius: 20, justifyContent: 'center', alignItems: 'center', flexDirection: 'row', gap: 6 },
+  actionBtnSmall: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: 15, justifyContent: 'center', alignItems: 'center', flexDirection: 'row', gap: 4, borderWidth: 1, borderColor: "transparent" },
 
-  searchBox: {
-    marginTop: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 15,
-    paddingVertical: 14,
-    borderRadius: 14,
-    borderWidth: 1,
-  },
+  // LIVE ZONE STRIP
+  liveZoneStrip: { borderRadius: 12, borderWidth: 1, marginBottom: 25, overflow: 'hidden' },
 
-  searchIcon: { fontSize: 20, marginRight: 10 },
-  searchInput: { flex: 1, fontSize: 16 },
+  // GRID
+  gridContainer: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: 12, marginBottom: 15 },
+  gridItem: {
+    width: "48%", paddingVertical: 15, paddingHorizontal: 12, borderRadius: 14, borderWidth: 1,
+    flexDirection: "row", alignItems: "center", gap: 10
+  },
+  gridIcon: { width: 36, height: 36, borderRadius: 18, justifyContent: "center", alignItems: "center" },
+  gridTitle: { fontSize: 14, fontWeight: "600", flex: 1, flexWrap: 'wrap', lineHeight: 20 },
 
-  grid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    marginTop: 20,
-  },
+  // RECENT
+  activityList: { gap: 10 },
+  activityRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 12, borderRadius: 10 },
 
-  card: {
-    width: "47%",
-    padding: 20,
-    borderRadius: 16,
-    marginBottom: 20,
-    alignItems: "center",
+  // PROMOS
+  promoCard: {
+    width: width * 0.75, padding: 16, borderRadius: 16, flexDirection: 'row', alignItems: 'center', gap: 12,
+    borderWidth: 1, borderColor: "rgba(255,255,255,0.05)"
   },
-
-  iconWrapper: {
-    backgroundColor: "#FFD400",
-    padding: 18,
-    borderRadius: 14,
-    marginBottom: 12,
-  },
-
-  iconImg: { width: 35, height: 35, tintColor: "#000" },
-
-  cardTitle: {
-    fontSize: 17,
-    fontWeight: "600",
-  },
-
-  bigCard: {
-    padding: 25,
-    borderRadius: 18,
-    marginTop: 10,
-  },
-
-  bigCardTitle: {
-    fontSize: 22,
-    fontWeight: "700",
-  },
-
-  bigCardSubtitle: {
-    marginTop: 4,
-    marginBottom: 15,
-  },
-
-  bookNowBtn: {
-    backgroundColor: "#FFD400",
-    paddingVertical: 16,
-    borderRadius: 12,
-  },
-  bookNowText: {
-    textAlign: "center",
-    fontSize: 18,
-    fontWeight: "600",
-  },
-
-  promoYellow: {
-    backgroundColor: "#FFD400",
-    padding: 20,
-    borderRadius: 15,
-    marginTop: 20,
-  },
-
-  promoWhite: {
-    padding: 20,
-    borderWidth: 1,
-    borderRadius: 15,
-    marginTop: 20,
-  },
-
-  promoTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-  },
-  promoSubtitle: {
-    marginTop: 5,
-    color: "#666",
-  },
-
-  logoutBtn: {
-    marginTop: 40,
-    backgroundColor: "#FF3B30",
-    paddingVertical: 16,
-    borderRadius: 12,
-  },
-  logoutText: {
-    textAlign: "center",
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "600",
-  },
+  promoIconBox: { width: 44, height: 44, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
+  promoTitle: { fontSize: 14, fontWeight: "700", marginBottom: 4, lineHeight: 20 },
+  promoDesc: { fontSize: 12, lineHeight: 16 },
+  claimBtn: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: 8 },
+  claimBtnText: { fontSize: 12, fontWeight: "700", color: "#000" }
 });
