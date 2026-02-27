@@ -128,7 +128,9 @@ export default function BookingTab() {
     }
   };
 
-  console.log("ALL BOOKINGS:", bookings);
+  useEffect(() => {
+    console.log("ALL BOOKINGS:", bookings);
+  }, [bookings]);
 
   const filteredBookings = bookings.filter(b => {
     const status = (b.status || 'completed').toLowerCase();

@@ -10,7 +10,10 @@ import {
   Animated,
   StatusBar,
   Dimensions,
-  Platform
+  Platform,
+  Modal,
+  ActivityIndicator,
+  Keyboard
 } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -19,6 +22,7 @@ import { useTranslation } from "react-i18next";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../context/themeContext";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get("window");
 
@@ -30,6 +34,16 @@ export default function PhoneAuth() {
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Partner Login State
+  const [showPartnerLogin, setShowPartnerLogin] = useState(false);
+  const [partnerUsername, setPartnerUsername] = useState("");
+  const [partnerPassword, setPartnerPassword] = useState("");
+  const [partnerLoading, setPartnerLoading] = useState(false);
+
+  // Registration State
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<'parking' | 'mechanic' | 'garage'>('parking');
 
   // Animations
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -85,6 +99,38 @@ export default function PhoneAuth() {
     }
   };
 
+  const handlePartnerLogin = () => {
+    if (!partnerUsername || !partnerPassword) {
+      Alert.alert("Error", "Please enter both username and password.");
+      return;
+    }
+
+    setPartnerLoading(true);
+    // MOCK CREDENTIAL CHECK / REGISTRATION
+    setTimeout(() => {
+      setPartnerLoading(false);
+
+      // LOGIN - All roles go to Hub now
+      if (partnerPassword === 'pass') {
+        // Simulate loading user profile (mock)
+        AsyncStorage.setItem('PARTNER_USERNAME', partnerUsername);
+        // If admin_parking, set roles to parking
+        let roles = ['parking', 'mechanic', 'garage']; // Default superuser for demo
+
+        if (partnerUsername.includes('parking')) roles = ['parking'];
+        if (partnerUsername.includes('mechanic')) roles = ['mechanic'];
+        if (partnerUsername.includes('garage')) roles = ['garage'];
+
+        AsyncStorage.setItem('PARTNER_ROLES', JSON.stringify(roles));
+
+        setShowPartnerLogin(false);
+        router.replace('/partner/hub' as any);
+      } else {
+        Alert.alert("Error", "Invalid Password");
+      }
+    }, 1500);
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
@@ -96,6 +142,79 @@ export default function PhoneAuth() {
         />
       )}
 
+      <Modal
+        visible={showPartnerLogin}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowPartnerLogin(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => Keyboard.dismiss()}
+        >
+          <View style={[styles.modalContent, { backgroundColor: isDark ? '#1F1F1F' : '#FFF', borderColor: isDark ? '#333' : '#EEE' }]}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>Partner Login</Text>
+              <TouchableOpacity onPress={() => setShowPartnerLogin(false)}>
+                <Ionicons name="close" size={24} color={colors.subText} />
+              </TouchableOpacity>
+            </View>
+
+            {/* LOGIN FORM ONLY */}
+            <View style={styles.inputGroup}>
+              <Text style={[styles.inputLabel, { color: colors.subText }]}>Username</Text>
+              <TextInput
+                style={[styles.partnerInput, { color: colors.text, borderColor: isDark ? '#444' : '#DDD', backgroundColor: isDark ? '#111' : '#F9F9F9' }]}
+                placeholder="e.g. admin_parking"
+                placeholderTextColor={colors.subText}
+                autoCapitalize="none"
+                value={partnerUsername}
+                onChangeText={setPartnerUsername}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={[styles.inputLabel, { color: colors.subText }]}>Password</Text>
+              <TextInput
+                style={[styles.partnerInput, { color: colors.text, borderColor: isDark ? '#444' : '#DDD', backgroundColor: isDark ? '#111' : '#F9F9F9' }]}
+                placeholder="••••••"
+                placeholderTextColor={colors.subText}
+                secureTextEntry
+                value={partnerPassword}
+                onChangeText={setPartnerPassword}
+              />
+            </View>
+
+            <TouchableOpacity
+              style={[styles.partnerLoginBtn, { backgroundColor: colors.primary }]}
+              onPress={handlePartnerLogin}
+              disabled={partnerLoading}
+            >
+              {partnerLoading ? (
+                <ActivityIndicator color="#000" />
+              ) : (
+                <Text style={styles.partnerLoginText}>Login to Dashboard</Text>
+              )}
+            </TouchableOpacity>
+
+            {/* LINK TO REGISTRATION WIZARD */}
+            <TouchableOpacity
+              style={{ marginTop: 15, alignSelf: 'center' }}
+              onPress={() => {
+                setShowPartnerLogin(false);
+                router.push('/partner/register' as any);
+              }}
+            >
+              <Text style={{ color: colors.subText }}>
+                New Partner? <Text style={{ color: colors.primary, fontWeight: 'bold' }}>Register Here</Text>
+              </Text>
+            </TouchableOpacity>
+
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
       <SafeAreaView style={styles.safeArea}>
         <Animated.View style={[styles.headerWrapper, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
           <TouchableOpacity
@@ -106,6 +225,7 @@ export default function PhoneAuth() {
             <Ionicons name="chevron-back" size={24} color={colors.text} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: colors.text }]}>{t("login")}</Text>
+
           <View style={{ width: 44 }} />
         </Animated.View>
 
@@ -187,6 +307,13 @@ export default function PhoneAuth() {
               }
             >
               <Text style={[styles.devText, { color: colors.subText }]}>DEV: Skip to OTP</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={{ marginTop: 20, alignSelf: 'center', paddingBottom: 20 }}
+              onPress={() => setShowPartnerLogin(true)}
+            >
+              <Text style={{ color: colors.primary, fontWeight: 'bold', fontSize: 14 }}>Do you want to do business with us?</Text>
             </TouchableOpacity>
           </View>
         </Animated.View>
@@ -329,4 +456,74 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
+  partnerSwitch: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.8)',
+    justifyContent: 'center',
+    padding: 25,
+  },
+  modalContent: {
+    borderRadius: 20,
+    padding: 25,
+    borderWidth: 1,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  inputGroup: {
+    marginBottom: 15,
+  },
+  inputLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 8,
+    marginLeft: 4,
+  },
+  partnerInput: {
+    height: 50,
+    borderRadius: 12,
+    borderWidth: 1,
+    paddingHorizontal: 15,
+    fontSize: 16,
+  },
+  partnerLoginBtn: {
+    height: 54,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  partnerLoginText: {
+    color: '#000',
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  roleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+    gap: 10
+  },
+  roleBtn: {
+    flex: 1,
+    alignItems: 'center',
+    padding: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#333',
+    gap: 5
+  },
+  roleText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#888'
+  }
 });
