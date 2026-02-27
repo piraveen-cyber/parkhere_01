@@ -246,6 +246,15 @@ export default function Onboarding() {
                         </LinearGradient>
                     </TouchableOpacity>
                 </Animated.View>
+
+                {/* OWNER LINK */}
+                <Animated.View style={{ opacity: fadeAnim, alignItems: 'center', marginBottom: 20 }}>
+                    <TouchableOpacity onPress={() => router.push("../business-onboarding/service-selection")}>
+                        <Text style={{ color: colors.subText, fontSize: 14 }}>
+                            {t('wannaBusiness')} <Text style={{ color: colors.primary, fontWeight: '700' }}>{t('hostNow')}</Text>
+                        </Text>
+                    </TouchableOpacity>
+                </Animated.View>
             </SafeAreaView>
         </View>
     );

@@ -38,7 +38,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const adminController = __importStar(require("../controllers/adminController"));
+const authMiddleware_1 = require("../middleware/authMiddleware");
 const router = express_1.default.Router();
+// Apply middleware to all routes in this router
+router.use(authMiddleware_1.verifyToken, authMiddleware_1.verifyAdmin);
 // Get System Stats
 router.get('/stats', adminController.getStats);
 // Get All Bookings

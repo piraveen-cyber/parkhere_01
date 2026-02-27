@@ -38,9 +38,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const userController = __importStar(require("../controllers/userController"));
+const verificationController = __importStar(require("../controllers/verificationController"));
 const validateResource_1 = __importDefault(require("../middleware/validateResource"));
 const user_schema_1 = require("../schema/user.schema");
+const authMiddleware_1 = require("../middleware/authMiddleware");
 const router = express_1.default.Router();
-router.post('/', (0, validateResource_1.default)(user_schema_1.createUserSchema), userController.updateUser);
+router.post('/', authMiddleware_1.verifyToken, (0, validateResource_1.default)(user_schema_1.createUserSchema), userController.updateUser);
 router.get('/:id', userController.getUser);
+// Verification Endpoints
+router.post('/verify-disability', authMiddleware_1.verifyToken, verificationController.requestDisabilityVerification);
+router.post('/approve-disability', authMiddleware_1.verifyToken, verificationController.approveDisabilityVerification);
 exports.default = router;

@@ -15,6 +15,7 @@ export interface IUser extends Document {
     avatarUrl?: string; // Profile picture URL
     disabilityStatus?: 'none' | 'pending' | 'verified' | 'rejected';
     disabilityDocumentUrl?: string; // URL to the uploaded document
+    role?: 'user' | 'admin';
     createdAt: Date;
     updatedAt: Date;
 }
@@ -37,7 +38,12 @@ const UserSchema: Schema = new Schema({
         enum: ['none', 'pending', 'verified', 'rejected'],
         default: 'none'
     },
-    disabilityDocumentUrl: { type: String }
+    disabilityDocumentUrl: { type: String },
+    role: {
+        type: String,
+        enum: ['user', 'admin'],
+        default: 'user'
+    }
 }, { timestamps: true });
 
 export default mongoose.model<IUser>('User', UserSchema);

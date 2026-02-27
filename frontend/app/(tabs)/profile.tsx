@@ -449,6 +449,33 @@ export default function ProfileTab() {
                   <View style={styles.badge}><Text style={styles.badgeText}>{t("goldMember")}</Text></View>
                 </View>
 
+                {/* SWITCH TO HOSTING */}
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: 'rgba(255, 212, 0, 0.1)',
+                    borderColor: 'rgba(255, 212, 0, 0.3)',
+                    borderWidth: 1,
+                    borderRadius: 20,
+                    padding: 16,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: 25
+                  }}
+                  onPress={() => router.replace("/(owner)/dashboard")}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
+                    <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: '#FFD400', justifyContent: 'center', alignItems: 'center' }}>
+                      <Ionicons name="business" size={20} color="#000" />
+                    </View>
+                    <View>
+                      <Text style={{ color: COLORS.text, fontSize: 16, fontWeight: '700' }}>Switch to Hosting</Text>
+                      <Text style={{ color: COLORS.subText, fontSize: 12 }}>Earn by renting your space</Text>
+                    </View>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color={COLORS.subText} />
+                </TouchableOpacity>
+
                 {/* MENUS */}
                 <Text style={[styles.sectionTitle, { color: COLORS.subText }]}>{t("account")}</Text>
                 <View style={[styles.menuGroup, { backgroundColor: COLORS.card }]}>
@@ -495,7 +522,11 @@ export default function ProfileTab() {
             <View style={[styles.modalContent, { backgroundColor: COLORS.card }]}>
               <Text style={[styles.modalTitle, { color: COLORS.text }]}>{t("chooseLanguage")}</Text>
               {['en', 'ta', 'si'].map(lang => (
-                <TouchableOpacity key={lang} style={[styles.langOption, { borderColor: COLORS.border }]} onPress={() => { i18n.changeLanguage(lang); setLangModalVisible(false); }}>
+                <TouchableOpacity key={lang} style={[styles.langOption, { borderColor: COLORS.border }]} onPress={async () => {
+                  await i18n.changeLanguage(lang);
+                  await AsyncStorage.setItem('user-language', lang);
+                  setLangModalVisible(false);
+                }}>
                   <Text style={[styles.langText, { color: COLORS.text }]}>{lang === 'en' ? 'English' : lang === 'ta' ? 'தமிழ்' : 'සිංහල'}</Text>
                 </TouchableOpacity>
               ))}

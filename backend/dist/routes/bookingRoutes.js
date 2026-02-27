@@ -40,11 +40,14 @@ const express_1 = __importDefault(require("express"));
 const bookingController = __importStar(require("../controllers/bookingController"));
 const validateResource_1 = __importDefault(require("../middleware/validateResource"));
 const booking_schema_1 = require("../schema/booking.schema");
+const authMiddleware_1 = require("../middleware/authMiddleware");
 const router = express_1.default.Router();
 // POST /api/bookings - Create a booking
-router.post('/', (0, validateResource_1.default)(booking_schema_1.createBookingSchema), bookingController.createBooking);
+router.post('/', authMiddleware_1.verifyToken, (0, validateResource_1.default)(booking_schema_1.createBookingSchema), bookingController.createBooking);
 // GET /api/bookings/:userId - Get bookings for a user
-router.get('/:userId', bookingController.getUserBookings);
+router.get('/:userId', authMiddleware_1.verifyToken, bookingController.getUserBookings);
 // POST /api/bookings/scan - QR Scan for Check-In/Out
-router.post('/scan', bookingController.scanBooking);
+router.post('/scan', authMiddleware_1.verifyToken, bookingController.scanBooking);
+// POST /api/bookings/:bookingId/extend - Extend Booking Time
+router.post('/:bookingId/extend', authMiddleware_1.verifyToken, bookingController.extendBooking);
 exports.default = router;

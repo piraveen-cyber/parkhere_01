@@ -10,6 +10,12 @@ exports.createUserSchema = (0, zod_1.object)({
         phone: (0, zod_1.string)().optional(),
         gender: (0, zod_1.string)().optional(),
         vehiclePlate: (0, zod_1.string)().optional(),
+        vehicleModel: (0, zod_1.string)().optional(),
+        vehicleType: (0, zod_1.string)().optional(),
+        vehicleBrand: (0, zod_1.string)().optional(),
+        fuelType: (0, zod_1.string)().optional(),
+        transmission: (0, zod_1.string)().optional(),
+        avatarUrl: (0, zod_1.string)().optional(),
     }),
 });
 exports.updateUserSchema = (0, zod_1.object)({
@@ -19,5 +25,11 @@ exports.updateUserSchema = (0, zod_1.object)({
         phone: (0, zod_1.string)().optional(),
         gender: (0, zod_1.string)().optional(),
         vehiclePlate: (0, zod_1.string)().optional(),
+        vehicleModel: (0, zod_1.string)().optional(),
+        vehicleType: (0, zod_1.string)().optional(),
+        vehicleBrand: (0, zod_1.string)().optional(),
+        fuelType: (0, zod_1.string)().optional(),
+        transmission: (0, zod_1.string)().optional(),
+        avatarUrl: (0, zod_1.string)().optional(),
     }),
 });
